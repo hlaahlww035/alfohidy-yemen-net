@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>النظام الشامل لإدارة أصول ومخازن الميكروتيك v4.6 (سحابي)</title>
+    <title>النظام الشامل لإدارة أصول ومخازن الميكروتيك v4.6</title>
     <!-- Bootstrap 5 RTL CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css">
     <!-- FontAwesome Icons -->
@@ -12,9 +12,11 @@
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
     <!-- Chart.js for Dashboards -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- Firebase SDK (Compat) -->
-    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+    
+    <!-- Firebase SDK (Compat Version للعمل المباشر والسريع مع المتصفح) -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+
     <style>
         :root {
             --bs-body-font-size: 1rem;
@@ -152,7 +154,7 @@
                 <i class="fa-solid fa-server"></i>
             </div>
             <h4 class="fw-bold text-dark">تسجيل الدخول للنظام</h4>
-            <p class="text-muted small">النظام السحابي الشامل لإدارة أصول ومخازن الميكروتيك</p>
+            <p class="text-muted small">النظام الشامل لإدارة أصول ومخازن الميكروتيك v4.6 (السحابي)</p>
         </div>
         
         <div id="loginAlert"></div>
@@ -247,7 +249,7 @@
                 </li>
             </ul>
             <div class="footer text-center text-muted small border-top border-secondary pt-2">
-                الإصدار السحابي v4.6 &copy; 2026
+                الإصدار الاحترافي v4.6 &copy; 2026
             </div>
         </div>
 
@@ -1244,65 +1246,122 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
-    // تهيئة Firebase
+    // تهيئة فايربيس (Firebase Initialization)
     const firebaseConfig = {
-      apiKey: "AIzaSyCgyMhxuD7bTiHeoKPk86jLCm-pVLlnM5M",
-      authDomain: "yemen-net-43ee9.firebaseapp.com",
-      projectId: "yemen-net-43ee9",
-      storageBucket: "yemen-net-43ee9.firebasestorage.app",
-      messagingSenderId: "315180295425",
-      appId: "1:315180295425:web:d8340f72cc9b09a74b6700",
-      measurementId: "G-QEP4GWZNQ1"
+        apiKey: "AIzaSyCgyMhxuD7bTiHeoKPk86jLCm-pVLlnM5M",
+        authDomain: "yemen-net-43ee9.firebaseapp.com",
+        projectId: "yemen-net-43ee9",
+        storageBucket: "yemen-net-43ee9.firebasestorage.app",
+        messagingSenderId: "315180295425",
+        appId: "1:315180295425:web:d8340f72cc9b09a74b6700",
+        measurementId: "G-QEP4GWZNQ1"
     };
+
     firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
+    const db = firebase.firestore();
 
-    // المتغيرات السحابية
-    let towers = [];
-    let customWarehouses = [];
-    let categoryModelsMap = {};
-    let brandingSettings = { companyName: "نظام الميكروتيك الاحترافي", currency: "$" };
-    let uiCustomization = { fontSize: "1rem", primaryColor: "#0d6efd", bgColor: "#f1f5f9", textColor: "#212529" };
-    let tabVisibility = {};
-    let devices = [];
-    let movements = [];
-    let maintenance = [];
-    let users = [];
-    let targetStaffAssignments = {};
-    let currentLoggedInUserObj = null;
+    function escapeHtml(value) {
+        return String(value ?? "")
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+    }
 
-    const defaultTowers = [
-        { type: "رئيسي", name: "برج المطار الرئيسي - 01", owner: "شركة الاتصالات", ownerPhone: "777000000", location: "القطاع الشمالي - حي المطار", device: "Rocket Dish M5", notes: "يعمل بكفاءة عالية - تغطية 360 درجة", createdBy: "admin" },
-        { type: "فرعي", name: "برج جبل حديد - 02", owner: "أحمد سعيد", ownerPhone: "733000000", location: "المرتفعات الشرقية", device: "NanoStation M5", notes: "الربط الرئيسي لخطوط الميكروويف", createdBy: "admin" }
-    ];
-
-    const defaultWarehouses = [
-        { name: "المخزن الرئيسي", keeper: "مدير النظام الرئيسي", type: "رئيسي", status: "مفعل", notes: "المخزن الافتراضي الرئيسي للنظام", createdBy: "admin" },
-        { name: "عهدة مدير الصيانة", keeper: "مدير النظام الرئيسي", type: "فرعي", status: "مفعل", notes: "عهدة مخصصة لقطع الغيار السريعة", createdBy: "admin" },
-        { name: "عهدة فني الصيانة", keeper: "مدير النظام الرئيسي", type: "فرعي", status: "مفعل", notes: "عهدة الفنيين الميدانيين", createdBy: "admin" },
-        { name: "الأجهزة التالفة (سكراب)", keeper: "مدير النظام الرئيسي", type: "رئيسي", status: "مفعل", notes: "مخزن التالف والخراب", createdBy: "admin" }
-    ];
-
-    const defaultCategoryModelsMap = {
-        "روتر بورد": ["RB1100 X4", "RB2011"],
-        "أجهزة البث الاسلكي M2": ["PowerBeam M2", "NanoStation M2"],
-        "أجهزة البث الاسلكي M5": ["PowerBeam M5", "NanoStation M5", "NanoStation M5 LOCO", "PowerBeam AC 620", "Rocket Dish", "Air Fiber"],
-        "أجهزة البث الاسلكي ( الموديمات )": ["TOTO ADSL", "TOTO N300RH", "TP-WA801N", "TP-WA901N"],
-        "سويتش ( Switch 1000 )": ["RB2011", "TOTO 1000 8-PORT", "TP-Link 1000 8-Port"],
-        "سويتش ( Switch 100 )": ["TOTO 100 8P-9V", "TP-Link 100 8P-9V"]
-    };
+    function normalizeArray(value, fallback = []) {
+        return Array.isArray(value) ? value : fallback;
+    }
 
     const permissionSectionsConfig = [
-        { sectionKey: "dashboard_section", sectionName: "لوحة التحكم والمؤشرات", items: [{ id: "dash_print_report", label: "زر طباعة التقرير" }, { id: "dash_add_device", label: "زر إضافة جهاز" }] },
-        { sectionKey: "devices_section", sectionName: "سجل الأجهزة والأصول", items: [{ id: "dev_export_excel", label: "زر تصدير اكسل" }, { id: "dev_add_device", label: "زر إضافة جهاز" }, { id: "dev_edit", label: "زر تعديل" }, { id: "dev_delete", label: "زر حذف" }] },
-        { sectionKey: "towers_section", sectionName: "إدارة الأبراج والمواقع", items: [{ id: "tower_add_device", label: "زر إضافة جهاز" }, { id: "tower_edit", label: "زر تعديل" }, { id: "tower_delete", label: "زر حذف" }] },
-        { sectionKey: "locations_section", sectionName: "سجل المخازن والعهدة", items: [{ id: "loc_add_device", label: "زر إضافة جهاز" }, { id: "loc_edit", label: "زر تعديل" }, { id: "loc_delete", label: "زر حذف" }] },
-        { sectionKey: "movements_section", sectionName: "سجل حركة وتحويلات الأجهزة", items: [{ id: "move_new", label: "زر تسجيل حركة جديد" }, { id: "move_receive", label: "زر استلام" }, { id: "move_reject", label: "زر رفض" }, { id: "move_edit", label: "زر تعديل" }, { id: "move_delete", label: "زر حذف" }] },
-        { sectionKey: "reports_section", sectionName: "شاشة التقارير الشاملة والجرد", items: [{ id: "report_view", label: "عرض واصدار التقارير" }, { id: "report_export", label: "تصدير وطباعة التقارير" }] },
-        { sectionKey: "maintenance_section", sectionName: "إدارة الصيانة والأعطال", items: [{ id: "maint_send", label: "زر تسجيل عطل / ارسال" }] },
-        { sectionKey: "users_section", sectionName: "إدارة المستخدمين", items: [{ id: "user_add_new", label: "زر إضافة مستخدم" }, { id: "user_edit", label: "زر تعديل" }, { id: "user_delete", label: "زر حذف" }] },
-        { sectionKey: "search_section", sectionName: "الاستعلام الذكي", items: [] },
-        { sectionKey: "settings_section", sectionName: "إدارة الإعدادات والتحكم", items: [{ id: "set_ui", label: "إعدادات المظهر" }, { id: "set_branding", label: "هوية النظام" }, { id: "set_toggle_screens", label: "التحكم بالشاشات" }, { id: "set_cat_models", label: "إدارة الفئات" }, { id: "set_backup", label: "النسخ الاحتياطي" }, { id: "set_danger", label: "منطقة الخطر" }] }
+        {
+            sectionKey: "dashboard_section",
+            sectionName: "لوحة التحكم والمؤشرات",
+            items: [
+                { id: "dash_print_report", label: "زر طباعة التقرير" },
+                { id: "dash_add_device", label: "زر إضافة جهاز" }
+            ]
+        },
+        {
+            sectionKey: "devices_section",
+            sectionName: "سجل الأجهزة والأصول",
+            items: [
+                { id: "dev_export_excel", label: "زر تصدير اكسل" },
+                { id: "dev_add_device", label: "زر إضافة جهاز" },
+                { id: "dev_edit", label: "زر تعديل" },
+                { id: "dev_delete", label: "زر حذف" }
+            ]
+        },
+        {
+            sectionKey: "towers_section",
+            sectionName: "إدارة الأبراج والمواقع",
+            items: [
+                { id: "tower_add_device", label: "زر إضافة جهاز" },
+                { id: "tower_edit", label: "زر تعديل" },
+                { id: "tower_delete", label: "زر حذف" }
+            ]
+        },
+        {
+            sectionKey: "locations_section",
+            sectionName: "سجل المخازن والعهدة",
+            items: [
+                { id: "loc_add_device", label: "زر إضافة جهاز" },
+                { id: "loc_edit", label: "زر تعديل" },
+                { id: "loc_delete", label: "زر حذف" }
+            ]
+        },
+        {
+            sectionKey: "movements_section",
+            sectionName: "سجل حركة وتحويلات الأجهزة",
+            items: [
+                { id: "move_new", label: "زر تسجيل حركة جديد" },
+                { id: "move_receive", label: "زر استلام" },
+                { id: "move_reject", label: "زر رفض" },
+                { id: "move_edit", label: "زر تعديل" },
+                { id: "move_delete", label: "زر حذف" }
+            ]
+        },
+        {
+            sectionKey: "reports_section",
+            sectionName: "شاشة التقارير الشاملة والجرد",
+            items: [
+                { id: "report_view", label: "عرض واصدار التقارير" },
+                { id: "report_export", label: "تصدير وطباعة التقارير" }
+            ]
+        },
+        {
+            sectionKey: "maintenance_section",
+            sectionName: "إدارة الصيانة والأعطال",
+            items: [
+                { id: "maint_send", label: "زر تسجيل عطل / ارسال" }
+            ]
+        },
+        {
+            sectionKey: "users_section",
+            sectionName: "إدارة المستخدمين",
+            items: [
+                { id: "user_add_new", label: "زر إضافة مستخدم" },
+                { id: "user_edit", label: "زر تعديل" },
+                { id: "user_delete", label: "زر حذف" }
+            ]
+        },
+        {
+            sectionKey: "search_section",
+            sectionName: "الاستعلام الذكي",
+            items: []
+        },
+        {
+            sectionKey: "settings_section",
+            sectionName: "إدارة الإعدادات والتحكم",
+            items: [
+                { id: "set_ui", label: "إعدادات المظهر" },
+                { id: "set_branding", label: "هوية النظام" },
+                { id: "set_toggle_screens", label: "التحكم بالشاشات" },
+                { id: "set_cat_models", label: "إدارة الفئات" },
+                { id: "set_backup", label: "النسخ الاحتياطي" },
+                { id: "set_danger", label: "منطقة الخطر" }
+            ]
+        }
     ];
 
     const adminPermissionsConfig = [
@@ -1320,92 +1379,166 @@
         { id: "admin_transfers_delete_out", label: "صلاحية حذف التحويلات الصادرة:", options: ["غير مصرح", "لجميع المخازن", "للمخازن والمواقع/الابراج المسؤل عنها فقط"] }
     ];
 
+    let defaultTowers = [
+        { type: "رئيسي", name: "برج المطار الرئيسي - 01", owner: "شركة الاتصالات", ownerPhone: "777000000", location: "القطاع الشمالي - حي المطار", device: "Rocket Dish M5", notes: "يعمل بكفاءة عالية - تغطية 360 درجة", createdBy: "admin" },
+        { type: "فرعي", name: "برج جبل حديد - 02", owner: "أحمد سعيد", ownerPhone: "733000000", location: "المرتفعات الشرقية", device: "NanoStation M5", notes: "الربط الرئيسي لخطوط الميكروويف", createdBy: "admin" }
+    ];
+
+    let defaultWarehouses = [
+        { name: "المخزن الرئيسي", keeper: "مدير النظام الرئيسي", type: "رئيسي", status: "مفعل", notes: "المخزن الافتراضي الرئيسي للنظام", createdBy: "admin" },
+        { name: "عهدة مدير الصيانة", keeper: "مدير النظام الرئيسي", type: "فرعي", status: "مفعل", notes: "عهدة مخصصة لقطع الغيار السريعة", createdBy: "admin" },
+        { name: "عهدة فني الصيانة", keeper: "مدير النظام الرئيسي", type: "فرعي", status: "مفعل", notes: "عهدة الفنيين الميدانيين", createdBy: "admin" },
+        { name: "الأجهزة التالفة (سكراب)", keeper: "مدير النظام الرئيسي", type: "رئيسي", status: "مفعل", notes: "مخزن التالف والخراب", createdBy: "admin" }
+    ];
+
+    let defaultCategoryModelsMap = {
+        "روتر بورد": ["RB1100 X4", "RB2011"],
+        "أجهزة البث الاسلكي M2": ["PowerBeam M2", "NanoStation M2"],
+        "أجهزة البث الاسلكي M5": ["PowerBeam M5", "NanoStation M5", "NanoStation M5 LOCO", "PowerBeam AC 620", "Rocket Dish", "Air Fiber"],
+        "أجهزة البث الاسلكي ( الموديمات )": ["TOTO ADSL", "TOTO N300RH", "TP-WA801N", "TP-WA901N"],
+        "سويتش ( Switch 1000 )": ["RB2011", "TOTO 1000 8-PORT", "TP-Link 1000 8-Port"],
+        "سويتش ( Switch 100 )": ["TOTO 100 8P-9V", "TP-Link 100 8P-9V"]
+    };
+
+    let defaultDevices = [
+        { id: 1, name: "Main-Tower-M5", category: "أجهزة البث الاسلكي M5", model: "NanoStation M5", mac: "E0:63:DA:11:22:33", ip: "10.0.1.50", location: "برج المطار الرئيسي - 01", status: "سليم", supplier: "مؤسسة الاتصالات", price: 120, currency: "USD", purchaseDate: "2026-01-15", createdBy: "admin" },
+        { id: 2, name: "Core-RB750", category: "روتر بورد", model: "RB2011", mac: "68:72:51:AA:BB:CC", ip: "10.0.0.1", location: "المخزن الرئيسي", status: "سليم", supplier: "الوكيل المحلي", price: 85, currency: "USD", purchaseDate: "2026-02-10", createdBy: "admin" }
+    ];
+
+    let defaultUsers = [
+        { id: 1, name: "مدير النظام الرئيسي", username: "admin", password: "admin123", job: "مدير عام", status: "نشط", permissions: generateFullPermissionsObject(true), createdBy: "admin" }
+    ];
+
+    let towers = [];
+    let customWarehouses = [];
+    let categoryModelsMap = defaultCategoryModelsMap;
+    let brandingSettings = { companyName: "نظام الميكروتيك الاحترافي", currency: "$" };
+    let uiCustomization = { fontSize: "1rem", primaryColor: "#0d6efd", bgColor: "#f1f5f9", textColor: "#212529" };
+    let tabVisibility = { "dashboard-tab": true, "devices-tab": true, "towers-tab": true, "locations-tab": true, "movements-tab": true, "reports-tab": true, "maintenance-tab": true, "users-tab": true, "search-tab": true, "settings-tab": true };
+    let devices = [];
+    let movements = [];
+    let maintenance = [];
+    let users = [];
+    let targetStaffAssignments = {};
+    let currentLoggedInUserObj = null;
+
     function generateFullPermissionsObject(val) {
         let screensObj = {};
         permissionSectionsConfig.forEach(sec => {
             screensObj[sec.sectionKey] = val;
-            sec.items.forEach(it => { screensObj[it.id] = val; });
+            sec.items.forEach(it => {
+                screensObj[it.id] = val;
+            });
         });
         let adminObj = {};
-        adminPermissionsConfig.forEach(adm => { adminObj[adm.id] = val ? adm.options[1] : adm.options[0]; });
+        adminPermissionsConfig.forEach(adm => {
+            adminObj[adm.id] = val ? adm.options[1] : adm.options[0];
+        });
         return { screens: screensObj, admin: adminObj };
     }
 
-    function escapeHtml(value) {
-        return String(value ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
-    }
+    let statusChartInstance = null;
+    let categoryChartInstance = null;
 
-    function getAllWarehouses() {
-        return customWarehouses;
-    }
-
-    // مزامنة البيانات تلقائياً من Firebase
-    db.ref('mikrotik_system').on('value', (snapshot) => {
-        const data = snapshot.val() || {};
-        
-        towers = data.towers || defaultTowers;
-        customWarehouses = data.customWarehouses || defaultWarehouses;
-        categoryModelsMap = data.categoryModelsMap || defaultCategoryModelsMap;
-        brandingSettings = data.brandingSettings || { companyName: "نظام الميكروتيك الاحترافي", currency: "$" };
-        uiCustomization = data.uiCustomization || { fontSize: "1rem", primaryColor: "#0d6efd", bgColor: "#f1f5f9", textColor: "#212529" };
-        tabVisibility = data.tabVisibility || { "dashboard-tab": true, "devices-tab": true, "towers-tab": true, "locations-tab": true, "movements-tab": true, "reports-tab": true, "maintenance-tab": true, "users-tab": true, "search-tab": true, "settings-tab": true };
-        devices = data.devices || [
-            { id: 1, name: "Main-Tower-M5", category: "أجهزة البث الاسلكي M5", model: "NanoStation M5", mac: "E0:63:DA:11:22:33", ip: "10.0.1.50", location: "برج المطار الرئيسي - 01", status: "سليم", supplier: "مؤسسة الاتصالات", price: 120, currency: "USD", purchaseDate: "2026-01-15", createdBy: "admin" },
-            { id: 2, name: "Core-RB750", category: "روتر بورد", model: "RB2011", mac: "68:72:51:AA:BB:CC", ip: "10.0.0.1", location: "المخزن الرئيسي", status: "سليم", supplier: "الوكيل المحلي", price: 85, currency: "USD", purchaseDate: "2026-02-10", createdBy: "admin" }
-        ];
-        movements = data.movements || [];
-        maintenance = data.maintenance || [];
-        users = data.users || [
-            { id: 1, name: "مدير النظام الرئيسي", username: "admin", password: "admin123", job: "مدير عام", status: "نشط", permissions: generateFullPermissionsObject(true), createdBy: "admin" }
-        ];
-        targetStaffAssignments = data.targetStaffAssignments || {};
-
-        if (!users.some(u => u.username === "admin")) {
-            users.unshift({
-                id: Date.now(),
-                name: "مدير النظام الرئيسي",
-                username: "admin",
-                password: "admin123",
-                job: "مدير عام",
-                status: "نشط",
-                permissions: generateFullPermissionsObject(true),
-                createdBy: "admin"
-            });
-        }
-
-        applySettingsToUI();
-        if(sessionStorage.getItem('mikrotik_logged_in') === 'true') {
-            const currentId = Number(sessionStorage.getItem('mikrotik_current_user_id'));
-            const currentName = sessionStorage.getItem('mikrotik_current_user');
-            currentLoggedInUserObj = users.find(u => Number(u.id) === currentId) || users.find(u => u.name === currentName) || users[0];
-            document.getElementById("loginScreen").style.display = "none";
-            applyUserPermissionsRestriction();
-            renderAll();
-            buildPermissionsMatrixUI();
-        }
-    });
-
+    // دالة المزامنة السحابية العامة مع Firestore
     function saveSystemData() {
         const payload = {
-            devices,
-            towers,
-            customWarehouses,
-            movements,
-            maintenance,
-            users,
-            targetStaffAssignments,
-            categoryModelsMap,
-            brandingSettings,
-            uiCustomization,
-            tabVisibility
+            devices: devices,
+            towers: towers,
+            customWarehouses: customWarehouses,
+            movements: movements,
+            maintenance: maintenance,
+            users: users,
+            targetStaffAssignments: targetStaffAssignments,
+            categoryModelsMap: categoryModelsMap,
+            brandingSettings: brandingSettings,
+            uiCustomization: uiCustomization,
+            tabVisibility: tabVisibility
         };
-        db.ref('mikrotik_system').set(payload);
+
+        db.collection("mikrotik_system").doc("main_data").set(payload)
+          .then(() => {
+              console.log("تمت مزامنة البيانات سحابياً بنجاح.");
+          })
+          .catch((error) => {
+              console.error("خطأ في المزامنة السحابية: ", error);
+          });
+    }
+
+    // جلب البيانات السحابية عند فتح النظام ومراقبة التحديثات اللحظية
+    function loadSystemDataFromCloud(callback) {
+        db.collection("mikrotik_system").doc("main_data").get()
+          .then((doc) => {
+              if (doc.exists) {
+                  const data = doc.data();
+                  devices = normalizeArray(data.devices, defaultDevices);
+                  towers = normalizeArray(data.towers, defaultTowers);
+                  customWarehouses = normalizeArray(data.customWarehouses, defaultWarehouses);
+                  movements = normalizeArray(data.movements, []);
+                  maintenance = normalizeArray(data.maintenance, []);
+                  users = normalizeArray(data.users, defaultUsers);
+                  targetStaffAssignments = data.targetStaffAssignments || {};
+                  categoryModelsMap = data.categoryModelsMap || defaultCategoryModelsMap;
+                  brandingSettings = data.brandingSettings || brandingSettings;
+                  uiCustomization = data.uiCustomization || uiCustomization;
+                  tabVisibility = data.tabVisibility || tabVisibility;
+              } else {
+                  // البيانات الافتراضية الأولى
+                  devices = defaultDevices;
+                  towers = defaultTowers;
+                  customWarehouses = defaultWarehouses;
+                  users = defaultUsers;
+                  saveSystemData();
+              }
+              if(callback) callback();
+          })
+          .catch((error) => {
+              console.error("خطأ في جلب البيانات:", error);
+              devices = defaultDevices;
+              towers = defaultTowers;
+              customWarehouses = defaultWarehouses;
+              users = defaultUsers;
+              if(callback) callback();
+          });
     }
 
     document.addEventListener("DOMContentLoaded", () => {
-        if(localStorage.getItem('sidebar_minimized') === 'true') {
-            document.body.classList.add('sidebar-minimized');
-        }
+        loadSystemDataFromCloud(() => {
+            applySettingsToUI();
+            
+            if(sessionStorage.getItem('mikrotik_logged_in') === 'true') {
+                const currentId = Number(sessionStorage.getItem('mikrotik_current_user_id'));
+                const currentName = sessionStorage.getItem('mikrotik_current_user');
+                currentLoggedInUserObj = users.find(u => Number(u.id) === currentId)
+                    || users.find(u => u.name === currentName)
+                    || users.find(u => u.username === 'admin')
+                    || users[0];
+                document.getElementById("loginScreen").style.display = "none";
+                applyUserPermissionsRestriction();
+                renderAll();
+                buildPermissionsMatrixUI();
+            }
+
+            if(localStorage.getItem('sidebar_minimized') === 'true') {
+                document.body.classList.add('sidebar-minimized');
+            }
+        });
+
+        // الاستماع للتحديثات اللحظية من باقي المستخدمين أونلاين
+        db.collection("mikrotik_system").doc("main_data")
+          .onSnapshot((doc) => {
+              if (doc.exists && sessionStorage.getItem('mikrotik_logged_in') === 'true') {
+                  const data = doc.data();
+                  devices = normalizeArray(data.devices, devices);
+                  towers = normalizeArray(data.towers, towers);
+                  customWarehouses = normalizeArray(data.customWarehouses, customWarehouses);
+                  movements = normalizeArray(data.movements, movements);
+                  maintenance = normalizeArray(data.maintenance, maintenance);
+                  users = normalizeArray(data.users, users);
+                  targetStaffAssignments = data.targetStaffAssignments || targetStaffAssignments;
+                  renderAll();
+              }
+          });
     });
 
     function checkUserPermission(permKey) {
@@ -1421,10 +1554,15 @@
             showAlert("عذراً! لا تمتلك صلاحية الدخول لهذه الشاشة.", "danger");
             return false;
         }
+
         document.querySelectorAll('.sidebar .nav-link').forEach(el => el.classList.remove('active'));
-        document.querySelectorAll('.tab-pane').forEach(el => { el.classList.remove('show', 'active'); });
+        document.querySelectorAll('.tab-pane').forEach(el => {
+            el.classList.remove('show', 'active');
+        });
+
         const tabElem = document.getElementById(tabId);
         const paneElem = document.getElementById(paneId);
+
         if (tabElem) tabElem.classList.add('active');
         if (paneElem) paneElem.classList.add('show', 'active');
         return true;
@@ -1432,7 +1570,9 @@
 
     function applyUserPermissionsRestriction() {
         if(!currentLoggedInUserObj) return;
+        
         document.getElementById("currentLoggedInUserLabel").innerText = `المستخدم: ${currentLoggedInUserObj.name} (${currentLoggedInUserObj.job || 'موظف'})`;
+
         const mappingNav = {
             "dashboard": { tab: "dashboard-tab", perm: "dashboard_section" },
             "devices": { tab: "devices-tab", perm: "devices_section" },
@@ -1481,14 +1621,18 @@
 
     function toggleElementVisibility(elemId, isVisible) {
         const el = document.getElementById(elemId);
-        if(el) { el.style.display = isVisible ? "inline-block" : "none"; }
+        if(el) {
+            el.style.display = isVisible ? "inline-block" : "none";
+        }
     }
 
     function handleLogin(e) {
         e.preventDefault();
+
         const usernameInput = document.getElementById("loginUsername").value.trim();
         const passwordInput = document.getElementById("loginPassword").value;
         const alertBox = document.getElementById("loginAlert");
+
         alertBox.innerHTML = "";
 
         if (!usernameInput || !passwordInput) {
@@ -1497,14 +1641,17 @@
         }
 
         const foundUser = users.find(u => String(u.username || "").trim().toLowerCase() === usernameInput.toLowerCase());
+
         if (!foundUser) {
             alertBox.innerHTML = `<div class="alert alert-danger py-2 small">اسم المستخدم أو كلمة المرور غير صحيحة.</div>`;
             return;
         }
+
         if (foundUser.status === "موقوف") {
             alertBox.innerHTML = `<div class="alert alert-danger py-2 small">هذا الحساب موقوف حالياً من قبل الإدارة.</div>`;
             return;
         }
+
         const expectedPassword = foundUser.password || (foundUser.username === "admin" ? "admin123" : "");
         if (passwordInput !== expectedPassword) {
             alertBox.innerHTML = `<div class="alert alert-danger py-2 small">اسم المستخدم أو كلمة المرور غير صحيحة.</div>`;
@@ -1568,11 +1715,15 @@
 
     function saveUICustomization(e) {
         e.preventDefault();
-        if(!checkUserPermission('set_ui')) { showAlert("عذراً! لا تمتلك صلاحية تعديل الإعدادات.", "danger"); return; }
+        if(!checkUserPermission('set_ui')) {
+            showAlert("عذراً! لا تمتلك صلاحية تعديل الإعدادات.", "danger");
+            return;
+        }
         uiCustomization.fontSize = document.getElementById("settingFontSize").value;
         uiCustomization.primaryColor = document.getElementById("settingPrimaryColor").value;
         uiCustomization.bgColor = document.getElementById("settingBgColor").value;
         uiCustomization.textColor = document.getElementById("settingTextColor").value;
+        
         saveSystemData();
         applySettingsToUI();
         showAlert("تم حفظ إعدادات المظهر بنجاح!");
@@ -1580,7 +1731,10 @@
 
     function saveBrandingSettings(e) {
         e.preventDefault();
-        if(!checkUserPermission('set_branding')) { showAlert("عذراً! لا تمتلك صلاحية تعديل الإعدادات.", "danger"); return; }
+        if(!checkUserPermission('set_branding')) {
+            showAlert("عذراً! لا تمتلك صلاحية تعديل الإعدادات.", "danger");
+            return;
+        }
         brandingSettings.companyName = document.getElementById("settingCompanyName").value.trim() || "نظام الميكروتيك الاحترافي";
         brandingSettings.currency = document.getElementById("settingCurrency").value.trim() || "$";
         saveSystemData();
@@ -1589,7 +1743,10 @@
     }
 
     function toggleSystemTab(tabId, isChecked) {
-        if(!checkUserPermission('set_toggle_screens')) { showAlert("عذراً! لا تمتلك صلاحية تعديل التفضلات.", "danger"); return; }
+        if(!checkUserPermission('set_toggle_screens')) {
+            showAlert("عذراً! لا تمتلك صلاحية تعديل التفضلات.", "danger");
+            return;
+        }
         tabVisibility[tabId] = isChecked;
         saveSystemData();
         applySettingsToUI();
@@ -1604,13 +1761,14 @@
         renderMaintenanceTable();
         generateReport();
         renderUsersTable();
-        renderCharts();
+        saveSystemData();
     }
 
     function showNotification(message, type = 'success') {
         const container = document.getElementById('floatingNotifications');
         const toastId = 'toast_' + Date.now();
         const borderColors = { success: '#198754', warning: '#ffc107', danger: '#dc3545', info: '#0dcaf0' };
+
         const toastHTML = `
             <div id="${toastId}" class="toast-notification" style="border-right-color: ${borderColors[type] || '#0d6efd'};">
                 <div class="d-flex align-items-center w-100">
@@ -1620,10 +1778,19 @@
             </div>
         `;
         container.insertAdjacentHTML('beforeend', toastHTML);
-        setTimeout(() => { const elem = document.getElementById(toastId); if (elem) elem.remove(); }, 4000);
+        setTimeout(() => {
+            const elem = document.getElementById(toastId);
+            if (elem) elem.remove();
+        }, 4000);
     }
 
-    function showAlert(message, type = 'success') { showNotification(message, type); }
+    function showAlert(message, type = 'success') {
+        showNotification(message, type);
+    }
+
+    function getAllWarehouses() {
+        return customWarehouses;
+    }
 
     function populateLocationSelects() {
         const devLocSelect = document.getElementById("devLocation");
@@ -1631,27 +1798,44 @@
         const reportLocSelect = document.getElementById("reportLocationFilter");
         
         let optionsHtml = `<optgroup label="الأبراج الشغالة">`;
-        towers.forEach(t => { optionsHtml += `<option value="${escapeHtml(t.name)}">${escapeHtml(t.name)} (${escapeHtml(t.type)})</option>`; });
+        towers.forEach(t => {
+            optionsHtml += `<option value="${escapeHtml(t.name)}">${escapeHtml(t.name)} (${escapeHtml(t.type)})</option>`;
+        });
         optionsHtml += `</optgroup><optgroup label="المخازن">`;
-        getAllWarehouses().forEach(w => { optionsHtml += `<option value="${escapeHtml(w.name)}">${escapeHtml(w.name)}</option>`; });
+        getAllWarehouses().forEach(w => {
+            optionsHtml += `<option value="${escapeHtml(w.name)}">${escapeHtml(w.name)}</option>`;
+        });
         optionsHtml += `</optgroup>`;
 
         if(devLocSelect) devLocSelect.innerHTML = optionsHtml;
+
         if(filterSelect) {
             let filterHtml = `<option value="">عرض الكل</option>`;
-            getAllWarehouses().forEach(w => { filterHtml += `<option value="${escapeHtml(w.name)}">${escapeHtml(w.name)}</option>`; });
+            getAllWarehouses().forEach(w => {
+                filterHtml += `<option value="${escapeHtml(w.name)}">${escapeHtml(w.name)}</option>`;
+            });
             filterSelect.innerHTML = filterHtml;
         }
-        if(reportLocSelect) { reportLocSelect.innerHTML = `<option value="">جميع المواقع والمخازن</option>${optionsHtml}`; }
+
+        if(reportLocSelect) {
+            let repHtml = `<option value="">جميع المواقع والمخازن</option>${optionsHtml}`;
+            reportLocSelect.innerHTML = repHtml;
+        }
     }
 
     function openManageStaffModal(targetName) {
-        if(!checkUserPermission('locations_section') && !checkUserPermission('towers_section')) { showAlert("عذراً، لا تمتلك الصلاحية الكافية لإدارة المسئولين!", "danger"); return; }
+        if(!checkUserPermission('locations_section') && !checkUserPermission('towers_section')) {
+            showAlert("عذراً، لا تمتلك الصلاحية الكافية لإدارة المسئولين!", "danger");
+            return;
+        }
         document.getElementById("currentManagingTarget").value = targetName;
         document.getElementById("manageStaffTitle").innerHTML = `<i class="fa-solid fa-users-gear me-2"></i>إدارة المسئولين: <span class="text-warning">${escapeHtml(targetName)}</span>`;
+        
         const container = document.getElementById("staffListContainer");
         container.innerHTML = "";
+
         const assignedStaff = targetStaffAssignments[targetName] || [];
+
         users.forEach(u => {
             const isChecked = assignedStaff.includes(u.name) ? 'checked' : '';
             container.innerHTML += `
@@ -1666,15 +1850,20 @@
                 </div>
             `;
         });
+
         new bootstrap.Modal(document.getElementById('manageStaffModal')).show();
     }
 
     function saveTargetStaff() {
         const targetName = document.getElementById("currentManagingTarget").value;
         const selected = [];
-        document.querySelectorAll('.staff-checkbox:checked').forEach(cb => { selected.push(cb.value); });
+        document.querySelectorAll('.staff-checkbox:checked').forEach(cb => {
+            selected.push(cb.value);
+        });
+
         targetStaffAssignments[targetName] = selected;
         saveSystemData();
+
         bootstrap.Modal.getInstance(document.getElementById('manageStaffModal')).hide();
         showAlert(`تم تحديث المسئولين بنجاح!`);
         renderLocationsView();
@@ -1685,8 +1874,10 @@
         const addDevCat = document.getElementById("devCategory");
         const filterCat = document.getElementById("filterCategory");
         const cats = Object.keys(categoryModelsMap);
+
         if(addDevCat) addDevCat.innerHTML = "";
         if(filterCat) filterCat.innerHTML = '<option value="">كل الفئات</option>';
+
         cats.forEach(cat => {
             if(addDevCat) addDevCat.innerHTML += `<option value="${escapeHtml(cat)}">${escapeHtml(cat)}</option>`;
             if(filterCat) filterCat.innerHTML += `<option value="${escapeHtml(cat)}">${escapeHtml(cat)}</option>`;
@@ -1698,8 +1889,10 @@
         const modelSelect = document.getElementById("devModel");
         if(!categorySelect || !modelSelect) return;
         const selectedCategory = categorySelect.value;
+
         modelSelect.innerHTML = "";
         const models = categoryModelsMap[selectedCategory] || [];
+
         models.forEach(model => {
             const option = document.createElement("option");
             option.value = model;
@@ -1712,10 +1905,15 @@
     function renderTowersView() {
         const container = document.getElementById("towersContainer");
         if(!container) return;
-        if (!checkUserPermission('towers_section')) { container.innerHTML = `<div class="col-12"><div class="alert alert-warning">عذراً، لا تمتلك صلاحية استعراض شاشة الأبراج.</div></div>`; return; }
+        
+        if (!checkUserPermission('towers_section')) {
+            container.innerHTML = `<div class="col-12"><div class="alert alert-warning">عذراً، لا تمتلك صلاحية استعراض شاشة الأبراج.</div></div>`;
+            return;
+        }
 
         const searchQuery = document.getElementById("towersSearchInput") ? document.getElementById("towersSearchInput").value.toLowerCase() : "";
         const typeFilter = document.getElementById("towerSelectorFilter") ? document.getElementById("towerSelectorFilter").value : "";
+        
         container.innerHTML = "";
 
         let filteredTowers = towers.filter(tower => {
@@ -1724,11 +1922,15 @@
             return matchesType && matchesSearch;
         });
 
-        if(filteredTowers.length === 0) { container.innerHTML = `<div class="col-12 text-center py-4 text-muted">لا توجد بيانات متاحة لعرضها.</div>`; return; }
+        if(filteredTowers.length === 0) {
+            container.innerHTML = `<div class="col-12 text-center py-4 text-muted">لا توجد بيانات متاحة لعرضها.</div>`;
+            return;
+        }
 
         filteredTowers.forEach(tower => {
             const towerDevices = devices.filter(d => d.location === tower.name);
             let devRows = "";
+
             if(towerDevices.length === 0) {
                 devRows = `<tr><td colspan="5" class="text-center text-muted py-2">لا توجد أجهزة مرتبطة به حالياً</td></tr>`;
             } else {
@@ -1766,7 +1968,9 @@
                         <div class="card-body">
                             <div class="table-responsive">
                                 <table class="table table-striped align-middle mb-0">
-                                    <thead class="table-light"><tr><th>#</th><th>الجهاز</th><th>MAC</th><th>IP</th><th>الحالة</th></tr></thead>
+                                    <thead class="table-light">
+                                        <tr><th>#</th><th>الجهاز</th><th>MAC</th><th>IP</th><th>الحالة</th></tr>
+                                    </thead>
                                     <tbody>${devRows}</tbody>
                                 </table>
                             </div>
@@ -1778,7 +1982,10 @@
     }
 
     function openTowerModal() {
-        if(!checkUserPermission('tower_add_device')) { showAlert("عذراً، لا تمتلك صلاحية إضافة برج جديد!", "danger"); return; }
+        if(!checkUserPermission('tower_add_device')) {
+            showAlert("عذراً، لا تمتلك صلاحية إضافة برج جديد!", "danger");
+            return;
+        }
         document.getElementById("towerForm").reset();
         document.getElementById("towerOldName").value = "";
         new bootstrap.Modal(document.getElementById('towerModal')).show();
@@ -1787,13 +1994,26 @@
     function saveTower() {
         const oldName = document.getElementById("towerOldName").value;
         const isEdit = !!oldName;
-        if(isEdit && !checkUserPermission('tower_edit')) { showAlert("حماية: لا تمتلك صلاحية تعديل البرج!", "danger"); return; }
-        if(!isEdit && !checkUserPermission('tower_add_device')) { showAlert("حماية: لا تمتلك صلاحية إضافة برج!", "danger"); return; }
+
+        if(isEdit && !checkUserPermission('tower_edit')) {
+            showAlert("حماية: لا تمتلك صلاحية تعديل البرج!", "danger");
+            return;
+        }
+        if(!isEdit && !checkUserPermission('tower_add_device')) {
+            showAlert("حماية: لا تمتلك صلاحية إضافة برج!", "danger");
+            return;
+        }
 
         const name = document.getElementById("towerName").value.trim();
-        if(!name) { showAlert("يرجى إدخال اسم البرج.", "warning"); return; }
+        if(!name) {
+            showAlert("يرجى إدخال اسم البرج.", "warning");
+            return;
+        }
         const duplicateTower = towers.find(t => t.name === name && t.name !== oldName);
-        if (duplicateTower) { showAlert("اسم البرج مستخدم مسبقاً.", "danger"); return; }
+        if (duplicateTower) {
+            showAlert("اسم البرج مستخدم مسبقاً.", "danger");
+            return;
+        }
 
         const towerData = {
             type: document.getElementById("towerType").value,
@@ -1814,6 +2034,8 @@
         }
 
         saveSystemData();
+        renderTowersView();
+        populateLocationSelects();
         bootstrap.Modal.getInstance(document.getElementById('towerModal')).hide();
         showAlert("تم حفظ بيانات البرج بنجاح!");
     }
@@ -1821,7 +2043,11 @@
     function editTower(name) {
         const tower = towers.find(t => t.name === name);
         if(!tower) return;
-        if(!checkUserPermission('tower_edit')) { showAlert("عذراً، لا تمتلك الصلاحية لتعديل هذا البرج!", "danger"); return; }
+        if(!checkUserPermission('tower_edit')) {
+            showAlert("عذراً، لا تمتلك الصلاحية لتعديل هذا البرج!", "danger");
+            return;
+        }
+
         document.getElementById("towerOldName").value = tower.name;
         document.getElementById("towerType").value = tower.type;
         document.getElementById("towerName").value = tower.name;
@@ -1830,40 +2056,66 @@
         document.getElementById("towerLocation").value = tower.location || '';
         document.getElementById("towerDevice").value = tower.device || '';
         document.getElementById("towerNotes").value = tower.notes || '';
+
         new bootstrap.Modal(document.getElementById('towerModal')).show();
     }
 
     function deleteTower(name) {
         const tower = towers.find(t => t.name === name);
         if(!tower) return;
-        if(!checkUserPermission('tower_delete')) { showAlert("عذراً، لا تمتلك صلاحية حذف هذا البرج!", "danger"); return; }
+        if(!checkUserPermission('tower_delete')) {
+            showAlert("عذراً، لا تمتلك صلاحية حذف هذا البرج!", "danger");
+            return;
+        }
         if(confirm(`هل أنت تأكد من حذف البرج (${name})؟`)) {
             towers = towers.filter(t => t.name !== name);
             saveSystemData();
+            renderTowersView();
+            populateLocationSelects();
             showAlert("تم حذف البرج بنجاح!");
         }
     }
 
     function openWarehouseModal() {
-        if(!checkUserPermission('loc_add_device')) { showAlert("عذراً، لا تمتلك صلاحية إضافة مخازن جديدة!", "danger"); return; }
+        if(!checkUserPermission('loc_add_device')) {
+            showAlert("عذراً، لا تمتلك صلاحية إضافة مخازن جديدة!", "danger");
+            return;
+        }
         document.getElementById("warehouseForm").reset();
         document.getElementById("warehouseOldName").value = "";
+        
         const keeperSelect = document.getElementById("newWarehouseKeeper");
         keeperSelect.innerHTML = "";
-        users.forEach(u => { keeperSelect.innerHTML += `<option value="${escapeHtml(u.name)}">${escapeHtml(u.name)}</option>`; });
+        users.forEach(u => {
+            keeperSelect.innerHTML += `<option value="${escapeHtml(u.name)}">${escapeHtml(u.name)}</option>`;
+        });
+
         new bootstrap.Modal(document.getElementById('warehouseModal')).show();
     }
 
     function saveNewWarehouse() {
         const oldName = document.getElementById("warehouseOldName").value;
         const isEdit = !!oldName;
-        if(isEdit && !checkUserPermission('loc_edit')) { showAlert("حماية: لا تمتلك صلاحية التعديل!", "danger"); return; }
-        if(!isEdit && !checkUserPermission('loc_add_device')) { showAlert("حماية: لا تمتلك صلاحية الإنشاء!", "danger"); return; }
+
+        if(isEdit && !checkUserPermission('loc_edit')) {
+            showAlert("حماية: لا تمتلك صلاحية التعديل!", "danger");
+            return;
+        }
+        if(!isEdit && !checkUserPermission('loc_add_device')) {
+            showAlert("حماية: لا تمتلك صلاحية الإنشاء!", "danger");
+            return;
+        }
 
         const name = document.getElementById("newWarehouseName").value.trim();
-        if(!name) { showAlert("يرجى إدخال اسم المخزن.", "warning"); return; }
+        if(!name) {
+            showAlert("يرجى إدخال اسم المخزن.", "warning");
+            return;
+        }
         const duplicateWarehouse = customWarehouses.find(w => w.name === name && w.name !== oldName);
-        if (duplicateWarehouse) { showAlert("اسم المخزن مستخدم مسبقاً.", "danger"); return; }
+        if (duplicateWarehouse) {
+            showAlert("اسم المخزن مستخدم مسبقاً.", "danger");
+            return;
+        }
 
         const warehouseData = {
             name: name,
@@ -1882,6 +2134,8 @@
         }
 
         saveSystemData();
+        renderLocationsView();
+        populateLocationSelects();
         bootstrap.Modal.getInstance(document.getElementById('warehouseModal')).hide();
         showAlert("تم حفظ المخزن بنجاح!");
     }
@@ -1889,12 +2143,17 @@
     function editWarehouse(name) {
         const w = customWarehouses.find(item => item.name === name);
         if(!w) return;
-        if(!checkUserPermission('loc_edit')) { showAlert("عذراً، لا تمتلك الصلاحية للتعديل!", "danger"); return; }
+        if(!checkUserPermission('loc_edit')) {
+            showAlert("عذراً، لا تمتلك الصلاحية للتعديل!", "danger");
+            return;
+        }
         document.getElementById("warehouseForm").reset();
         document.getElementById("warehouseOldName").value = w.name;
         const keeperSelect = document.getElementById("newWarehouseKeeper");
         keeperSelect.innerHTML = "";
-        users.forEach(u => { keeperSelect.innerHTML += `<option value="${escapeHtml(u.name)}">${escapeHtml(u.name)}</option>`; });
+        users.forEach(u => {
+            keeperSelect.innerHTML += `<option value="${escapeHtml(u.name)}">${escapeHtml(u.name)}</option>`;
+        });
         document.getElementById("newWarehouseName").value = w.name;
         document.getElementById("newWarehouseKeeper").value = w.keeper;
         document.getElementById("newWarehouseType").value = w.type;
@@ -1906,10 +2165,15 @@
     function deleteWarehouse(name) {
         const w = customWarehouses.find(item => item.name === name);
         if(!w) return;
-        if(!checkUserPermission('loc_delete')) { showAlert("عذراً، لا تمتلك صلاحية الحذف!", "danger"); return; }
+        if(!checkUserPermission('loc_delete')) {
+            showAlert("عذراً، لا تمتلك صلاحية الحذف!", "danger");
+            return;
+        }
         if(confirm(`هل تريد حذف المخزن (${name})؟`)) {
             customWarehouses = customWarehouses.filter(item => item.name !== name);
             saveSystemData();
+            renderLocationsView();
+            populateLocationSelects();
             showAlert("تم الحذف بنجاح!");
         }
     }
@@ -1917,12 +2181,20 @@
     function renderLocationsView() {
         const container = document.getElementById("locationsContainer");
         if(!container) return;
-        if(!checkUserPermission('locations_section')) { container.innerHTML = `<div class="col-12"><div class="alert alert-warning">عذراً، لا تمتلك صلاحية رؤية المخازن.</div></div>`; return; }
+        
+        if(!checkUserPermission('locations_section')) {
+            container.innerHTML = `<div class="col-12"><div class="alert alert-warning">عذراً، لا تمتلك صلاحية رؤية المخازن.</div></div>`;
+            return;
+        }
 
         const searchQuery = document.getElementById("locationsSearchInput") ? document.getElementById("locationsSearchInput").value.toLowerCase() : "";
         container.innerHTML = "";
 
-        let filtered = customWarehouses.filter(w => w.name.toLowerCase().includes(searchQuery));
+        let filtered = customWarehouses.filter(w => {
+            const matchesSearch = w.name.toLowerCase().includes(searchQuery);
+            return matchesSearch;
+        });
+
         filtered.forEach(w => {
             const adminPerms = currentLoggedInUserObj?.permissions?.admin || {};
             const scope = adminPerms['admin_inv_reports'] || 'لجميع المخازن';
@@ -1934,6 +2206,7 @@
 
             const warehouseDevices = devices.filter(d => d.location === w.name);
             let devRows = "";
+
             if(warehouseDevices.length === 0) {
                 devRows = `<tr><td colspan="5" class="text-center text-muted py-2">لا توجد أجهزة مضافة</td></tr>`;
             } else {
@@ -1970,7 +2243,9 @@
                         <div class="card-body">
                             <div class="table-responsive">
                                 <table class="table table-striped align-middle mb-0">
-                                    <thead class="table-light"><tr><th>#</th><th>الجهاز</th><th>MAC</th><th>IP</th><th>الحالة</th></tr></thead>
+                                    <thead class="table-light">
+                                        <tr><th>#</th><th>الجهاز</th><th>MAC</th><th>IP</th><th>الحالة</th></tr>
+                                    </thead>
                                     <tbody>${devRows}</tbody>
                                 </table>
                             </div>
@@ -1985,14 +2260,23 @@
         const tbody = document.getElementById("movementsTableBody");
         if(!tbody) return;
         tbody.innerHTML = "";
+
         if(!checkUserPermission('movements_section')) return;
 
         const searchQuery = document.getElementById("movementSearchInput") ? document.getElementById("movementSearchInput").value.toLowerCase() : "";
+
         const reversedMovements = [...movements].reverse();
 
         reversedMovements.forEach((m) => {
             const index = movements.indexOf(m);
-            const matchesSearch = (m.device && m.device.toLowerCase().includes(searchQuery)) || (m.mac && m.mac.toLowerCase().includes(searchQuery)) || (m.from && m.from.toLowerCase().includes(searchQuery)) || (m.to && m.to.toLowerCase().includes(searchQuery)) || (m.user && m.user.toLowerCase().includes(searchQuery));
+
+            const matchesSearch = 
+                (m.device && m.device.toLowerCase().includes(searchQuery)) ||
+                (m.mac && m.mac.toLowerCase().includes(searchQuery)) ||
+                (m.from && m.from.toLowerCase().includes(searchQuery)) ||
+                (m.to && m.to.toLowerCase().includes(searchQuery)) ||
+                (m.user && m.user.toLowerCase().includes(searchQuery));
+
             if (!matchesSearch) return;
 
             const adminPerms = currentLoggedInUserObj?.permissions?.admin || {};
@@ -2040,42 +2324,205 @@
 
     function exportMovementsExcel() {
         const searchQuery = document.getElementById("movementSearchInput") ? document.getElementById("movementSearchInput").value.toLowerCase() : "";
-        const filtered = movements.filter(m => (m.device && m.device.toLowerCase().includes(searchQuery)) || (m.mac && m.mac.toLowerCase().includes(searchQuery)));
-        if(filtered.length === 0) { showAlert("لا توجد حركات مطابقة لتصديرها!", "warning"); return; }
         
-        let htmlTable = `<html dir="rtl"><head><meta charset="utf-8"><style>table{border-collapse:collapse;width:100%;font-family:'Cairo',sans-serif;}th,td{border:1px solid #b0bec5;padding:10px;text-align:center;}th{background-color:#198754;color:white;}</style></head><body><table><thead><tr><th>تاريخ</th><th>نوع</th><th>الجهاز</th><th>من</th><th>إلى</th><th>المسؤول</th><th>الحالة</th></tr></thead><tbody>`;
-        filtered.forEach(m => { htmlTable += `<tr><td>${m.date}</td><td>${m.type}</td><td>${m.device}</td><td>${m.from}</td><td>${m.to}</td><td>${m.user}</td><td>${m.status}</td></tr>`; });
+        const filtered = movements.filter(m => {
+            const matchesSearch = 
+                (m.device && m.device.toLowerCase().includes(searchQuery)) ||
+                (m.mac && m.mac.toLowerCase().includes(searchQuery)) ||
+                (m.from && m.from.toLowerCase().includes(searchQuery)) ||
+                (m.to && m.to.toLowerCase().includes(searchQuery)) ||
+                (m.user && m.user.toLowerCase().includes(searchQuery));
+            return matchesSearch;
+        });
+
+        if(filtered.length === 0) {
+            showAlert("لا توجد حركات مطابقة لتصديرها!", "warning");
+            return;
+        }
+
+        let htmlTable = `
+            <html dir="rtl">
+            <head>
+                <meta charset="utf-8">
+                <style>
+                    table { border-collapse: collapse; width: 100%; font-family: 'Cairo', sans-serif; }
+                    th, td { border: 1px solid #b0bec5; padding: 10px; text-align: center; font-size: 13px; }
+                    th { background-color: #198754; color: white; font-weight: bold; }
+                    tr:nth-child(even) { background-color: #f8f9fa; }
+                </style>
+            </head>
+            <body>
+            <h3 style="text-align:center; color:#333;">سجل حركات وتحويلات الأجهزة المخزنية</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>تاريخ الحركة</th>
+                        <th>نوع الحركة</th>
+                        <th>اسم الجهاز</th>
+                        <th>MAC Address</th>
+                        <th>من المصدر</th>
+                        <th>إلى الجهة المستلمة</th>
+                        <th>سبب التحويل / ملاحظات</th>
+                        <th>المسؤول</th>
+                        <th>الحالة</th>
+                    </tr>
+                </thead>
+                <tbody>
+        `;
+
+        filtered.forEach((m, idx) => {
+            htmlTable += `
+                <tr>
+                    <td>${idx + 1}</td>
+                    <td>${escapeHtml(m.date)}</td>
+                    <td>${escapeHtml(m.type)}</td>
+                    <td>${escapeHtml(m.device || '')}</td>
+                    <td>${escapeHtml(m.mac || '')}</td>
+                    <td>${escapeHtml(m.from)}</td>
+                    <td>${escapeHtml(m.to)}</td>
+                    <td>${escapeHtml(m.reason || '-')}</td>
+                    <td>${escapeHtml(m.user)}</td>
+                    <td>${escapeHtml(m.status)}</td>
+                </tr>
+            `;
+        });
+
         htmlTable += `</tbody></table></body></html>`;
-        
+
         const blob = new Blob([htmlTable], { type: 'application/vnd.ms-excel;charset=utf-8;' });
         const url = URL.createObjectURL(blob);
         const link = document.createElement("a");
         link.href = url;
-        link.download = `movements_${Date.now()}.xls`;
+        link.download = `movements_report_${Date.now()}.xls`;
+        document.body.appendChild(link);
         link.click();
         link.remove();
+        showAlert("تم تصدير البيانات المحددة والمعروضة بنجاح كملف Excel منسق!");
     }
 
     function exportDevicesExcel() {
-        if(devices.length === 0) { showAlert("لا توجد أجهزة!", "warning"); return; }
-        let htmlTable = `<html dir="rtl"><head><meta charset="utf-8"><style>table{border-collapse:collapse;width:100%;font-family:'Cairo',sans-serif;}th,td{border:1px solid #b0bec5;padding:10px;text-align:center;}th{background-color:#0d6efd;color:white;}</style></head><body><table><thead><tr><th>اسم</th><th>فئة</th><th>موديل</th><th>MAC</th><th>IP</th><th>الموقع</th><th>الحالة</th></tr></thead><tbody>`;
-        devices.forEach(d => { htmlTable += `<tr><td>${d.name}</td><td>${d.category}</td><td>${d.model}</td><td>${d.mac}</td><td>${d.ip||'-'}</td><td>${d.location}</td><td>${d.status}</td></tr>`; });
+        const search = document.getElementById("deviceSearchInput") ? document.getElementById("deviceSearchInput").value.toLowerCase() : "";
+        const cat = document.getElementById("filterCategory") ? document.getElementById("filterCategory").value : "";
+
+        const filtered = devices.filter(d => {
+            const matchesSearch = d.name.toLowerCase().includes(search) || d.mac.toLowerCase().includes(search) || (d.ip && d.ip.toLowerCase().includes(search));
+            const matchesCat = cat ? d.category === cat : true;
+            return matchesSearch && matchesCat;
+        });
+
+        if(filtered.length === 0) {
+            showAlert("لا توجد أجهزة مطابقة لتصديرها!", "warning");
+            return;
+        }
+
+        let htmlTable = `
+            <html dir="rtl">
+            <head>
+                <meta charset="utf-8">
+                <style>
+                    table { border-collapse: collapse; width: 100%; font-family: 'Cairo', sans-serif; }
+                    th, td { border: 1px solid #b0bec5; padding: 10px; text-align: center; font-size: 13px; }
+                    th { background-color: #0d6efd; color: white; font-weight: bold; }
+                    tr:nth-child(even) { background-color: #f8f9fa; }
+                </style>
+            </head>
+            <body>
+            <h3 style="text-align:center; color:#333;">تقرير الأصول والأجهزة المخزنية</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>اسم الجهاز</th>
+                        <th>الفئة</th>
+                        <th>الموديل</th>
+                        <th>MAC Address</th>
+                        <th>IP Address</th>
+                        <th>سعر الشراء</th>
+                        <th>الموقع الحالي</th>
+                        <th>الحالة</th>
+                    </tr>
+                </thead>
+                <tbody>
+        `;
+
+        filtered.forEach((d, idx) => {
+            htmlTable += `
+                <tr>
+                    <td>${idx + 1}</td>
+                    <td>${escapeHtml(d.name)}</td>
+                    <td>${escapeHtml(d.category)}</td>
+                    <td>${escapeHtml(d.model)}</td>
+                    <td>${escapeHtml(d.mac)}</td>
+                    <td>${escapeHtml(d.ip || '-')}</td>
+                    <td>${d.price ? d.price + ' ' + (d.currency || '$') : '-'}</td>
+                    <td>${escapeHtml(d.location)}</td>
+                    <td>${escapeHtml(d.status)}</td>
+                </tr>
+            `;
+        });
+
         htmlTable += `</tbody></table></body></html>`;
+
         const blob = new Blob([htmlTable], { type: 'application/vnd.ms-excel;charset=utf-8;' });
         const url = URL.createObjectURL(blob);
         const link = document.createElement("a");
         link.href = url;
-        link.download = `devices_${Date.now()}.xls`;
+        link.download = `devices_report_${Date.now()}.xls`;
+        document.body.appendChild(link);
         link.click();
         link.remove();
+        showAlert("تم تصدير البيانات المحددة والمعروضة بنجاح كملف Excel منسق!");
     }
 
-    function exportReportsExcel() { exportDevicesExcel(); }
+    function exportReportsExcel() {
+        const tbody = document.getElementById("reportsTableBody");
+        if(!tbody || tbody.rows.length === 0) {
+            showAlert("لا توجد بيانات في التقرير لتصديرها!", "warning");
+            return;
+        }
+
+        let htmlTable = `
+            <html dir="rtl">
+            <head>
+                <meta charset="utf-8">
+                <style>
+                    table { border-collapse: collapse; width: 100%; font-family: 'Cairo', sans-serif; }
+                    th, td { border: 1px solid #b0bec5; padding: 10px; text-align: center; font-size: 13px; }
+                    th { background-color: #212529; color: white; font-weight: bold; }
+                    tr:nth-child(even) { background-color: #f8f9fa; }
+                </style>
+            </head>
+            <body>
+            <h3 style="text-align:center; color:#333;">تقرير الجرد الشامل</h3>
+            <table>
+                <thead>
+                    <tr>${document.getElementById("reportTableHeaders").innerHTML}</tr>
+                </thead>
+                <tbody>
+                    ${tbody.innerHTML}
+                </tbody>
+            </table>
+            </body>
+            </html>
+        `;
+
+        const blob = new Blob([htmlTable], { type: 'application/vnd.ms-excel;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = `inventory_audit_report_${Date.now()}.xls`;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        showAlert("تم تصدير التقرير كملف Excel منسق بنجاح!");
+    }
 
     function renderCategoriesConfigTable() {
         const tbody = document.getElementById("categoriesConfigBody");
         if(!tbody) return;
         tbody.innerHTML = "";
+
         for (const [cat, models] of Object.entries(categoryModelsMap)) {
             tbody.innerHTML += `
                 <tr>
@@ -2083,8 +2530,8 @@
                     <td>${escapeHtml(models.join(", "))}</td>
                     <td>
                         <div class="btn-group btn-group-sm">
-                            <button class="btn btn-outline-primary py-0 px-2" onclick="editCategoryConfig('${escapeHtml(cat)}')"><i class="fa-solid fa-pen"></i></button>
-                            <button class="btn btn-outline-danger py-0 px-2" onclick="deleteCategoryConfig('${escapeHtml(cat)}')"><i class="fa-solid fa-trash"></i></button>
+                            <button class="btn btn-outline-primary py-0 px-2" title="تعديل" onclick="editCategoryConfig('${escapeHtml(cat)}')"><i class="fa-solid fa-pen"></i></button>
+                            <button class="btn btn-outline-danger py-0 px-2" title="حذف" onclick="deleteCategoryConfig('${escapeHtml(cat)}')"><i class="fa-solid fa-trash"></i></button>
                         </div>
                     </td>
                 </tr>
@@ -2093,61 +2540,101 @@
     }
 
     function editCategoryConfig(catName) {
-        if(!checkUserPermission('set_cat_models')) { showAlert("عذراً، لا تمتلك الصلاحية لتعديل الفئات!", "danger"); return; }
+        if(!checkUserPermission('set_cat_models')) {
+            showAlert("عذراً، لا تمتلك الصلاحية لتعديل الفئات!", "danger");
+            return;
+        }
         const models = categoryModelsMap[catName] || [];
         document.getElementById("editingCategoryOldName").value = catName;
         document.getElementById("newCategoryName").value = catName;
         document.getElementById("newCategoryModels").value = models.join(", ");
+        
         const btn = document.getElementById("saveCategoryBtn");
         btn.innerHTML = `<i class="fa-solid fa-save me-1"></i> حفظ التعديل`;
         btn.className = "btn btn-success btn-sm w-100";
     }
 
     function saveCategoryConfig() {
-        if(!checkUserPermission('set_cat_models')) { showAlert("عذراً، لا تمتلك الصلاحية لتعديل الفئات!", "danger"); return; }
+        if(!checkUserPermission('set_cat_models')) {
+            showAlert("عذراً، لا تمتلك الصلاحية لتعديل الفئات!", "danger");
+            return;
+        }
         const oldName = document.getElementById("editingCategoryOldName").value;
         const name = document.getElementById("newCategoryName").value.trim();
         const modelsStr = document.getElementById("newCategoryModels").value.trim();
-        if(!name || !modelsStr) { showAlert("يرجى إدخال اسم الفئة والموديلات التابعة.", "warning"); return; }
+
+        if(!name || !modelsStr) {
+            showAlert("يرجى إدخال اسم الفئة والموديلات التابعة.", "warning");
+            return;
+        }
+
         const modelsArr = modelsStr.split(',').map(m => m.trim()).filter(Boolean);
-        if (oldName && oldName !== name) { delete categoryModelsMap[oldName]; }
+
+        if (oldName && oldName !== name) {
+            delete categoryModelsMap[oldName];
+        }
+
         categoryModelsMap[name] = modelsArr;
+
         document.getElementById("editingCategoryOldName").value = "";
         document.getElementById("newCategoryName").value = "";
         document.getElementById("newCategoryModels").value = "";
+        
         const btn = document.getElementById("saveCategoryBtn");
         btn.innerHTML = `<i class="fa-solid fa-plus me-1"></i> إضافة`;
         btn.className = "btn btn-outline-primary btn-sm w-100";
+
         saveSystemData();
+        renderCategoriesConfigTable();
+        populateCategorySelects();
         showAlert("تم حفظ الفئة والموديلات بنجاح!");
     }
 
     function deleteCategoryConfig(cat) {
-        if(!checkUserPermission('set_cat_models')) { showAlert("عذراً، لا تمتلك الصلاحية للحذف!", "danger"); return; }
+        if(!checkUserPermission('set_cat_models')) {
+            showAlert("عذراً، لا تمتلك الصلاحية للحذف!", "danger");
+            return;
+        }
         if(confirm(`هل تريد حذف الفئة (${cat})؟`)) {
             delete categoryModelsMap[cat];
             saveSystemData();
+            renderCategoriesConfigTable();
+            populateCategorySelects();
             showAlert("تم الحذف بنجاح!");
         }
     }
 
     function generateReport() {
         if(!checkUserPermission('reports_section')) return;
+
         const reportType = document.getElementById("reportTypeSelect").value;
         const locationFilter = document.getElementById("reportLocationFilter").value;
         const statusFilter = document.getElementById("reportStatusFilter").value;
         const dateFrom = document.getElementById("reportDateFrom").value;
         const dateTo = document.getElementById("reportDateTo").value;
+
         const tbody = document.getElementById("reportsTableBody");
         const headersTr = document.getElementById("reportTableHeaders");
         const tableTitle = document.getElementById("reportTableTitle");
         const recCountBadge = document.getElementById("reportRecordCount");
+
         tbody.innerHTML = "";
-        let totalCount = 0; let totalValue = 0;
+
+        let totalCount = 0;
+        let totalValue = 0;
 
         if (reportType === 'inventory_stock' || reportType === 'devices_status') {
             tableTitle.innerHTML = `<i class="fa-solid fa-table-list me-2 text-primary"></i>${reportType === 'inventory_stock' ? 'تقرير جرد رصيد المخازن والأبراج' : 'تقرير الأصول والأجهزة حسب الحالة'}`;
-            headersTr.innerHTML = `<th>#</th><th>اسم الجهاز</th><th>الفئة</th><th>الموقع</th><th>MAC / IP</th><th>السعر</th><th>الحالة</th>`;
+            headersTr.innerHTML = `
+                <th>#</th>
+                <th>اسم الجهاز والعنصر</th>
+                <th>الفئة والموديل</th>
+                <th>الموقع / المخزن</th>
+                <th>MAC / IP Address</th>
+                <th>تاريخ وسعر الشراء</th>
+                <th>الحالة</th>
+            `;
+
             let filteredDevs = devices.filter(d => {
                 const matchLoc = locationFilter ? d.location === locationFilter : true;
                 const matchStatus = statusFilter ? d.status === statusFilter : true;
@@ -2155,26 +2642,83 @@
                 const matchDateTo = dateTo ? (d.purchaseDate && d.purchaseDate <= dateTo) : true;
                 return matchLoc && matchStatus && matchDateFrom && matchDateTo;
             });
+
             totalCount = filteredDevs.length;
             filteredDevs.forEach((d, idx) => {
                 const priceNum = parseFloat(d.price || 0);
                 totalValue += priceNum;
-                tbody.innerHTML += `<tr><td>${idx + 1}</td><td class="fw-bold">${escapeHtml(d.name)}</td><td>${escapeHtml(d.category)}</td><td>${escapeHtml(d.location)}</td><td><code>${escapeHtml(d.mac)}</code></td><td>${priceNum} $</td><td>${getStatusBadge(d.status)}</td></tr>`;
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${idx + 1}</td>
+                        <td class="fw-bold text-primary">${escapeHtml(d.name)}</td>
+                        <td>${escapeHtml(d.category)}<br><small class="text-muted">${escapeHtml(d.model)}</small></td>
+                        <td>${escapeHtml(d.location)}</td>
+                        <td><code>${escapeHtml(d.mac)}</code><br><small>${escapeHtml(d.ip || '-')}</small></td>
+                        <td>${priceNum ? priceNum + ' ' + (d.currency || '$') : '-'} <br><small class="text-muted">${escapeHtml(d.purchaseDate || '-')}</small></td>
+                        <td>${getStatusBadge(d.status)}</td>
+                    </tr>
+                `;
             });
+
         } else if (reportType === 'movements_log') {
             tableTitle.innerHTML = `<i class="fa-solid fa-table-list me-2 text-primary"></i>تقرير حركات التحويلات التفصيلي`;
-            headersTr.innerHTML = `<th>#</th><th>التاريخ</th><th>نوع</th><th>الجهاز</th><th>من</th><th>إلى</th><th>الحالة</th>`;
-            totalCount = movements.length;
-            movements.forEach((m, idx) => {
-                tbody.innerHTML += `<tr><td>${idx + 1}</td><td>${m.date}</td><td>${m.type}</td><td>${m.device}</td><td>${m.from}</td><td>${m.to}</td><td>${m.status}</td></tr>`;
+            headersTr.innerHTML = `
+                <th>#</th>
+                <th>التاريخ</th>
+                <th>نوع الحركة</th>
+                <th>الجهاز / MAC</th>
+                <th>من المصدر</th>
+                <th>إلى الجهة المستلمة</th>
+                <th>المسؤول</th>
+                <th>الحالة</th>
+            `;
+
+            let filteredMoves = movements.filter(m => {
+                const matchLoc = locationFilter ? (m.from === locationFilter || m.to === locationFilter) : true;
+                return matchLoc;
             });
+
+            totalCount = filteredMoves.length;
+            filteredMoves.forEach((m, idx) => {
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${idx + 1}</td>
+                        <td>${escapeHtml(m.date)}</td>
+                        <td><span class="badge bg-info text-dark">${escapeHtml(m.type)}</span></td>
+                        <td class="fw-bold">${escapeHtml(m.device)}<br><small><code>${escapeHtml(m.mac)}</code></small></td>
+                        <td>${escapeHtml(m.from)}</td>
+                        <td>${escapeHtml(m.to)}</td>
+                        <td>${escapeHtml(m.user)}</td>
+                        <td><span class="badge ${m.status === 'مكتملة ومستلمة' ? 'bg-success' : 'bg-warning text-dark'}">${escapeHtml(m.status)}</span></td>
+                    </tr>
+                `;
+            });
+
         } else if (reportType === 'maintenance_log') {
-            tableTitle.innerHTML = `<i class="fa-solid fa-table-list me-2 text-primary"></i>تقرير الصيانة`;
-            headersTr.innerHTML = `<th>#</th><th>التاريخ</th><th>الجهاز</th><th>الفني</th><th>التكلفة</th><th>الحالة</th>`;
+            tableTitle.innerHTML = `<i class="fa-solid fa-table-list me-2 text-primary"></i>تقرير تكاليف وأعطال الصيانة`;
+            headersTr.innerHTML = `
+                <th>#</th>
+                <th>التاريخ</th>
+                <th>الجهاز والعطل</th>
+                <th>الفني المسؤول</th>
+                <th>التكلفة</th>
+                <th>حالة الصيانة</th>
+            `;
+
             totalCount = maintenance.length;
             maintenance.forEach((m, idx) => {
-                totalValue += parseFloat(m.cost || 0);
-                tbody.innerHTML += `<tr><td>${idx + 1}</td><td>${m.date}</td><td>${m.deviceName}</td><td>${m.tech}</td><td>${m.cost}$</td><td>${m.status}</td></tr>`;
+                const costNum = parseFloat(m.cost || 0);
+                totalValue += costNum;
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${idx + 1}</td>
+                        <td>${escapeHtml(m.date)}</td>
+                        <td class="fw-bold">${escapeHtml(m.deviceName)}<br><small class="text-danger">${escapeHtml(m.issue)}</small></td>
+                        <td>${escapeHtml(m.tech)}</td>
+                        <td>${costNum} $</td>
+                        <td><span class="badge ${m.status === 'تم الإصلاح' ? 'bg-success' : 'bg-warning text-dark'}">${escapeHtml(m.status)}</span></td>
+                    </tr>
+                `;
             });
         }
 
@@ -2192,6 +2736,7 @@
 
     function renderDashboard() {
         if(!checkUserPermission('dashboard_section')) return;
+
         document.getElementById("stat-towers").innerText = towers.length;
         document.getElementById("stat-main").innerText = devices.filter(d => d.location === 'المخزن الرئيسي').length;
         document.getElementById("stat-maint").innerText = devices.filter(d => d.status === 'تحت الصيانة').length;
@@ -2200,6 +2745,7 @@
         const dashTbody = document.querySelector("#dashTable tbody");
         if(!dashTbody) return;
         dashTbody.innerHTML = "";
+
         const recentDevices = devices.slice(-5).reverse();
         recentDevices.forEach(d => {
             dashTbody.innerHTML += `
@@ -2217,13 +2763,16 @@
 
     function filterDevices() {
         if(!checkUserPermission('devices_section')) return;
+
         const search = document.getElementById("deviceSearchInput") ? document.getElementById("deviceSearchInput").value.toLowerCase() : "";
         const cat = document.getElementById("filterCategory") ? document.getElementById("filterCategory").value : "";
+
         const filtered = devices.filter(d => {
-            const matchesSearch = d.name.toLowerCase().includes(search) || d.mac.toLowerCase().includes(search);
+            const matchesSearch = d.name.toLowerCase().includes(search) || d.mac.toLowerCase().includes(search) || (d.ip && d.ip.toLowerCase().includes(search));
             const matchesCat = cat ? d.category === cat : true;
             return matchesSearch && matchesCat;
         });
+
         renderDevicesTable(filtered);
     }
 
@@ -2231,9 +2780,11 @@
         const tbody = document.getElementById("devicesTableBody");
         if(!tbody) return;
         tbody.innerHTML = "";
+
         devList.forEach((d, idx) => {
             const canEdit = checkUserPermission('dev_edit');
             const canDelete = checkUserPermission('dev_delete');
+
             tbody.innerHTML += `
                 <tr>
                     <td>${idx + 1}</td>
@@ -2255,7 +2806,10 @@
     }
 
     function openAddModal() {
-        if(!checkUserPermission('dev_add_device') && !checkUserPermission('dash_add_device')) { showAlert("عذراً، لا تمتلك صلاحية إضافة أجهزة جديدة!", "danger"); return; }
+        if(!checkUserPermission('dev_add_device') && !checkUserPermission('dash_add_device')) {
+            showAlert("عذراً، لا تمتلك صلاحية إضافة أجهزة جديدة!", "danger");
+            return;
+        }
         document.getElementById("deviceForm").reset();
         document.getElementById("devId").value = "";
         updateModelsDropdown();
@@ -2265,8 +2819,15 @@
     function saveDevice() {
         const id = document.getElementById("devId").value;
         const isEdit = !!id;
-        if(isEdit && !checkUserPermission('dev_edit')) { showAlert("حماية: لا تمتلك صلاحية التعديل!", "danger"); return; }
-        if(!isEdit && !checkUserPermission('dev_add_device') && !checkUserPermission('dash_add_device')) { showAlert("حماية: لا تمتلك صلاحية الإضافة!", "danger"); return; }
+
+        if(isEdit && !checkUserPermission('dev_edit')) {
+            showAlert("حماية: لا تمتلك صلاحية التعديل!", "danger");
+            return;
+        }
+        if(!isEdit && !checkUserPermission('dev_add_device') && !checkUserPermission('dash_add_device')) {
+            showAlert("حماية: لا تمتلك صلاحية الإضافة!", "danger");
+            return;
+        }
 
         const name = document.getElementById("devName").value.trim();
         const mac = document.getElementById("devMac").value.trim().toUpperCase();
@@ -2274,9 +2835,15 @@
         const model = document.getElementById("devModel").value;
         const location = document.getElementById("devLocation").value;
 
-        if (!name || !category || !model || !mac || !location) { showAlert("يرجى تعبئة جميع الحقول الأساسية للجهاز.", "warning"); return; }
+        if (!name || !category || !model || !mac || !location) {
+            showAlert("يرجى تعبئة جميع الحقول الأساسية للجهاز.", "warning");
+            return;
+        }
         const duplicateMac = devices.find(d => String(d.mac || "").toUpperCase() === mac && Number(d.id) !== Number(id || 0));
-        if (duplicateMac) { showAlert("عنوان MAC مستخدم مسبقاً لجهاز آخر.", "danger"); return; }
+        if (duplicateMac) {
+            showAlert("عنوان MAC مستخدم مسبقاً لجهاز آخر.", "danger");
+            return;
+        }
 
         const devData = {
             id: isEdit ? parseInt(id) : Date.now(),
@@ -2286,7 +2853,7 @@
             mac: mac,
             ip: document.getElementById("devIp").value.trim(),
             status: document.getElementById("devStatus").value,
-            location: location,
+            location: document.getElementById("devLocation").value,
             supplier: document.getElementById("devSupplier").value.trim(),
             price: document.getElementById("devPrice").value,
             currency: document.getElementById("devCurrency").value,
@@ -2302,6 +2869,7 @@
         }
 
         saveSystemData();
+        renderAll();
         bootstrap.Modal.getInstance(document.getElementById('addDeviceModal')).hide();
         showAlert("تم حفظ بيانات الجهاز بنجاح!");
     }
@@ -2309,7 +2877,11 @@
     function editDevice(id) {
         const d = devices.find(item => item.id === id);
         if(!d) return;
-        if(!checkUserPermission('dev_edit')) { showAlert("عذراً، لا تمتلك الصلاحية لتعديل هذا الجهاز!", "danger"); return; }
+        if(!checkUserPermission('dev_edit')) {
+            showAlert("عذراً، لا تمتلك الصلاحية لتعديل هذا الجهاز!", "danger");
+            return;
+        }
+
         document.getElementById("devId").value = d.id;
         document.getElementById("devCategory").value = d.category;
         updateModelsDropdown(d.model);
@@ -2322,24 +2894,34 @@
         document.getElementById("devPrice").value = d.price || '';
         document.getElementById("devCurrency").value = d.currency || 'USD';
         document.getElementById("devPurchaseDate").value = d.purchaseDate || '';
+
         new bootstrap.Modal(document.getElementById('addDeviceModal')).show();
     }
 
     function deleteDevice(id) {
         const d = devices.find(item => item.id === id);
         if(!d) return;
-        if(!checkUserPermission('dev_delete')) { showAlert("عذراً، لا تمتلك صلاحية حذف هذا الجهاز!", "danger"); return; }
+        if(!checkUserPermission('dev_delete')) {
+            showAlert("عذراً، لا تمتلك صلاحية حذف هذا الجهاز!", "danger");
+            return;
+        }
+
         if(confirm("هل أنت تأكد من إزالة هذا الجهاز من النظام؟")) {
             devices = devices.filter(item => item.id !== id);
             saveSystemData();
+            renderAll();
             showAlert("تم الحذف بنجاح!");
         }
     }
 
     function openTransferModal(editIndex = null) {
-        if(!checkUserPermission('move_new') && editIndex === null) { showAlert("عذراً، لا تمتلك صلاحية إجراء تحويلات جديدة!", "danger"); return; }
+        if(!checkUserPermission('move_new') && editIndex === null) {
+            showAlert("عذراً، لا تمتلك صلاحية إجراء تحويلات جديدة!", "danger");
+            return;
+        }
         document.getElementById("warehouseTransferForm").reset();
         document.getElementById("transferEditIndex").value = "";
+        
         if (editIndex !== null && movements[editIndex]) {
             const m = movements[editIndex];
             document.getElementById("transferEditIndex").value = editIndex;
@@ -2351,6 +2933,7 @@
             document.getElementById("transferSubmitBtn").innerText = "تأكيد امر التحويل";
             document.getElementById("transferReason").value = "";
         }
+
         onTransferSourceTypeChange();
         onTransferDestTypeChange();
         new bootstrap.Modal(document.getElementById('warehouseTransferModal')).show();
@@ -2360,13 +2943,17 @@
         const type = document.getElementById("transferSourceType").value;
         const entitySelect = document.getElementById("transferSourceEntity");
         entitySelect.innerHTML = "";
+
         let items = [];
         if(type === 'مخزن') items = getAllWarehouses().map(w => w.name);
         else items = towers.filter(t => t.type === (type === 'برج رئيسي' ? 'رئيسي' : 'فرعي')).map(t => t.name);
 
         const adminPerms = currentLoggedInUserObj?.permissions?.admin || {};
         const createScope = adminPerms['admin_transfers_create'] || 'من جميع المخازن';
-        if (createScope === 'غير مصرح') { entitySelect.innerHTML = ''; return; }
+        if (createScope === 'غير مصرح') {
+            entitySelect.innerHTML = '';
+            return;
+        }
 
         items.forEach(item => {
             if (currentLoggedInUserObj.username !== 'admin' && createScope === 'من المخازن والمواقع/الابراج المسؤل عنها فقط') {
@@ -2375,6 +2962,7 @@
             }
             entitySelect.innerHTML += `<option value="${escapeHtml(item)}">${escapeHtml(item)}</option>`;
         });
+
         onTransferSourceEntityChange();
     }
 
@@ -2382,10 +2970,16 @@
         const sourceName = document.getElementById("transferSourceEntity").value;
         const catSelect = document.getElementById("transferCategory");
         catSelect.innerHTML = "";
+
         if(!sourceName) return;
+
         const availableDevices = devices.filter(d => d.location === sourceName);
         const cats = [...new Set(availableDevices.map(d => d.category))];
-        cats.forEach(c => { catSelect.innerHTML += `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`; });
+
+        cats.forEach(c => {
+            catSelect.innerHTML += `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`;
+        });
+
         onTransferCategoryChange();
     }
 
@@ -2394,10 +2988,16 @@
         const cat = document.getElementById("transferCategory").value;
         const modelSelect = document.getElementById("transferModel");
         modelSelect.innerHTML = "";
+
         if(!sourceName || !cat) return;
+
         const availableDevices = devices.filter(d => d.location === sourceName && d.category === cat);
         const models = [...new Set(availableDevices.map(d => d.model))];
-        models.forEach(m => { modelSelect.innerHTML += `<option value="${escapeHtml(m)}">${escapeHtml(m)}</option>`; });
+
+        models.forEach(m => {
+            modelSelect.innerHTML += `<option value="${escapeHtml(m)}">${escapeHtml(m)}</option>`;
+        });
+
         onTransferModelChange();
     }
 
@@ -2407,9 +3007,15 @@
         const model = document.getElementById("transferModel").value;
         const devSelect = document.getElementById("transferDeviceItem");
         devSelect.innerHTML = "";
+
         if(!sourceName || !cat || !model) return;
+
         const availableDevices = devices.filter(d => d.location === sourceName && d.category === cat && d.model === model);
-        availableDevices.forEach(d => { devSelect.innerHTML += `<option value="${d.id}">${escapeHtml(d.name)}</option>`; });
+
+        availableDevices.forEach(d => {
+            devSelect.innerHTML += `<option value="${d.id}">${escapeHtml(d.name)}</option>`;
+        });
+
         onTransferDeviceItemChange();
     }
 
@@ -2417,35 +3023,87 @@
         const devId = parseInt(document.getElementById("transferDeviceItem").value);
         const macInput = document.getElementById("transferDeviceMac");
         const ipInput = document.getElementById("transferDeviceIp");
+
         const dev = devices.find(d => d.id === devId);
-        if (dev) { macInput.value = dev.mac || ""; ipInput.value = dev.ip || ""; } else { macInput.value = ""; ipInput.value = ""; }
+        if (dev) {
+            macInput.value = dev.mac || "";
+            ipInput.value = dev.ip || "";
+        } else {
+            macInput.value = "";
+            ipInput.value = "";
+        }
     }
 
     function onTransferDestTypeChange() {
         const type = document.getElementById("transferDestType").value;
         const destSelect = document.getElementById("transferDestEntity");
         destSelect.innerHTML = "";
+
         let items = [];
         if(type === 'الى مخزن') items = getAllWarehouses().map(w => w.name);
         else items = towers.filter(t => t.type === (type === 'الى برج رئيسي' ? 'رئيسي' : 'فرعي')).map(t => t.name);
-        items.forEach(item => { destSelect.innerHTML += `<option value="${escapeHtml(item)}">${escapeHtml(item)}</option>`; });
+
+        items.forEach(item => {
+            destSelect.innerHTML += `<option value="${escapeHtml(item)}">${escapeHtml(item)}</option>`;
+        });
     }
 
     function executeWarehouseTransfer() {
         const editIndexVal = document.getElementById("transferEditIndex").value;
         const isEdit = editIndexVal !== "";
-        if (isEdit && !checkUserPermission('move_edit')) { showAlert("عذراً، لا تمتلك صلاحية تعديل التحويلات!", "danger"); return; }
-        if (!isEdit && !checkUserPermission('move_new')) { showAlert("حماية: لا تمتلك الصلاحية لإضافة حركة نقل!", "danger"); return; }
+
+        const adminPerms = currentLoggedInUserObj?.permissions?.admin || {};
+        const createScope = adminPerms['admin_transfers_create'] || 'من جميع المخازن';
+        const actionScope = adminPerms['admin_transfer_action'] || 'لجميع المخازن';
+        const editScope = adminPerms['admin_transfers_edit'] || 'لجميع المخازن';
+
+        if (createScope === 'غير مصرح' && !isEdit) {
+            showAlert("عذراً، ليس لديك صلاحية لإنشاء تحويل (غير مصرح).", "danger");
+            return;
+        }
+        if (actionScope === 'غير مصرح' && !isEdit) {
+            showAlert("عذراً، ليس لديك صلاحية لتنفيذ التحويل (غير مصرح).", "danger");
+            return;
+        }
+        if (editScope === 'غير مصرح' && isEdit) {
+            showAlert("عذراً، ليس لديك صلاحية لتعديل التحويلات (غير مصرح).", "danger");
+            return;
+        }
+
+        if (isEdit && !checkUserPermission('move_edit')) {
+            showAlert("عذراً، لا تمتلك صلاحية تعديل التحويلات!", "danger");
+            return;
+        }
+        if (!isEdit && !checkUserPermission('move_new')) {
+            showAlert("حماية: لا تمتلك الصلاحية لإضافة حركة نقل!", "danger");
+            return;
+        }
 
         const devId = parseInt(document.getElementById("transferDeviceItem").value);
         const dest = document.getElementById("transferDestEntity").value;
         const source = document.getElementById("transferSourceEntity").value;
         const reason = document.getElementById("transferReason").value.trim();
 
-        if(!devId || !dest) { showAlert("يرجى اختيار الجهاز والجهة المستلمة!", "warning"); return; }
+        if(!devId || !dest) {
+            showAlert("يرجى اختيار الجهاز والجهة المستلمة!", "warning");
+            return;
+        }
 
         const dev = devices.find(d => d.id === devId);
         if(dev) {
+            if (!isEdit && dev.location !== source) {
+                showAlert("عذراً، هذا الجهاز غير موجود حالياً في المصدر المحدد (ربما تم تحويله مسبقاً)!", "danger");
+                return;
+            }
+
+            if (!isEdit) {
+                const existingPending = movements.find(m => m.deviceId === dev.id && m.status === "معلقة قيد الاستلام");
+                if (existingPending) {
+                    showAlert("عذراً، هذا الجهاز لديه بالفعل أمر تحويل معلق بانتظار الاستلام ولا يمكن تحويله مرة أخرى حتى يتم الاستلام أو الإلغاء!", "danger");
+                    return;
+                }
+            }
+
             if (isEdit) {
                 const idx = parseInt(editIndexVal);
                 movements[idx].to = dest;
@@ -2453,6 +3111,7 @@
                 movements[idx].deviceId = dev.id;
                 movements[idx].device = dev.name;
                 movements[idx].mac = dev.mac;
+                movements[idx].ip = dev.ip || '';
                 movements[idx].reason = reason;
                 showAlert("تم تحديث بيانات التحويل بنجاح!");
             } else {
@@ -2471,55 +3130,176 @@
                     createdBy: currentLoggedInUserObj.name
                 };
                 movements.push(movementRecord);
-                showAlert("تم إنشاء أمر التحويل بنجاح!");
+                showAlert("تم إنشاء أمر التحويل بنجاح وهو بانتظار الاستلام!");
             }
+
             saveSystemData();
+            renderAll();
             bootstrap.Modal.getInstance(document.getElementById('warehouseTransferModal')).hide();
         }
     }
 
     function receiveMovement(index) {
-        if(!checkUserPermission('move_receive')) { showAlert("عذراً، لا تمتلك صلاحية استلام التحويلات!", "danger"); return; }
+        const adminPerms = currentLoggedInUserObj?.permissions?.admin || {};
+        const receiveScope = adminPerms['admin_transfers_receive'] || 'لجميع المخازن';
+        if (receiveScope === 'غير مصرح') {
+            showAlert("عذراً، ليس لديك صلاحية لاستلام التحويلات (غير مصرح).", "danger");
+            return;
+        }
+
+        if(!checkUserPermission('move_receive')) {
+            showAlert("عذراً، لا تمتلك صلاحية استلام التحويلات!", "danger");
+            return;
+        }
+
         const m = movements[index];
-        if(m.status === "مكتملة ومستلمة") { showAlert("هذا التحويل مستلم مسبقاً!", "warning"); return; }
-        let dev = devices.find(d => d.id === m.deviceId) || devices.find(d => d.mac === m.mac);
-        if (dev) { dev.location = m.to; }
+        
+        if (currentLoggedInUserObj.username !== 'admin') {
+            if (receiveScope === 'للمخازن والمواقع/الابراج المسؤل عنها فقط') {
+                const assignedTo = targetStaffAssignments[m.to] || [];
+                if (!assignedTo.includes(currentLoggedInUserObj.name)) {
+                    showAlert("عذراً، لا يمكنك الاستلام لأنك لست المسؤول المخول عن الجهة المستلمة (الوجهة النهائية) لهذا الجهاز!", "danger");
+                    return;
+                }
+            }
+        }
+
+        if(m.status === "مكتملة ومستلمة") {
+            showAlert("هذا التحويل مستلم مسبقاً!", "warning");
+            return;
+        }
+
+        let dev = devices.find(d => d.id === m.deviceId);
+        if (!dev) {
+            dev = devices.find(d => d.mac === m.mac);
+        }
+
+        if (dev) {
+            dev.location = m.to;
+        }
+
         m.status = "مكتملة ومستلمة";
+
+        movements.forEach((item, idx) => {
+            if (idx !== index && item.deviceId === m.deviceId && item.status === "معلقة قيد الاستلام") {
+                item.status = "مرفوضة (تم استلاستام الجهاز بجهة أخرى)";
+            }
+        });
+
         saveSystemData();
-        showAlert("تم استلام التحويل بنجاح ونقل الجهاز إلى (" + m.to + ")");
+        renderAll();
+        showAlert("تم استلاستام التحويل بنجاح وتم نقل الجهاز إلى عهدة (" + m.to + ")");
     }
 
     function rejectMovement(index) {
-        if(!checkUserPermission('move_reject')) { showAlert("عذراً، لا تمتلك صلاحية رفض التحويلات!", "danger"); return; }
+        const adminPerms = currentLoggedInUserObj?.permissions?.admin || {};
+        const rejectScope = adminPerms['admin_transfers_reject'] || 'لجميع المخازن';
+        if (rejectScope === 'غير مصرح') {
+            showAlert("عذراً، ليس لديك صلاحية لرفض التحويلات (غير مصرح).", "danger");
+            return;
+        }
+
+        if(!checkUserPermission('move_reject')) {
+            showAlert("عذراً، لا تمتلك صلاحية رفض التحويلات!", "danger");
+            return;
+        }
+
+        const m = movements[index];
+
+        if (currentLoggedInUserObj.username !== 'admin') {
+            if (rejectScope === 'للمخازن والمواقع/الابراج المسؤل عنها فقط') {
+                const assignedTo = targetStaffAssignments[m.to] || [];
+                const assignedFrom = targetStaffAssignments[m.from] || [];
+                if (!assignedTo.includes(currentLoggedInUserObj.name) && !assignedFrom.includes(currentLoggedInUserObj.name)) {
+                    showAlert("عذراً، لا تمتلك صلاحية رفض هذا التحويل لعدم ارتباطك بالمصدر أو الوجهة!", "danger");
+                    return;
+                }
+            }
+        }
+
         movements[index].status = "مرفوضة";
         saveSystemData();
-        showAlert("تم رفض التحويل!", "warning");
+        renderMovementsTable();
+        showAlert("تم رفض التحويل بنجاح!", "warning");
     }
 
-    function editMovement(index) { openTransferModal(index); }
+    function editMovement(index) {
+        const adminPerms = currentLoggedInUserObj?.permissions?.admin || {};
+        const editScope = adminPerms['admin_transfers_edit'] || 'لجميع المخازن';
+        if (editScope === 'غير مصرح') {
+            showAlert("عذراً، ليس لديك صلاحية تعديل التحويلات (غير مصرح).", "danger");
+            return;
+        }
+
+        if(!checkUserPermission('move_edit')) {
+            showAlert("عذراً، لا تمتلك صلاحية تعديل التحويلات!", "danger");
+            return;
+        }
+        openTransferModal(index);
+    }
+
     function deleteMovement(index) {
-        if(!checkUserPermission('move_delete')) { showAlert("عذراً، لا تمتلك صلاحية الحذف!", "danger"); return; }
-        if(confirm("هل أنت متأكد من حذف السجل؟")) { movements.splice(index, 1); saveSystemData(); showAlert("تم الحذف!"); }
+        const adminPerms = currentLoggedInUserObj?.permissions?.admin || {};
+        const deleteScope = adminPerms['admin_transfers_delete'] || 'لجميع المخازن';
+        if (deleteScope === 'غير مصرح') {
+            showAlert("عذراً، ليس لديك صلاحية حذف التحويلات (غير مصرح).", "danger");
+            return;
+        }
+
+        if(!checkUserPermission('move_delete')) {
+            showAlert("عذراً، لا تمتلك صلاحية حذف التحويلات!", "danger");
+            return;
+        }
+        if(confirm("هل أنت متأكد من حذف سجل التحويل هذا؟")) {
+            movements.splice(index, 1);
+            saveSystemData();
+            renderMovementsTable();
+            showAlert("تم حذف سجل التحويل بنجاح!");
+        }
     }
 
     function openMaintenanceModal() {
-        if(!checkUserPermission('maint_send')) { showAlert("عذراً، لا تمتلك صلاحية الصيانة!", "danger"); return; }
+        if(!checkUserPermission('maint_send')) {
+            showAlert("عذراً، لا تمتلك صلاحية تسليم الأجهزة للصيانة!", "danger");
+            return;
+        }
+
         document.getElementById("maintForm").reset();
+
         const devSelect = document.getElementById("maintDeviceSelect");
         devSelect.innerHTML = "";
-        devices.forEach(d => { devSelect.innerHTML += `<option value="${d.id}">${escapeHtml(d.name)} (${escapeHtml(d.mac)})</option>`; });
+        devices.forEach(d => {
+            devSelect.innerHTML += `<option value="${d.id}">${escapeHtml(d.name)} (${escapeHtml(d.mac)}) - [${escapeHtml(d.location)}]</option>`;
+        });
+
         const techSelect = document.getElementById("maintTech");
         techSelect.innerHTML = "";
-        users.forEach(u => { techSelect.innerHTML += `<option value="${escapeHtml(u.name)}">${escapeHtml(u.name)}</option>`; });
+        users.forEach(u => {
+            techSelect.innerHTML += `<option value="${escapeHtml(u.name)}">${escapeHtml(u.name)}</option>`;
+        });
+
         new bootstrap.Modal(document.getElementById('maintModal')).show();
     }
 
     function saveMaintenance() {
+        if(!checkUserPermission('maint_send')) {
+            showAlert("حماية: لا تمتلك صلاحيات الصيانة!", "danger");
+            return;
+        }
+
         const devId = parseInt(document.getElementById("maintDeviceSelect").value);
         const issue = document.getElementById("maintIssue").value.trim();
         const tech = document.getElementById("maintTech").value;
         const dev = devices.find(d => d.id === devId);
-        if(!dev || !issue) { showAlert("يرجى إكمال البيانات المطلوبة.", "warning"); return; }
+
+        if(!dev) {
+            showAlert("يرجى اختيار الجهاز.", "warning");
+            return;
+        }
+        if(!issue || !tech) {
+            showAlert("يرجى إدخال وصف العطل وتحديد الفني المسؤول.", "warning");
+            return;
+        }
 
         const maintRecord = {
             date: new Date().toLocaleDateString('ar-EG'),
@@ -2543,6 +3323,7 @@
 
         maintenance.push(maintRecord);
         saveSystemData();
+        renderAll();
         bootstrap.Modal.getInstance(document.getElementById('maintModal')).hide();
         showAlert("تم حفظ سجل الصيانة بنجاح!");
     }
@@ -2551,9 +3332,21 @@
         const tbody = document.getElementById("maintenanceTableBody");
         if(!tbody) return;
         tbody.innerHTML = "";
+
         if(!checkUserPermission('maintenance_section')) return;
+
         maintenance.forEach((m) => {
-            tbody.innerHTML += `<tr><td>${m.date}</td><td class="fw-bold">${m.deviceName}</td><td>${m.issue}</td><td>${m.tech}</td><td>${m.cost}$</td><td>${m.status}</td><td>-</td></tr>`;
+            tbody.innerHTML += `
+                <tr>
+                    <td>${escapeHtml(m.date)}</td>
+                    <td class="fw-bold">${escapeHtml(m.deviceName)}</td>
+                    <td>${escapeHtml(m.issue)}</td>
+                    <td>${escapeHtml(m.tech)}</td>
+                    <td>${m.cost ? escapeHtml(m.cost) + ' $' : '-'}</td>
+                    <td><span class="badge ${m.status === 'تم الإصلاح' ? 'bg-success' : 'bg-warning text-dark'}">${escapeHtml(m.status)}</span></td>
+                    <td>-</td>
+                </tr>
+            `;
         });
     }
 
@@ -2582,17 +3375,22 @@
                 `;
             });
         }
+
         const adminContainer = document.getElementById("adminPermissionsContainer");
         if(adminContainer) {
             adminContainer.innerHTML = "";
             adminPermissionsConfig.forEach(adm => {
                 let optionsHtml = "";
-                adm.options.forEach(opt => { optionsHtml += `<option value="${escapeHtml(opt)}">${escapeHtml(opt)}</option>`; });
+                adm.options.forEach(opt => {
+                    optionsHtml += `<option value="${escapeHtml(opt)}">${escapeHtml(opt)}</option>`;
+                });
                 adminContainer.innerHTML += `
                     <div class="col-md-6">
                         <div class="p-2 border rounded bg-light h-100">
                             <label class="form-label small fw-bold text-dark mb-1">${escapeHtml(adm.label)}</label>
-                            <select class="form-select form-select-sm admin-perm-select" data-admin-key="${adm.id}">${optionsHtml}</select>
+                            <select class="form-select form-select-sm admin-perm-select" data-admin-key="${adm.id}">
+                                ${optionsHtml}
+                            </select>
                         </div>
                     </div>
                 `;
@@ -2601,9 +3399,14 @@
     }
 
     function handleSectionToggle(masterCheckbox) {
+        const key = masterCheckbox.getAttribute("data-key");
         const isChecked = masterCheckbox.checked;
         const parentDiv = masterCheckbox.closest('.p-2');
-        if(parentDiv) { parentDiv.querySelectorAll('input.screen-perm-check').forEach(cb => { cb.checked = isChecked; }); }
+        if(parentDiv) {
+            parentDiv.querySelectorAll('input.screen-perm-check').forEach(cb => {
+                cb.checked = isChecked;
+            });
+        }
     }
 
     function toggleAllSectionScreens(masterCheckbox) {
@@ -2612,7 +3415,11 @@
     }
 
     function openUserModal(userId = null) {
-        if(!checkUserPermission('user_add_new') && !userId) { showAlert("عذراً، لا تمتلك صلاحية إضافة مستخدم جديد!", "danger"); return; }
+        if(!checkUserPermission('user_add_new') && !userId) {
+            showAlert("عذراً، لا تمتلك صلاحية إضافة مستخدم جديد!", "danger");
+            return;
+        }
+
         document.getElementById("userForm").reset();
         document.getElementById("userId").value = "";
         document.getElementById("selectAllGlobalScreens").checked = false;
@@ -2627,6 +3434,7 @@
                 document.getElementById("userPassword").value = u.password || "";
                 document.getElementById("userJobTitle").value = u.job || "";
                 document.getElementById("userStatus").value = u.status || "نشط";
+
                 if (u.permissions && u.permissions.screens) {
                     for (const [k, val] of Object.entries(u.permissions.screens)) {
                         const cb = document.querySelector(`.screen-perm-check[data-key="${k}"]`);
@@ -2641,13 +3449,18 @@
                 }
             }
         }
+
         new bootstrap.Modal(document.getElementById('userModal')).show();
     }
 
     function saveUser() {
         const idVal = document.getElementById("userId").value;
         const isEdit = !!idVal;
-        if(isEdit && !checkUserPermission('user_edit')) { showAlert("حماية: لا تمتلك صلاحية التعديل!", "danger"); return; }
+
+        if(isEdit && !checkUserPermission('user_edit')) {
+            showAlert("حماية: لا تمتلك صلاحية تعديل المستخدمين!", "danger");
+            return;
+        }
 
         const name = document.getElementById("userName").value.trim();
         const username = document.getElementById("userUsername").value.trim();
@@ -2655,12 +3468,28 @@
         const job = document.getElementById("userJobTitle").value.trim();
         const status = document.getElementById("userStatus").value;
 
-        if(!name || !username) { showAlert("يرجى إدخال اسم الموظف واسم المستخدم.", "warning"); return; }
+        if(!name || !username) {
+            showAlert("يرجى إدخال اسم الموظف واسم المستخدم.", "warning");
+            return;
+        }
+
+        const duplicate = users.find(u => u.username.toLowerCase() === username.toLowerCase() && Number(u.id) !== Number(idVal || 0));
+        if (duplicate) {
+            showAlert("اسم المستخدم مسجل مسبقاً لموظف آخر.", "danger");
+            return;
+        }
 
         let screensPerms = {};
-        document.querySelectorAll('.screen-perm-check').forEach(cb => { screensPerms[cb.getAttribute("data-key")] = cb.checked; });
+        document.querySelectorAll('.screen-perm-check').forEach(cb => {
+            const key = cb.getAttribute("data-key");
+            screensPerms[key] = cb.checked;
+        });
+
         let adminPerms = {};
-        document.querySelectorAll('.admin-perm-select').forEach(sel => { adminPerms[sel.getAttribute("data-admin-key")] = sel.value; });
+        document.querySelectorAll('.admin-perm-select').forEach(sel => {
+            const key = sel.getAttribute("data-admin-key");
+            adminPerms[key] = sel.value;
+        });
 
         const userData = {
             id: isEdit ? Number(idVal) : Date.now(),
@@ -2681,18 +3510,22 @@
         }
 
         saveSystemData();
+        renderUsersTable();
         bootstrap.Modal.getInstance(document.getElementById('userModal')).hide();
-        showAlert("تم حفظ المستخدم والصلاحيات بنجاح!");
+        showAlert("تم حفظ بيانات المستخدم والصلاحيات بنجاح!");
     }
 
     function renderUsersTable() {
         const tbody = document.getElementById("usersTableBody");
         if(!tbody) return;
         tbody.innerHTML = "";
+
         if(!checkUserPermission('users_section')) return;
+
         users.forEach((u, idx) => {
             const canEdit = checkUserPermission('user_edit');
             const canDelete = checkUserPermission('user_delete');
+
             tbody.innerHTML += `
                 <tr>
                     <td>${idx + 1}</td>
@@ -2712,28 +3545,37 @@
     }
 
     function deleteUser(id) {
-        if(!checkUserPermission('user_delete')) { showAlert("عذراً، لا تمتلك الصلاحية للحذف!", "danger"); return; }
-        if(confirm("هل أنت متأكد من حذف المستخدم؟")) {
+        if(!checkUserPermission('user_delete')) {
+            showAlert("عذراً، لا تمتلك صلاحية حذف المستخدمين!", "danger");
+            return;
+        }
+        if(confirm("هل أنت متأكد من حذف هذا المستخدم؟")) {
             users = users.filter(u => Number(u.id) !== Number(id));
             saveSystemData();
+            renderUsersTable();
             showAlert("تم الحذف بنجاح!");
         }
     }
 
-    let statusChartInstance = null;
-    let categoryChartInstance = null;
-
     function renderCharts() {
         if(!checkUserPermission('dashboard_section')) return;
+
         const statusCtx = document.getElementById('statusChart');
         if (statusCtx) {
             if (statusChartInstance) statusChartInstance.destroy();
             const healthyCount = devices.filter(d => d.status === 'سليم').length;
             const maintCount = devices.filter(d => d.status === 'تحت الصيانة').length;
             const scrapCount = devices.filter(d => d.status === 'تالف').length;
+
             statusChartInstance = new Chart(statusCtx, {
                 type: 'doughnut',
-                data: { labels: ['سليم', 'تحت الصيانة', 'تالف'], datasets: [{ data: [healthyCount, maintCount, scrapCount], backgroundColor: ['#198754', '#ffc107', '#dc3545'] }] },
+                data: {
+                    labels: ['سليم', 'تحت الصيانة', 'تالف'],
+                    datasets: [{
+                        data: [healthyCount, maintCount, scrapCount],
+                        backgroundColor: ['#198754', '#ffc107', '#dc3545']
+                    }]
+                },
                 options: { responsive: true, maintainAspectRatio: false }
             });
         }
@@ -2743,9 +3585,17 @@
             if (categoryChartInstance) categoryChartInstance.destroy();
             const cats = Object.keys(categoryModelsMap);
             const counts = cats.map(c => devices.filter(d => d.category === c).length);
+
             categoryChartInstance = new Chart(catCtx, {
                 type: 'bar',
-                data: { labels: cats, datasets: [{ label: 'عدد الأجهزة', data: counts, backgroundColor: '#0d6efd' }] },
+                data: {
+                    labels: cats,
+                    datasets: [{
+                        label: 'عدد الأجهزة',
+                        data: counts,
+                        backgroundColor: '#0d6efd'
+                    }]
+                },
                 options: { responsive: true, maintainAspectRatio: false }
             });
         }
@@ -2755,20 +3605,37 @@
         const query = document.getElementById("queryInput").value.trim().toLowerCase();
         const resultsContainer = document.getElementById("searchResults");
         if(!resultsContainer) return;
-        if(!query) { resultsContainer.innerHTML = `<div class="col-12 text-center text-muted">يرجى إدخال نص للبحث.</div>`; return; }
 
-        const found = devices.filter(d => d.name.toLowerCase().includes(query) || d.mac.toLowerCase().includes(query) || (d.ip && d.ip.toLowerCase().includes(query)));
-        if(found.length === 0) { resultsContainer.innerHTML = `<div class="col-md-6"><div class="alert alert-warning text-center">لا توجد نتائج مطابقة.</div></div>`; return; }
+        if(!query) {
+            resultsContainer.innerHTML = `<div class="col-12 text-center text-muted">يرجى إدخال نص للبحث.</div>`;
+            return;
+        }
+
+        const found = devices.filter(d => 
+            d.name.toLowerCase().includes(query) ||
+            d.mac.toLowerCase().includes(query) ||
+            (d.ip && d.ip.toLowerCase().includes(query))
+        );
+
+        if(found.length === 0) {
+            resultsContainer.innerHTML = `<div class="col-md-6"><div class="alert alert-warning text-center">لا توجد نتائج مطابقة للبحث.</div></div>`;
+            return;
+        }
 
         resultsContainer.innerHTML = "";
         found.forEach(d => {
-            resultsContainer.innerHTML += `
-                <div class="col-md-8 mb-2">
-                    <div class="card border-0 shadow-sm p-3">
-                        <h5 class="fw-bold text-primary mb-2">${escapeHtml(d.name)}</h5>
-                        <div><strong>الفئة:</strong> ${escapeHtml(d.category)} | <strong>الموديل:</strong> ${escapeHtml(d.model)}</div>
-                        <div><strong>MAC:</strong> <code>${escapeHtml(d.mac)}</code> | <strong>IP:</strong> ${escapeHtml(d.ip || '-')}</div>
-                        <div><strong>الموقع:</strong> ${escapeHtml(d.location)} | <strong>الحالة:</strong> ${getStatusBadge(d.status)}</div>
+            resultsContainer.innerHTML = `
+                <div class="col-md-8">
+                    <div class="card border-0 shadow-sm p-4 mb-3">
+                        <h4 class="fw-bold text-primary mb-3"><i class="fa-solid fa-server me-2"></i>${escapeHtml(d.name)}</h4>
+                        <div class="row g-2">
+                            <div class="col-md-6"><strong>الفئة:</strong> ${escapeHtml(d.category)}</div>
+                            <div class="col-md-6"><strong>الموديل:</strong> ${escapeHtml(d.model)}</div>
+                            <div class="col-md-6"><strong>MAC:</strong> <code>${escapeHtml(d.mac)}</code></div>
+                            <div class="col-md-6"><strong>IP:</strong> ${escapeHtml(d.ip || '-')}</div>
+                            <div class="col-md-6"><strong>الموقع الحالي:</strong> ${escapeHtml(d.location)}</div>
+                            <div class="col-md-6"><strong>الحالة:</strong> ${getStatusBadge(d.status)}</div>
+                        </div>
                     </div>
                 </div>
             `;
@@ -2776,20 +3643,27 @@
     }
 
     function exportBackup() {
-        const payload = { devices, towers, customWarehouses, movements, maintenance, users, categoryModelsMap, brandingSettings, uiCustomization, tabVisibility };
-        const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+        const data = { devices, towers, customWarehouses, movements, maintenance, users, categoryModelsMap, brandingSettings, uiCustomization, tabVisibility };
+        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
         const url = URL.createObjectURL(blob);
         const link = document.createElement('a');
         link.href = url;
-        link.download = `backup_${Date.now()}.json`;
+        link.download = `mikrotik_backup_${Date.now()}.json`;
         link.click();
         URL.revokeObjectURL(url);
     }
 
     function importBackup() {
-        if(!checkUserPermission('set_backup')) { showAlert("عذراً، لا تمتلك الصلاحية!", "danger"); return; }
+        if(!checkUserPermission('set_backup')) {
+            showAlert("عذراً، لا تمتلك الصلاحية لاستعادة النسخ الاحتياطية!", "danger");
+            return;
+        }
         const fileInput = document.getElementById("backupFile");
-        if(fileInput.files.length === 0) { showAlert("يرجى اختيار ملف.", "warning"); return; }
+        if(fileInput.files.length === 0) {
+            showAlert("يرجى اختيار ملف النسخة الاحتياطية أولاً.", "warning");
+            return;
+        }
+        const file = fileInput.files[0];
         const reader = new FileReader();
         reader.onload = function(e) {
             try {
@@ -2800,27 +3674,44 @@
                 if(parsed.movements) movements = parsed.movements;
                 if(parsed.maintenance) maintenance = parsed.maintenance;
                 if(parsed.users) users = parsed.users;
+                if(parsed.categoryModelsMap) categoryModelsMap = parsed.categoryModelsMap;
+                if(parsed.brandingSettings) brandingSettings = parsed.brandingSettings;
+                if(parsed.uiCustomization) uiCustomization = parsed.uiCustomization;
+                if(parsed.tabVisibility) tabVisibility = parsed.tabVisibility;
+
                 saveSystemData();
-                showAlert("تمت الاستعادة بنجاح!");
-            } catch(err) { showAlert("ملف غير صالح.", "danger"); }
+                applySettingsToUI();
+                renderAll();
+                showAlert("تم استعادة النسخة الاحتياطية بنجاح!");
+            } catch(err) {
+                showAlert("ملف النسخة الاحتياطية غير صالح.", "danger");
+            }
         };
-        reader.readAsText(fileInput.files[0]);
+        reader.readAsText(file);
     }
 
     function loadSampleData() {
-        if(!checkUserPermission('set_danger')) { showAlert("عذراً!", "danger"); return; }
-        if(confirm("إعادة البيانات الافتراضية؟")) {
-            db.ref('mikrotik_system').remove();
-            location.reload();
+        if(!checkUserPermission('set_danger')) {
+            showAlert("عذراً، لا تمتلك صلاحية تنفيذ هذا الإجراء.", "danger");
+            return;
+        }
+        if(confirm("هل تريد إعادة تحميل البيانات الافتراضية؟")) {
+            db.collection("mikrotik_system").doc("main_data").delete().then(() => {
+                location.reload();
+            });
         }
     }
 
     function resetSystem() {
-        if(!checkUserPermission('set_danger')) { showAlert("عذراً!", "danger"); return; }
-        if(confirm("تحذير: سيتم مسح كافة البيانات السحابية!")) {
-            db.ref('mikrotik_system').remove();
-            sessionStorage.clear();
-            location.reload();
+        if(!checkUserPermission('set_danger')) {
+            showAlert("عذراً، لا تمتلك صلاحية تصفير النظام.", "danger");
+            return;
+        }
+        if(confirm("تحذير: سيتم حذف كافة البيانات وإعادة تعيين النظام بالكامل! هل أنت متأكد؟")) {
+            db.collection("mikrotik_system").doc("main_data").delete().then(() => {
+                sessionStorage.clear();
+                location.reload();
+            });
         }
     }
 </script>
