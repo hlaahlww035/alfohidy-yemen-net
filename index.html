@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>النظام الشامل لإدارة أصول ومخازن الميكروتيك v4.6</title>
+    <title>النظام الشامل لإدارة أصول ومخازن شبكة يمن نت v4.6</title>
     <!-- Bootstrap 5 RTL CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css">
     <!-- FontAwesome Icons -->
@@ -12,6 +12,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
     <!-- Chart.js for Dashboards -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- SheetJS for Excel Import/Export -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     
     <!-- Firebase SDK (Compat Version للعمل المباشر والسريع مع المتصفح) -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
@@ -154,7 +156,7 @@
                 <i class="fa-solid fa-server"></i>
             </div>
             <h4 class="fw-bold text-dark">تسجيل الدخول للنظام</h4>
-            <p class="text-muted small">النظام الشامل لإدارة أصول ومخازن الميكروتيك v4.6 (السحابي)</p>
+            <p class="text-muted small">النظام الشامل لإدارة أصول ومخازن شبكة يمن نت v4.6 (السحابي)</p>
         </div>
         
         <div id="loginAlert"></div>
@@ -189,7 +191,7 @@
         <div class="col-auto sidebar p-3 d-flex flex-column no-print" id="sidebarNav">
             <div class="d-flex align-items-center justify-content-between border-bottom border-secondary pb-3 mb-2">
                 <h4 class="text-info fw-bold mb-0 text-truncate">
-                    <i class="fa-solid fa-server me-2"></i><span>نظام الميكروتيك</span>
+                    <i class="fa-solid fa-server me-2"></i><span>نظام شبكة يمن نت</span>
                 </h4>
                 <button class="btn btn-sm btn-outline-secondary text-white border-0" id="sidebarToggleBtn" onclick="toggleSidebar()" title="تصغير/إكبار القائمة">
                     <i class="fa-solid fa-bars"></i>
@@ -375,8 +377,12 @@
                             <select id="filterCategory" class="form-select" onchange="filterDevices()">
                                 <option value="">كل الفئات</option>
                             </select>
+                            <input type="file" id="excelImportFileInput" accept=".xlsx, .xls, .csv" style="display: none;" onchange="importDevicesExcel(event)">
+                            <button class="btn btn-outline-info text-nowrap" id="btnImportExcel" onclick="document.getElementById('excelImportFileInput').click()">
+                                <i class="fa-solid fa-file-excel me-1"></i> استيراد الأصول 
+                            </button>
                             <button class="btn btn-outline-success text-nowrap" id="btnExportExcel" onclick="exportDevicesExcel()">
-                                <i class="fa-solid fa-file-excel me-1"></i> تصدير البيانات المحددة (Excel)
+                                <i class="fa-solid fa-file-excel me-1"></i> تصدير
                             </button>
                             <button class="btn btn-primary text-nowrap" id="btnCreateDevice" onclick="openAddModal()">
                                 <i class="fa-solid fa-plus me-1"></i> إضافة جهاز جديد
@@ -460,7 +466,7 @@
                         <div class="d-flex gap-2 flex-wrap">
                             <input type="text" id="movementSearchInput" class="form-control form-control-sm" placeholder="بحث ذكي في الحركات..." onkeyup="renderMovementsTable()" style="width: 240px;">
                             <button class="btn btn-outline-success btn-sm text-nowrap" onclick="exportMovementsExcel()">
-                                <i class="fa-solid fa-file-excel me-1"></i> تصدير البيانات المحددة (Excel)
+                                <i class="fa-solid fa-file-excel me-1"></i> تصدير
                             </button>
                             <button class="btn btn-success btn-sm" id="btnCreateMovement" onclick="openTransferModal()">
                                 <i class="fa-solid fa-arrow-right-arrow-left me-1"></i> تسجيل حركة نقل جديدة
@@ -501,7 +507,7 @@
                                 <i class="fa-solid fa-print me-1"></i> طباعة التقارير
                             </button>
                             <button class="btn btn-success btn-sm" onclick="exportReportsExcel()">
-                                <i class="fa-solid fa-file-excel me-1"></i> تصدير التقرير (Excel)
+                                <i class="fa-solid fa-file-excel me-1"></i> تصدير Excel
                             </button>
                         </div>
                     </div>
@@ -1286,6 +1292,7 @@
             sectionKey: "devices_section",
             sectionName: "سجل الأجهزة والأصول",
             items: [
+                { id: "dev_import_excel", label: "زر استيراد اكسل" },
                 { id: "dev_export_excel", label: "زر تصدير اكسل" },
                 { id: "dev_add_device", label: "زر إضافة جهاز" },
                 { id: "dev_edit", label: "زر تعديل" },
@@ -1412,7 +1419,7 @@
     let towers = [];
     let customWarehouses = [];
     let categoryModelsMap = defaultCategoryModelsMap;
-    let brandingSettings = { companyName: "نظام الميكروتيك الاحترافي", currency: "$" };
+    let brandingSettings = { companyName: "نظام شبكة يمن نت", currency: "$" };
     let uiCustomization = { fontSize: "1rem", primaryColor: "#0d6efd", bgColor: "#f1f5f9", textColor: "#212529" };
     let tabVisibility = { "dashboard-tab": true, "devices-tab": true, "towers-tab": true, "locations-tab": true, "movements-tab": true, "reports-tab": true, "maintenance-tab": true, "users-tab": true, "search-tab": true, "settings-tab": true };
     let devices = [];
@@ -1617,6 +1624,7 @@
         toggleElementVisibility("btnCreateUser", checkUserPermission('user_add_new'));
         toggleElementVisibility("btnPrintReport", checkUserPermission('dash_print_report'));
         toggleElementVisibility("btnExportExcel", checkUserPermission('dev_export_excel'));
+        toggleElementVisibility("btnImportExcel", checkUserPermission('dev_import_excel'));
     }
 
     function toggleElementVisibility(elemId, isVisible) {
@@ -1735,7 +1743,7 @@
             showAlert("عذراً! لا تمتلك صلاحية تعديل الإعدادات.", "danger");
             return;
         }
-        brandingSettings.companyName = document.getElementById("settingCompanyName").value.trim() || "نظام الميكروتيك الاحترافي";
+        brandingSettings.companyName = document.getElementById("settingCompanyName").value.trim() || "نظام شبكة يمن نت";
         brandingSettings.currency = document.getElementById("settingCurrency").value.trim() || "$";
         saveSystemData();
         applySettingsToUI();
@@ -1761,6 +1769,7 @@
         renderMaintenanceTable();
         generateReport();
         renderUsersTable();
+        renderCharts();
         saveSystemData();
     }
 
@@ -2473,6 +2482,89 @@
         link.click();
         link.remove();
         showAlert("تم تصدير البيانات المحددة والمعروضة بنجاح كملف Excel منسق!");
+    }
+
+    function importDevicesExcel(e) {
+        if(!checkUserPermission('dev_import_excel')) {
+            showAlert("عذراً، لا تمتلك صلاحية استيراد الأصول!", "danger");
+            e.target.value = "";
+            return;
+        }
+
+        const file = e.target.files[0];
+        if(!file) return;
+
+        const reader = new FileReader();
+        reader.onload = function(evt) {
+            try {
+                const data = new Uint8Array(evt.target.result);
+                const workbook = XLSX.read(data, { type: 'array' });
+                const firstSheetName = workbook.SheetNames[0];
+                const worksheet = workbook.Sheets[firstSheetName];
+                const jsonRows = XLSX.utils.sheet_to_json(worksheet, { defval: "" });
+
+                if(jsonRows.length === 0) {
+                    showAlert("الملف المختار فارغ أو لا يحتوي على بيانات صحيحة!", "warning");
+                    e.target.value = "";
+                    return;
+                }
+
+                let importedCount = 0;
+                let defaultLoc = customWarehouses.length > 0 ? customWarehouses[0].name : "المخزن الرئيسي";
+                let defaultCat = Object.keys(categoryModelsMap)[0] || "روتر بورد";
+                let defaultModel = categoryModelsMap[defaultCat] ? categoryModelsMap[defaultCat][0] : "RB2011";
+
+                jsonRows.forEach(row => {
+                    // دعم أسماء الأعمدة بالعربية أو الإنجليزية لمرونة قصوى
+                    const name = row['اسم الجهاز'] || row['اسم'] || row['name'] || row['Device Name'] || 'جهاز مستورد';
+                    const category = row['الفئة'] || row['فئة الجهاز'] || row['category'] || defaultCat;
+                    const model = row['الموديل'] || row['موديل'] || row['model'] || defaultModel;
+                    let mac = String(row['MAC Address'] || row['MAC'] || row['mac'] || '').trim().toUpperCase();
+                    if (!mac) {
+                        mac = 'MAC-' + Math.floor(100000 + Math.random() * 900000);
+                    }
+                    const ip = row['IP Address'] || row['IP'] || row['ip'] || '';
+                    const location = row['الموقع الحالي'] || row['الموقع'] || row['location'] || defaultLoc;
+                    const status = row['الحالة'] || row['status'] || 'سليم';
+                    const supplier = row['المورد'] || row['supplier'] || '';
+                    const price = parseFloat(row['سعر الشراء'] || row['السعر'] || row['price'] || 0);
+                    const currency = row['العملة'] || row['currency'] || 'USD';
+                    const purchaseDate = row['تاريخ الشراء'] || row['purchaseDate'] || new Date().toISOString().split('T')[0];
+
+                    // التحقق من عدم تكرار MAC
+                    const exists = devices.find(d => String(d.mac || "").toUpperCase() === mac);
+                    if (!exists) {
+                        const newDev = {
+                            id: Date.now() + Math.floor(Math.random() * 1000),
+                            name: String(name),
+                            category: String(category),
+                            model: String(model),
+                            mac: mac,
+                            ip: String(ip),
+                            location: String(location),
+                            status: String(status),
+                            supplier: String(supplier),
+                            price: price,
+                            currency: String(currency),
+                            purchaseDate: String(purchaseDate),
+                            createdBy: currentLoggedInUserObj.name
+                        };
+                        devices.push(newDev);
+                        importedCount++;
+                    }
+                });
+
+                saveSystemData();
+                renderAll();
+                showAlert(`تم استورد ${importedCount} جهاز بنجاح إلى قاعدة بيانات الأصول!`);
+            } catch (err) {
+                console.error(err);
+                showAlert("حدث خطأ أثناء قراءة ملف الاكسل. تأكد من صحة تنسيق الملف.", "danger");
+            } finally {
+                e.target.value = "";
+            }
+        };
+        reader.readAsArrayBuffer(file);
     }
 
     function exportReportsExcel() {
