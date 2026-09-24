@@ -164,7 +164,7 @@
                 <label class="form-label fw-bold">اسم المستخدم</label>
                 <div class="input-group">
                     <span class="input-group-text bg-light"><i class="fa-solid fa-user text-muted"></i></span>
-                    <input type="text" id="loginUsername" class="form-control" required placeholder="أدخل اسم المستخدم (افتراضي: )" autocomplete="username">
+                    <input type="text" id="loginUsername" class="form-control" required placeholder="أدخل اسم المستخدم" autocomplete="username">
                 </div>
             </div>
             <div class="mb-4">
@@ -1761,6 +1761,7 @@
         renderMaintenanceTable();
         generateReport();
         renderUsersTable();
+        renderCharts();
         saveSystemData();
     }
 
