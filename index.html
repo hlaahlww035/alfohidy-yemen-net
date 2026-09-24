@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>النظام الشامل لإدارة أصول ومخازن الميكروتيك v4.6</title>
+    <title>النظام الشامل لإدارة أصول ومخازن شبكة يمن نت v4.6</title>
     <!-- Bootstrap 5 RTL CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css">
     <!-- FontAwesome Icons -->
@@ -156,7 +156,7 @@
                 <i class="fa-solid fa-server"></i>
             </div>
             <h4 class="fw-bold text-dark">تسجيل الدخول للنظام</h4>
-            <p class="text-muted small">النظام الشامل لإدارة أصول ومخازن الميكروتيك v4.6 (السحابي)</p>
+            <p class="text-muted small">النظام الشامل لإدارة أصول ومخازن شبكة يمن نت v4.6 (السحابي)</p>
         </div>
         
         <div id="loginAlert"></div>
@@ -166,14 +166,14 @@
                 <label class="form-label fw-bold">اسم المستخدم</label>
                 <div class="input-group">
                     <span class="input-group-text bg-light"><i class="fa-solid fa-user text-muted"></i></span>
-                    <input type="text" id="loginUsername" class="form-control" required placeholder="أدخل اسم المستخدم" autocomplete="username">
+                    <input type="text" id="loginUsername" class="form-control" required placeholder="أدخل اسم المستخدم (افتراضي: admin)" autocomplete="username">
                 </div>
             </div>
             <div class="mb-4">
                 <label class="form-label fw-bold">كلمة المرور</label>
                 <div class="input-group">
                     <span class="input-group-text bg-light"><i class="fa-solid fa-lock text-muted"></i></span>
-                    <input type="password" id="loginPassword" class="form-control" required autocomplete="current-password" placeholder="أدخل كلمة المرور">
+                    <input type="password" id="loginPassword" class="form-control" required autocomplete="current-password" placeholder="أدخل كلمة المرور (الافتراضية: admin123)">
                 </div>
             </div>
             <button type="submit" class="btn btn-primary w-100 py-2 fw-bold shadow-sm">
@@ -191,7 +191,7 @@
         <div class="col-auto sidebar p-3 d-flex flex-column no-print" id="sidebarNav">
             <div class="d-flex align-items-center justify-content-between border-bottom border-secondary pb-3 mb-2">
                 <h4 class="text-info fw-bold mb-0 text-truncate">
-                    <i class="fa-solid fa-server me-2"></i><span>نظام الميكروتيك</span>
+                    <i class="fa-solid fa-server me-2"></i><span>نظام شبكة يمن نت</span>
                 </h4>
                 <button class="btn btn-sm btn-outline-secondary text-white border-0" id="sidebarToggleBtn" onclick="toggleSidebar()" title="تصغير/إكبار القائمة">
                     <i class="fa-solid fa-bars"></i>
@@ -379,10 +379,10 @@
                             </select>
                             <input type="file" id="excelImportFileInput" accept=".xlsx, .xls, .csv" style="display: none;" onchange="importDevicesExcel(event)">
                             <button class="btn btn-outline-info text-nowrap" id="btnImportExcel" onclick="document.getElementById('excelImportFileInput').click()">
-                                <i class="fa-solid fa-file-excel me-1"></i> استيراد الأصول (Excel)
+                                <i class="fa-solid fa-file-excel me-1"></i> استيراد الأصول 
                             </button>
                             <button class="btn btn-outline-success text-nowrap" id="btnExportExcel" onclick="exportDevicesExcel()">
-                                <i class="fa-solid fa-file-excel me-1"></i> تصدير البيانات (Excel)
+                                <i class="fa-solid fa-file-excel me-1"></i> تصدير
                             </button>
                             <button class="btn btn-primary text-nowrap" id="btnCreateDevice" onclick="openAddModal()">
                                 <i class="fa-solid fa-plus me-1"></i> إضافة جهاز جديد
@@ -466,7 +466,7 @@
                         <div class="d-flex gap-2 flex-wrap">
                             <input type="text" id="movementSearchInput" class="form-control form-control-sm" placeholder="بحث ذكي في الحركات..." onkeyup="renderMovementsTable()" style="width: 240px;">
                             <button class="btn btn-outline-success btn-sm text-nowrap" onclick="exportMovementsExcel()">
-                                <i class="fa-solid fa-file-excel me-1"></i> تصدير البيانات المحددة (Excel)
+                                <i class="fa-solid fa-file-excel me-1"></i> تصدير
                             </button>
                             <button class="btn btn-success btn-sm" id="btnCreateMovement" onclick="openTransferModal()">
                                 <i class="fa-solid fa-arrow-right-arrow-left me-1"></i> تسجيل حركة نقل جديدة
@@ -507,7 +507,7 @@
                                 <i class="fa-solid fa-print me-1"></i> طباعة التقارير
                             </button>
                             <button class="btn btn-success btn-sm" onclick="exportReportsExcel()">
-                                <i class="fa-solid fa-file-excel me-1"></i> تصدير التقرير (Excel)
+                                <i class="fa-solid fa-file-excel me-1"></i> تصدير Excel
                             </button>
                         </div>
                     </div>
@@ -1419,7 +1419,7 @@
     let towers = [];
     let customWarehouses = [];
     let categoryModelsMap = defaultCategoryModelsMap;
-    let brandingSettings = { companyName: "نظام الميكروتيك الاحترافي", currency: "$" };
+    let brandingSettings = { companyName: "نظام شبكة يمن نت", currency: "$" };
     let uiCustomization = { fontSize: "1rem", primaryColor: "#0d6efd", bgColor: "#f1f5f9", textColor: "#212529" };
     let tabVisibility = { "dashboard-tab": true, "devices-tab": true, "towers-tab": true, "locations-tab": true, "movements-tab": true, "reports-tab": true, "maintenance-tab": true, "users-tab": true, "search-tab": true, "settings-tab": true };
     let devices = [];
@@ -1428,32 +1428,6 @@
     let users = [];
     let targetStaffAssignments = {};
     let currentLoggedInUserObj = null;
-
-    // متغيرات ومؤقت الخروج التلقائي عند عدم النشاط (10 دقائق)
-    let idleTimer = null;
-    const IDLE_TIMEOUT_MS = 10 * 60 * 1000; // 5 دقائق بالمللي ثانية
-
-    function resetIdleTimer() {
-        if (!sessionStorage.getItem('mikrotik_logged_in') || sessionStorage.getItem('mikrotik_logged_in') !== 'true') {
-            return;
-        }
-        clearTimeout(idleTimer);
-        idleTimer = setTimeout(() => {
-            logoutSystemDueToInactivity();
-        }, IDLE_TIMEOUT_MS);
-    }
-
-    function logoutSystemDueToInactivity() {
-        if (sessionStorage.getItem('mikrotik_logged_in') === 'true') {
-            logoutSystem();
-            showAlert("تم تسجيل الخروج تلقائياً بسبب عدم النشاط لفترة 5 دقائق.", "warning");
-        }
-    }
-
-    // تفعيل مراقبة تفاعل المستخدم بالمتصفح
-    ['mousemove', 'mousedown', 'keypress', 'scroll', 'touchstart', 'click'].forEach(evt => {
-        document.addEventListener(evt, resetIdleTimer, true);
-    });
 
     function generateFullPermissionsObject(val) {
         let screensObj = {};
@@ -1550,7 +1524,6 @@
                 applyUserPermissionsRestriction();
                 renderAll();
                 buildPermissionsMatrixUI();
-                resetIdleTimer(); // تشغيل مؤقت الخروج التلقائي عند تسجيل الدخول المسبق
             }
 
             if(localStorage.getItem('sidebar_minimized') === 'true') {
@@ -1701,12 +1674,10 @@
         applyUserPermissionsRestriction();
         renderAll();
         buildPermissionsMatrixUI();
-        resetIdleTimer(); // بدء مؤقت الخروج التلقائي عند تسجيل الدخول الناجح
         showAlert(`مرحباً بك، ${escapeHtml(foundUser.name)}`);
     }
 
     function logoutSystem() {
-        clearTimeout(idleTimer);
         sessionStorage.clear();
         currentLoggedInUserObj = null;
         document.getElementById("loginScreen").style.display = "flex";
@@ -1772,7 +1743,7 @@
             showAlert("عذراً! لا تمتلك صلاحية تعديل الإعدادات.", "danger");
             return;
         }
-        brandingSettings.companyName = document.getElementById("settingCompanyName").value.trim() || "نظام الميكروتيك الاحترافي";
+        brandingSettings.companyName = document.getElementById("settingCompanyName").value.trim() || "نظام شبكة يمن نت";
         brandingSettings.currency = document.getElementById("settingCurrency").value.trim() || "$";
         saveSystemData();
         applySettingsToUI();
@@ -2543,6 +2514,7 @@
                 let defaultModel = categoryModelsMap[defaultCat] ? categoryModelsMap[defaultCat][0] : "RB2011";
 
                 jsonRows.forEach(row => {
+                    // دعم أسماء الأعمدة بالعربية أو الإنجليزية لمرونة قصوى
                     const name = row['اسم الجهاز'] || row['اسم'] || row['name'] || row['Device Name'] || 'جهاز مستورد';
                     const category = row['الفئة'] || row['فئة الجهاز'] || row['category'] || defaultCat;
                     const model = row['الموديل'] || row['موديل'] || row['model'] || defaultModel;
@@ -2558,6 +2530,7 @@
                     const currency = row['العملة'] || row['currency'] || 'USD';
                     const purchaseDate = row['تاريخ الشراء'] || row['purchaseDate'] || new Date().toISOString().split('T')[0];
 
+                    // التحقق من عدم تكرار MAC
                     const exists = devices.find(d => String(d.mac || "").toUpperCase() === mac);
                     if (!exists) {
                         const newDev = {
