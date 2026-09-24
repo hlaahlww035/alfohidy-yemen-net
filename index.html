@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>النظام الشامل لإدارة أصول ومخازن شبكة يمن نت v4.6</title>
+    <title>النظام الشامل لإدارة أصول ومخازن يمن نت v4.6</title>
     <!-- Bootstrap 5 RTL CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css">
     <!-- FontAwesome Icons -->
@@ -12,13 +12,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
     <!-- Chart.js for Dashboards -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- SheetJS for Excel Import/Export -->
-    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-    
-    <!-- Firebase SDK (Compat Version للعمل المباشر والسريع مع المتصفح) -->
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
-
     <style>
         :root {
             --bs-body-font-size: 1rem;
@@ -156,7 +149,7 @@
                 <i class="fa-solid fa-server"></i>
             </div>
             <h4 class="fw-bold text-dark">تسجيل الدخول للنظام</h4>
-            <p class="text-muted small">النظام الشامل لإدارة أصول ومخازن شبكة يمن نت v4.6 (السحابي)</p>
+            <p class="text-muted small">النظام الشامل لإدارة أصول ومخازن شبكة يمن نت v4.6</p>
         </div>
         
         <div id="loginAlert"></div>
@@ -166,14 +159,14 @@
                 <label class="form-label fw-bold">اسم المستخدم</label>
                 <div class="input-group">
                     <span class="input-group-text bg-light"><i class="fa-solid fa-user text-muted"></i></span>
-                    <input type="text" id="loginUsername" class="form-control" required placeholder="أدخل اسم المستخدم (افتراضي: admin)" autocomplete="username">
+                    <input type="text" id="loginUsername" class="form-control" required placeholder="" autocomplete="username">
                 </div>
             </div>
             <div class="mb-4">
                 <label class="form-label fw-bold">كلمة المرور</label>
                 <div class="input-group">
                     <span class="input-group-text bg-light"><i class="fa-solid fa-lock text-muted"></i></span>
-                    <input type="password" id="loginPassword" class="form-control" required autocomplete="current-password" placeholder="أدخل كلمة المرور (الافتراضية: admin123)">
+                    <input type="password" id="loginPassword" class="form-control" required autocomplete="current-password" placeholder="">
                 </div>
             </div>
             <button type="submit" class="btn btn-primary w-100 py-2 fw-bold shadow-sm">
@@ -191,7 +184,7 @@
         <div class="col-auto sidebar p-3 d-flex flex-column no-print" id="sidebarNav">
             <div class="d-flex align-items-center justify-content-between border-bottom border-secondary pb-3 mb-2">
                 <h4 class="text-info fw-bold mb-0 text-truncate">
-                    <i class="fa-solid fa-server me-2"></i><span>نظام شبكة يمن نت</span>
+                    <i class="fa-solid fa-server me-2"></i><span>شبكة يمن نت</span>
                 </h4>
                 <button class="btn btn-sm btn-outline-secondary text-white border-0" id="sidebarToggleBtn" onclick="toggleSidebar()" title="تصغير/إكبار القائمة">
                     <i class="fa-solid fa-bars"></i>
@@ -377,12 +370,8 @@
                             <select id="filterCategory" class="form-select" onchange="filterDevices()">
                                 <option value="">كل الفئات</option>
                             </select>
-                            <input type="file" id="excelImportFileInput" accept=".xlsx, .xls, .csv" style="display: none;" onchange="importDevicesExcel(event)">
-                            <button class="btn btn-outline-info text-nowrap" id="btnImportExcel" onclick="document.getElementById('excelImportFileInput').click()">
-                                <i class="fa-solid fa-file-excel me-1"></i> استيراد الأصول 
-                            </button>
                             <button class="btn btn-outline-success text-nowrap" id="btnExportExcel" onclick="exportDevicesExcel()">
-                                <i class="fa-solid fa-file-excel me-1"></i> تصدير
+                                <i class="fa-solid fa-file-excel me-1"></i> تصدير البيانات المحددة (Excel)
                             </button>
                             <button class="btn btn-primary text-nowrap" id="btnCreateDevice" onclick="openAddModal()">
                                 <i class="fa-solid fa-plus me-1"></i> إضافة جهاز جديد
@@ -466,7 +455,7 @@
                         <div class="d-flex gap-2 flex-wrap">
                             <input type="text" id="movementSearchInput" class="form-control form-control-sm" placeholder="بحث ذكي في الحركات..." onkeyup="renderMovementsTable()" style="width: 240px;">
                             <button class="btn btn-outline-success btn-sm text-nowrap" onclick="exportMovementsExcel()">
-                                <i class="fa-solid fa-file-excel me-1"></i> تصدير
+                                <i class="fa-solid fa-file-excel me-1"></i> تصدير البيانات المحددة (Excel)
                             </button>
                             <button class="btn btn-success btn-sm" id="btnCreateMovement" onclick="openTransferModal()">
                                 <i class="fa-solid fa-arrow-right-arrow-left me-1"></i> تسجيل حركة نقل جديدة
@@ -507,7 +496,7 @@
                                 <i class="fa-solid fa-print me-1"></i> طباعة التقارير
                             </button>
                             <button class="btn btn-success btn-sm" onclick="exportReportsExcel()">
-                                <i class="fa-solid fa-file-excel me-1"></i> تصدير Excel
+                                <i class="fa-solid fa-file-excel me-1"></i> تصدير التقرير (Excel)
                             </button>
                         </div>
                     </div>
@@ -1252,19 +1241,17 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
-    // تهيئة فايربيس (Firebase Initialization)
-    const firebaseConfig = {
-        apiKey: "AIzaSyCgyMhxuD7bTiHeoKPk86jLCm-pVLlnM5M",
-        authDomain: "yemen-net-43ee9.firebaseapp.com",
-        projectId: "yemen-net-43ee9",
-        storageBucket: "yemen-net-43ee9.firebasestorage.app",
-        messagingSenderId: "315180295425",
-        appId: "1:315180295425:web:d8340f72cc9b09a74b6700",
-        measurementId: "G-QEP4GWZNQ1"
-    };
-
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore();
+    function safeJSON(key, fallback) {
+        try {
+            const raw = localStorage.getItem(key);
+            if (raw === null || raw === "") return fallback;
+            const parsed = JSON.parse(raw);
+            return parsed ?? fallback;
+        } catch (err) {
+            console.warn("تعذر قراءة البيانات من التخزين المحلي:", key, err);
+            return fallback;
+        }
+    }
 
     function escapeHtml(value) {
         return String(value ?? "")
@@ -1279,6 +1266,19 @@
         return Array.isArray(value) ? value : fallback;
     }
 
+    const systemScreens = [
+        { id: "dashboard", name: "لوحة المؤشرات والتحليلات" },
+        { id: "devices", name: "سجل الأصول والأجهزة" },
+        { id: "towers", name: "إدارة الأبراج والمواقع الشغالة" },
+        { id: "locations", name: "سجل المخازن والعهدة" },
+        { id: "movements", name: "سجل التحويلات والحركات" },
+        { id: "reports", name: "التقارير الشاملة والجرد" },
+        { id: "maintenance", name: "إدارة الصيانة والأعطال" },
+        { id: "users", name: "إدارة المستخدمين والصلاحيات" },
+        { id: "search", name: "الاستعلام الذكي الشامل" },
+        { id: "settings", name: "إدارة الإعدادات والتحكم الشامل" }
+    ];
+
     const permissionSectionsConfig = [
         {
             sectionKey: "dashboard_section",
@@ -1292,7 +1292,6 @@
             sectionKey: "devices_section",
             sectionName: "سجل الأجهزة والأصول",
             items: [
-                { id: "dev_import_excel", label: "زر استيراد اكسل" },
                 { id: "dev_export_excel", label: "زر تصدير اكسل" },
                 { id: "dev_add_device", label: "زر إضافة جهاز" },
                 { id: "dev_edit", label: "زر تعديل" },
@@ -1391,12 +1390,19 @@
         { type: "فرعي", name: "برج جبل حديد - 02", owner: "أحمد سعيد", ownerPhone: "733000000", location: "المرتفعات الشرقية", device: "NanoStation M5", notes: "الربط الرئيسي لخطوط الميكروويف", createdBy: "admin" }
     ];
 
+    let towers = safeJSON('mikrotik_towers', defaultTowers);
+
     let defaultWarehouses = [
         { name: "المخزن الرئيسي", keeper: "مدير النظام الرئيسي", type: "رئيسي", status: "مفعل", notes: "المخزن الافتراضي الرئيسي للنظام", createdBy: "admin" },
         { name: "عهدة مدير الصيانة", keeper: "مدير النظام الرئيسي", type: "فرعي", status: "مفعل", notes: "عهدة مخصصة لقطع الغيار السريعة", createdBy: "admin" },
         { name: "عهدة فني الصيانة", keeper: "مدير النظام الرئيسي", type: "فرعي", status: "مفعل", notes: "عهدة الفنيين الميدانيين", createdBy: "admin" },
         { name: "الأجهزة التالفة (سكراب)", keeper: "مدير النظام الرئيسي", type: "رئيسي", status: "مفعل", notes: "مخزن التالف والخراب", createdBy: "admin" }
     ];
+    let customWarehouses = safeJSON('mikrotik_custom_warehouses', defaultWarehouses);
+
+    function getAllWarehouses() {
+        return customWarehouses;
+    }
 
     let defaultCategoryModelsMap = {
         "روتر بورد": ["RB1100 X4", "RB2011"],
@@ -1407,26 +1413,45 @@
         "سويتش ( Switch 100 )": ["TOTO 100 8P-9V", "TP-Link 100 8P-9V"]
     };
 
-    let defaultDevices = [
+    let categoryModelsMap = safeJSON('mikrotik_cat_models', defaultCategoryModelsMap);
+
+    let brandingSettings = safeJSON('mikrotik_branding', {
+        companyName: "نظام شبكة يمن نت",
+        currency: "$"
+    });
+
+    let uiCustomization = safeJSON('mikrotik_ui_customization', {
+        fontSize: "1rem",
+        primaryColor: "#0d6efd",
+        bgColor: "#f1f5f9",
+        textColor: "#212529"
+    });
+
+    let tabVisibility = safeJSON('mikrotik_tabs_vis', {
+        "dashboard-tab": true,
+        "devices-tab": true,
+        "towers-tab": true,
+        "locations-tab": true,
+        "movements-tab": true,
+        "reports-tab": true,
+        "maintenance-tab": true,
+        "users-tab": true,
+        "search-tab": true,
+        "settings-tab": true
+    });
+
+    let devices = normalizeArray(safeJSON('mikrotik_devices', [
         { id: 1, name: "Main-Tower-M5", category: "أجهزة البث الاسلكي M5", model: "NanoStation M5", mac: "E0:63:DA:11:22:33", ip: "10.0.1.50", location: "برج المطار الرئيسي - 01", status: "سليم", supplier: "مؤسسة الاتصالات", price: 120, currency: "USD", purchaseDate: "2026-01-15", createdBy: "admin" },
         { id: 2, name: "Core-RB750", category: "روتر بورد", model: "RB2011", mac: "68:72:51:AA:BB:CC", ip: "10.0.0.1", location: "المخزن الرئيسي", status: "سليم", supplier: "الوكيل المحلي", price: 85, currency: "USD", purchaseDate: "2026-02-10", createdBy: "admin" }
-    ];
+    ]));
 
-    let defaultUsers = [
+    let movements = normalizeArray(safeJSON('mikrotik_movements', []));
+    let maintenance = normalizeArray(safeJSON('mikrotik_maint', []));
+    let users = normalizeArray(safeJSON('mikrotik_users', [
         { id: 1, name: "مدير النظام الرئيسي", username: "admin", password: "admin123", job: "مدير عام", status: "نشط", permissions: generateFullPermissionsObject(true), createdBy: "admin" }
-    ];
+    ]));
 
-    let towers = [];
-    let customWarehouses = [];
-    let categoryModelsMap = defaultCategoryModelsMap;
-    let brandingSettings = { companyName: "نظام شبكة يمن نت", currency: "$" };
-    let uiCustomization = { fontSize: "1rem", primaryColor: "#0d6efd", bgColor: "#f1f5f9", textColor: "#212529" };
-    let tabVisibility = { "dashboard-tab": true, "devices-tab": true, "towers-tab": true, "locations-tab": true, "movements-tab": true, "reports-tab": true, "maintenance-tab": true, "users-tab": true, "search-tab": true, "settings-tab": true };
-    let devices = [];
-    let movements = [];
-    let maintenance = [];
-    let users = [];
-    let targetStaffAssignments = {};
+    let targetStaffAssignments = safeJSON('mikrotik_target_staff', {});
     let currentLoggedInUserObj = null;
 
     function generateFullPermissionsObject(val) {
@@ -1444,108 +1469,78 @@
         return { screens: screensObj, admin: adminObj };
     }
 
+    users = users.map((u, index) => ({
+        ...u,
+        id: Number.isFinite(Number(u.id)) ? Number(u.id) : Date.now() + index,
+        password: typeof u.password === "string" ? u.password : (u.username === "admin" ? "admin123" : ""),
+        status: u.status || "نشط",
+        permissions: u.permissions || generateFullPermissionsObject(false),
+        createdBy: u.createdBy || "admin"
+    }));
+
+    if (!users.some(u => u.username === "admin")) {
+        users.unshift({
+            id: Date.now(),
+            name: "مدير النظام الرئيسي",
+            username: "admin",
+            password: "admin123",
+            job: "مدير عام",
+            status: "نشط",
+            permissions: generateFullPermissionsObject(true),
+            createdBy: "admin"
+        });
+    }
+
+    towers = normalizeArray(towers, []);
+    customWarehouses = normalizeArray(customWarehouses, []);
+    devices = normalizeArray(devices, []);
+    movements = normalizeArray(movements, []);
+    maintenance = normalizeArray(maintenance, []);
+    categoryModelsMap = (categoryModelsMap && typeof categoryModelsMap === "object" && !Array.isArray(categoryModelsMap))
+        ? categoryModelsMap : defaultCategoryModelsMap;
+    tabVisibility = { 
+        "dashboard-tab": true, "devices-tab": true, "towers-tab": true,
+        "locations-tab": true, "movements-tab": true, "reports-tab": true, "maintenance-tab": true,
+        "users-tab": true, "search-tab": true, "settings-tab": true,
+        ...(tabVisibility || {})
+    };
+
     let statusChartInstance = null;
     let categoryChartInstance = null;
 
-    // دالة المزامنة السحابية العامة مع Firestore
     function saveSystemData() {
-        const payload = {
-            devices: devices,
-            towers: towers,
-            customWarehouses: customWarehouses,
-            movements: movements,
-            maintenance: maintenance,
-            users: users,
-            targetStaffAssignments: targetStaffAssignments,
-            categoryModelsMap: categoryModelsMap,
-            brandingSettings: brandingSettings,
-            uiCustomization: uiCustomization,
-            tabVisibility: tabVisibility
-        };
-
-        db.collection("mikrotik_system").doc("main_data").set(payload)
-          .then(() => {
-              console.log("تمت مزامنة البيانات سحابياً بنجاح.");
-          })
-          .catch((error) => {
-              console.error("خطأ في المزامنة السحابية: ", error);
-          });
-    }
-
-    // جلب البيانات السحابية عند فتح النظام ومراقبة التحديثات اللحظية
-    function loadSystemDataFromCloud(callback) {
-        db.collection("mikrotik_system").doc("main_data").get()
-          .then((doc) => {
-              if (doc.exists) {
-                  const data = doc.data();
-                  devices = normalizeArray(data.devices, defaultDevices);
-                  towers = normalizeArray(data.towers, defaultTowers);
-                  customWarehouses = normalizeArray(data.customWarehouses, defaultWarehouses);
-                  movements = normalizeArray(data.movements, []);
-                  maintenance = normalizeArray(data.maintenance, []);
-                  users = normalizeArray(data.users, defaultUsers);
-                  targetStaffAssignments = data.targetStaffAssignments || {};
-                  categoryModelsMap = data.categoryModelsMap || defaultCategoryModelsMap;
-                  brandingSettings = data.brandingSettings || brandingSettings;
-                  uiCustomization = data.uiCustomization || uiCustomization;
-                  tabVisibility = data.tabVisibility || tabVisibility;
-              } else {
-                  // البيانات الافتراضية الأولى
-                  devices = defaultDevices;
-                  towers = defaultTowers;
-                  customWarehouses = defaultWarehouses;
-                  users = defaultUsers;
-                  saveSystemData();
-              }
-              if(callback) callback();
-          })
-          .catch((error) => {
-              console.error("خطأ في جلب البيانات:", error);
-              devices = defaultDevices;
-              towers = defaultTowers;
-              customWarehouses = defaultWarehouses;
-              users = defaultUsers;
-              if(callback) callback();
-          });
+        localStorage.setItem('mikrotik_devices', JSON.stringify(devices));
+        localStorage.setItem('mikrotik_towers', JSON.stringify(towers));
+        localStorage.setItem('mikrotik_custom_warehouses', JSON.stringify(customWarehouses));
+        localStorage.setItem('mikrotik_movements', JSON.stringify(movements));
+        localStorage.setItem('mikrotik_maint', JSON.stringify(maintenance));
+        localStorage.setItem('mikrotik_users', JSON.stringify(users));
+        localStorage.setItem('mikrotik_target_staff', JSON.stringify(targetStaffAssignments));
+        localStorage.setItem('mikrotik_cat_models', JSON.stringify(categoryModelsMap));
+        localStorage.setItem('mikrotik_branding', JSON.stringify(brandingSettings));
+        localStorage.setItem('mikrotik_ui_customization', JSON.stringify(uiCustomization));
+        localStorage.setItem('mikrotik_tabs_vis', JSON.stringify(tabVisibility));
     }
 
     document.addEventListener("DOMContentLoaded", () => {
-        loadSystemDataFromCloud(() => {
-            applySettingsToUI();
-            
-            if(sessionStorage.getItem('mikrotik_logged_in') === 'true') {
-                const currentId = Number(sessionStorage.getItem('mikrotik_current_user_id'));
-                const currentName = sessionStorage.getItem('mikrotik_current_user');
-                currentLoggedInUserObj = users.find(u => Number(u.id) === currentId)
-                    || users.find(u => u.name === currentName)
-                    || users.find(u => u.username === 'admin')
-                    || users[0];
-                document.getElementById("loginScreen").style.display = "none";
-                applyUserPermissionsRestriction();
-                renderAll();
-                buildPermissionsMatrixUI();
-            }
+        applySettingsToUI();
+        
+        if(sessionStorage.getItem('mikrotik_logged_in') === 'true') {
+            const currentId = Number(sessionStorage.getItem('mikrotik_current_user_id'));
+            const currentName = sessionStorage.getItem('mikrotik_current_user');
+            currentLoggedInUserObj = users.find(u => Number(u.id) === currentId)
+                || users.find(u => u.name === currentName)
+                || users.find(u => u.username === 'admin')
+                || users[0];
+            document.getElementById("loginScreen").style.display = "none";
+            applyUserPermissionsRestriction();
+            renderAll();
+            buildPermissionsMatrixUI();
+        }
 
-            if(localStorage.getItem('sidebar_minimized') === 'true') {
-                document.body.classList.add('sidebar-minimized');
-            }
-        });
-
-        // الاستماع للتحديثات اللحظية من باقي المستخدمين أونلاين
-        db.collection("mikrotik_system").doc("main_data")
-          .onSnapshot((doc) => {
-              if (doc.exists && sessionStorage.getItem('mikrotik_logged_in') === 'true') {
-                  const data = doc.data();
-                  devices = normalizeArray(data.devices, devices);
-                  towers = normalizeArray(data.towers, towers);
-                  customWarehouses = normalizeArray(data.customWarehouses, customWarehouses);
-                  movements = normalizeArray(data.movements, movements);
-                  maintenance = normalizeArray(data.maintenance, maintenance);
-                  users = normalizeArray(data.users, users);
-                  targetStaffAssignments = data.targetStaffAssignments || targetStaffAssignments;
-                  renderAll();
-              }
-          });
+        if(localStorage.getItem('sidebar_minimized') === 'true') {
+            document.body.classList.add('sidebar-minimized');
+        }
     });
 
     function checkUserPermission(permKey) {
@@ -1556,17 +1551,20 @@
         return !!perms.screens[permKey];
     }
 
+    // دالة تحكم صارمة لمنع التجاوز وعرض الشاشة المطلوبة فقط إذا كان مسموحاً
     function switchSystemTab(tabId, paneId, permKey) {
         if (!checkUserPermission(permKey)) {
             showAlert("عذراً! لا تمتلك صلاحية الدخول لهذه الشاشة.", "danger");
             return false;
         }
 
+        // إزالة التفعيل والنشاط من كل التبويبات والشاشات
         document.querySelectorAll('.sidebar .nav-link').forEach(el => el.classList.remove('active'));
         document.querySelectorAll('.tab-pane').forEach(el => {
             el.classList.remove('show', 'active');
         });
 
+        // تفعيل التبويب والشاشة المستهدفة حصراً
         const tabElem = document.getElementById(tabId);
         const paneElem = document.getElementById(paneId);
 
@@ -1611,6 +1609,7 @@
             }
         });
 
+        // فرض التوجيه التلقائي حصراً على أول شاشة مصرحة للمستخدم الحالي ومنع ظهور شاشات سابقة
         if (firstAllowedPane && firstAllowedTab) {
             switchSystemTab(firstAllowedTab, firstAllowedPane, permissionSectionsConfig.find(s => s.sectionKey.includes(firstAllowedPane))?.sectionKey || '');
         }
@@ -1624,7 +1623,6 @@
         toggleElementVisibility("btnCreateUser", checkUserPermission('user_add_new'));
         toggleElementVisibility("btnPrintReport", checkUserPermission('dash_print_report'));
         toggleElementVisibility("btnExportExcel", checkUserPermission('dev_export_excel'));
-        toggleElementVisibility("btnImportExcel", checkUserPermission('dev_import_excel'));
     }
 
     function toggleElementVisibility(elemId, isVisible) {
@@ -1743,7 +1741,7 @@
             showAlert("عذراً! لا تمتلك صلاحية تعديل الإعدادات.", "danger");
             return;
         }
-        brandingSettings.companyName = document.getElementById("settingCompanyName").value.trim() || "نظام شبكة يمن نت";
+        brandingSettings.companyName = document.getElementById("settingCompanyName").value.trim() || "نظام الميكروتيك الاحترافي";
         brandingSettings.currency = document.getElementById("settingCurrency").value.trim() || "$";
         saveSystemData();
         applySettingsToUI();
@@ -1794,10 +1792,6 @@
 
     function showAlert(message, type = 'success') {
         showNotification(message, type);
-    }
-
-    function getAllWarehouses() {
-        return customWarehouses;
     }
 
     function populateLocationSelects() {
@@ -2481,89 +2475,6 @@
         link.click();
         link.remove();
         showAlert("تم تصدير البيانات المحددة والمعروضة بنجاح كملف Excel منسق!");
-    }
-
-    function importDevicesExcel(e) {
-        if(!checkUserPermission('dev_import_excel')) {
-            showAlert("عذراً، لا تمتلك صلاحية استيراد الأصول!", "danger");
-            e.target.value = "";
-            return;
-        }
-
-        const file = e.target.files[0];
-        if(!file) return;
-
-        const reader = new FileReader();
-        reader.onload = function(evt) {
-            try {
-                const data = new Uint8Array(evt.target.result);
-                const workbook = XLSX.read(data, { type: 'array' });
-                const firstSheetName = workbook.SheetNames[0];
-                const worksheet = workbook.Sheets[firstSheetName];
-                const jsonRows = XLSX.utils.sheet_to_json(worksheet, { defval: "" });
-
-                if(jsonRows.length === 0) {
-                    showAlert("الملف المختار فارغ أو لا يحتوي على بيانات صحيحة!", "warning");
-                    e.target.value = "";
-                    return;
-                }
-
-                let importedCount = 0;
-                let defaultLoc = customWarehouses.length > 0 ? customWarehouses[0].name : "المخزن الرئيسي";
-                let defaultCat = Object.keys(categoryModelsMap)[0] || "روتر بورد";
-                let defaultModel = categoryModelsMap[defaultCat] ? categoryModelsMap[defaultCat][0] : "RB2011";
-
-                jsonRows.forEach(row => {
-                    // دعم أسماء الأعمدة بالعربية أو الإنجليزية لمرونة قصوى
-                    const name = row['اسم الجهاز'] || row['اسم'] || row['name'] || row['Device Name'] || 'جهاز مستورد';
-                    const category = row['الفئة'] || row['فئة الجهاز'] || row['category'] || defaultCat;
-                    const model = row['الموديل'] || row['موديل'] || row['model'] || defaultModel;
-                    let mac = String(row['MAC Address'] || row['MAC'] || row['mac'] || '').trim().toUpperCase();
-                    if (!mac) {
-                        mac = 'MAC-' + Math.floor(100000 + Math.random() * 900000);
-                    }
-                    const ip = row['IP Address'] || row['IP'] || row['ip'] || '';
-                    const location = row['الموقع الحالي'] || row['الموقع'] || row['location'] || defaultLoc;
-                    const status = row['الحالة'] || row['status'] || 'سليم';
-                    const supplier = row['المورد'] || row['supplier'] || '';
-                    const price = parseFloat(row['سعر الشراء'] || row['السعر'] || row['price'] || 0);
-                    const currency = row['العملة'] || row['currency'] || 'USD';
-                    const purchaseDate = row['تاريخ الشراء'] || row['purchaseDate'] || new Date().toISOString().split('T')[0];
-
-                    // التحقق من عدم تكرار MAC
-                    const exists = devices.find(d => String(d.mac || "").toUpperCase() === mac);
-                    if (!exists) {
-                        const newDev = {
-                            id: Date.now() + Math.floor(Math.random() * 1000),
-                            name: String(name),
-                            category: String(category),
-                            model: String(model),
-                            mac: mac,
-                            ip: String(ip),
-                            location: String(location),
-                            status: String(status),
-                            supplier: String(supplier),
-                            price: price,
-                            currency: String(currency),
-                            purchaseDate: String(purchaseDate),
-                            createdBy: currentLoggedInUserObj.name
-                        };
-                        devices.push(newDev);
-                        importedCount++;
-                    }
-                });
-
-                saveSystemData();
-                renderAll();
-                showAlert(`تم استورد ${importedCount} جهاز بنجاح إلى قاعدة بيانات الأصول!`);
-            } catch (err) {
-                console.error(err);
-                showAlert("حدث خطأ أثناء قراءة ملف الاكسل. تأكد من صحة تنسيق الملف.", "danger");
-            } finally {
-                e.target.value = "";
-            }
-        };
-        reader.readAsArrayBuffer(file);
     }
 
     function exportReportsExcel() {
@@ -3787,9 +3698,8 @@
             return;
         }
         if(confirm("هل تريد إعادة تحميل البيانات الافتراضية؟")) {
-            db.collection("mikrotik_system").doc("main_data").delete().then(() => {
-                location.reload();
-            });
+            localStorage.clear();
+            location.reload();
         }
     }
 
@@ -3799,10 +3709,9 @@
             return;
         }
         if(confirm("تحذير: سيتم حذف كافة البيانات وإعادة تعيين النظام بالكامل! هل أنت متأكد؟")) {
-            db.collection("mikrotik_system").doc("main_data").delete().then(() => {
-                sessionStorage.clear();
-                location.reload();
-            });
+            localStorage.clear();
+            sessionStorage.clear();
+            location.reload();
         }
     }
 </script>
