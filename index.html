@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>النظام الشامل لإدارة أصول ومخازن شبكة يمن نت v4.6</title>
+    <title>النظام الشامل لإدارة أصول ومخازن الميكروتيك v4.6</title>
     <!-- Bootstrap 5 RTL CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css">
     <!-- FontAwesome Icons -->
@@ -166,14 +166,14 @@
                 <label class="form-label fw-bold">اسم المستخدم</label>
                 <div class="input-group">
                     <span class="input-group-text bg-light"><i class="fa-solid fa-user text-muted"></i></span>
-                    <input type="text" id="loginUsername" class="form-control" required placeholder="أدخل اسم المستخدم (افتراضي: admin)" autocomplete="username">
+                    <input type="text" id="loginUsername" class="form-control" required placeholder="أدخل اسم المستخدم" autocomplete="username">
                 </div>
             </div>
             <div class="mb-4">
                 <label class="form-label fw-bold">كلمة المرور</label>
                 <div class="input-group">
                     <span class="input-group-text bg-light"><i class="fa-solid fa-lock text-muted"></i></span>
-                    <input type="password" id="loginPassword" class="form-control" required autocomplete="current-password" placeholder="أدخل كلمة المرور (الافتراضية: admin123)">
+                    <input type="password" id="loginPassword" class="form-control" required autocomplete="current-password" placeholder="أدخل كلمة المرور">
                 </div>
             </div>
             <button type="submit" class="btn btn-primary w-100 py-2 fw-bold shadow-sm">
@@ -191,7 +191,7 @@
         <div class="col-auto sidebar p-3 d-flex flex-column no-print" id="sidebarNav">
             <div class="d-flex align-items-center justify-content-between border-bottom border-secondary pb-3 mb-2">
                 <h4 class="text-info fw-bold mb-0 text-truncate">
-                    <i class="fa-solid fa-server me-2"></i><span>نظام شبكة يمن نت</span>
+                    <i class="fa-solid fa-server me-2"></i><span>نظام الميكروتيك</span>
                 </h4>
                 <button class="btn btn-sm btn-outline-secondary text-white border-0" id="sidebarToggleBtn" onclick="toggleSidebar()" title="تصغير/إكبار القائمة">
                     <i class="fa-solid fa-bars"></i>
@@ -382,7 +382,7 @@
                                 <i class="fa-solid fa-file-excel me-1"></i> استيراد الأصول 
                             </button>
                             <button class="btn btn-outline-success text-nowrap" id="btnExportExcel" onclick="exportDevicesExcel()">
-                                <i class="fa-solid fa-file-excel me-1"></i> تصدير
+                                <i class="fa-solid fa-file-excel me-1"></i> تصدير البيانات 
                             </button>
                             <button class="btn btn-primary text-nowrap" id="btnCreateDevice" onclick="openAddModal()">
                                 <i class="fa-solid fa-plus me-1"></i> إضافة جهاز جديد
@@ -466,7 +466,7 @@
                         <div class="d-flex gap-2 flex-wrap">
                             <input type="text" id="movementSearchInput" class="form-control form-control-sm" placeholder="بحث ذكي في الحركات..." onkeyup="renderMovementsTable()" style="width: 240px;">
                             <button class="btn btn-outline-success btn-sm text-nowrap" onclick="exportMovementsExcel()">
-                                <i class="fa-solid fa-file-excel me-1"></i> تصدير
+                                <i class="fa-solid fa-file-excel me-1"></i> تصدير البيانات 
                             </button>
                             <button class="btn btn-success btn-sm" id="btnCreateMovement" onclick="openTransferModal()">
                                 <i class="fa-solid fa-arrow-right-arrow-left me-1"></i> تسجيل حركة نقل جديدة
@@ -507,7 +507,7 @@
                                 <i class="fa-solid fa-print me-1"></i> طباعة التقارير
                             </button>
                             <button class="btn btn-success btn-sm" onclick="exportReportsExcel()">
-                                <i class="fa-solid fa-file-excel me-1"></i> تصدير Excel
+                                <i class="fa-solid fa-file-excel me-1"></i> تصدير التقرير 
                             </button>
                         </div>
                     </div>
@@ -1419,7 +1419,7 @@
     let towers = [];
     let customWarehouses = [];
     let categoryModelsMap = defaultCategoryModelsMap;
-    let brandingSettings = { companyName: "نظام شبكة يمن نت", currency: "$" };
+    let brandingSettings = { companyName: "نظام الميكروتيك الاحترافي", currency: "$" };
     let uiCustomization = { fontSize: "1rem", primaryColor: "#0d6efd", bgColor: "#f1f5f9", textColor: "#212529" };
     let tabVisibility = { "dashboard-tab": true, "devices-tab": true, "towers-tab": true, "locations-tab": true, "movements-tab": true, "reports-tab": true, "maintenance-tab": true, "users-tab": true, "search-tab": true, "settings-tab": true };
     let devices = [];
@@ -1428,6 +1428,32 @@
     let users = [];
     let targetStaffAssignments = {};
     let currentLoggedInUserObj = null;
+
+    // متغيرات ومؤقت الخروج التلقائي عند عدم النشاط (10 دقائق)
+    let idleTimer = null;
+    const IDLE_TIMEOUT_MS = 10 * 60 * 1000; // 5 دقائق بالمللي ثانية
+
+    function resetIdleTimer() {
+        if (!sessionStorage.getItem('mikrotik_logged_in') || sessionStorage.getItem('mikrotik_logged_in') !== 'true') {
+            return;
+        }
+        clearTimeout(idleTimer);
+        idleTimer = setTimeout(() => {
+            logoutSystemDueToInactivity();
+        }, IDLE_TIMEOUT_MS);
+    }
+
+    function logoutSystemDueToInactivity() {
+        if (sessionStorage.getItem('mikrotik_logged_in') === 'true') {
+            logoutSystem();
+            showAlert("تم تسجيل الخروج تلقائياً بسبب عدم النشاط لفترة 5 دقائق.", "warning");
+        }
+    }
+
+    // تفعيل مراقبة تفاعل المستخدم بالمتصفح
+    ['mousemove', 'mousedown', 'keypress', 'scroll', 'touchstart', 'click'].forEach(evt => {
+        document.addEventListener(evt, resetIdleTimer, true);
+    });
 
     function generateFullPermissionsObject(val) {
         let screensObj = {};
@@ -1524,6 +1550,7 @@
                 applyUserPermissionsRestriction();
                 renderAll();
                 buildPermissionsMatrixUI();
+                resetIdleTimer(); // تشغيل مؤقت الخروج التلقائي عند تسجيل الدخول المسبق
             }
 
             if(localStorage.getItem('sidebar_minimized') === 'true') {
@@ -1674,10 +1701,12 @@
         applyUserPermissionsRestriction();
         renderAll();
         buildPermissionsMatrixUI();
+        resetIdleTimer(); // بدء مؤقت الخروج التلقائي عند تسجيل الدخول الناجح
         showAlert(`مرحباً بك، ${escapeHtml(foundUser.name)}`);
     }
 
     function logoutSystem() {
+        clearTimeout(idleTimer);
         sessionStorage.clear();
         currentLoggedInUserObj = null;
         document.getElementById("loginScreen").style.display = "flex";
@@ -2195,13 +2224,36 @@
             return;
         }
 
-        const searchQuery = document.getElementById("locationsSearchInput") ? document.getElementById("locationsSearchInput").value.toLowerCase() : "";
+        const searchQuery = document.getElementById("locationsSearchInput") ? document.getElementById("locationsSearchInput").value.toLowerCase().trim() : "";
+        const dropdownFilter = document.getElementById("locationSelectorFilter") ? document.getElementById("locationSelectorFilter").value : "";
         container.innerHTML = "";
 
         let filtered = customWarehouses.filter(w => {
-            const matchesSearch = w.name.toLowerCase().includes(searchQuery);
-            return matchesSearch;
+            const matchesDropdown = dropdownFilter ? w.name === dropdownFilter : true;
+            
+            // مطابقة البحث الذكي: اسم المخزن، أمين المخزن، الملاحظات، أو أجهزة المخزن (الاسم، MAC، IP)
+            const matchesSearchName = w.name.toLowerCase().includes(searchQuery) || 
+                                      (w.keeper && w.keeper.toLowerCase().includes(searchQuery)) || 
+                                      (w.notes && w.notes.toLowerCase().includes(searchQuery));
+            
+            const warehouseDevices = devices.filter(d => d.location === w.name);
+            const matchesDevice = warehouseDevices.some(d => 
+                d.name.toLowerCase().includes(searchQuery) || 
+                d.mac.toLowerCase().includes(searchQuery) || 
+                (d.ip && d.ip.toLowerCase().includes(searchQuery)) ||
+                d.model.toLowerCase().includes(searchQuery) ||
+                d.category.toLowerCase().includes(searchQuery)
+            );
+
+            const matchesSearch = !searchQuery || matchesSearchName || matchesDevice;
+
+            return matchesDropdown && matchesSearch;
         });
+
+        if(filtered.length === 0) {
+            container.innerHTML = `<div class="col-12 text-center py-4 text-muted">لا توجد مخازن مطابقة للبحث أو الفلتر.</div>`;
+            return;
+        }
 
         filtered.forEach(w => {
             const adminPerms = currentLoggedInUserObj?.permissions?.admin || {};
@@ -2212,11 +2264,24 @@
                 if (!assigned.includes(currentLoggedInUserObj.name)) return;
             }
 
-            const warehouseDevices = devices.filter(d => d.location === w.name);
+            let warehouseDevices = devices.filter(d => d.location === w.name);
+
+            // إذا كان هناك بحث نصي، نقوم بفلترة أجهزة المخزن أيضاً لتظهر فقط الأجهزة المطابقة
+            if (searchQuery) {
+                warehouseDevices = warehouseDevices.filter(d => 
+                    d.name.toLowerCase().includes(searchQuery) || 
+                    d.mac.toLowerCase().includes(searchQuery) || 
+                    (d.ip && d.ip.toLowerCase().includes(searchQuery)) ||
+                    d.model.toLowerCase().includes(searchQuery) ||
+                    d.category.toLowerCase().includes(searchQuery) ||
+                    w.name.toLowerCase().includes(searchQuery)
+                );
+            }
+
             let devRows = "";
 
             if(warehouseDevices.length === 0) {
-                devRows = `<tr><td colspan="5" class="text-center text-muted py-2">لا توجد أجهزة مضافة</td></tr>`;
+                devRows = `<tr><td colspan="5" class="text-center text-muted py-2">لا توجد أجهزة مضافة أو مطابقة للبحث</td></tr>`;
             } else {
                 warehouseDevices.forEach((d, idx) => {
                     devRows += `
@@ -2514,7 +2579,6 @@
                 let defaultModel = categoryModelsMap[defaultCat] ? categoryModelsMap[defaultCat][0] : "RB2011";
 
                 jsonRows.forEach(row => {
-                    // دعم أسماء الأعمدة بالعربية أو الإنجليزية لمرونة قصوى
                     const name = row['اسم الجهاز'] || row['اسم'] || row['name'] || row['Device Name'] || 'جهاز مستورد';
                     const category = row['الفئة'] || row['فئة الجهاز'] || row['category'] || defaultCat;
                     const model = row['الموديل'] || row['موديل'] || row['model'] || defaultModel;
@@ -2530,7 +2594,6 @@
                     const currency = row['العملة'] || row['currency'] || 'USD';
                     const purchaseDate = row['تاريخ الشراء'] || row['purchaseDate'] || new Date().toISOString().split('T')[0];
 
-                    // التحقق من عدم تكرار MAC
                     const exists = devices.find(d => String(d.mac || "").toUpperCase() === mac);
                     if (!exists) {
                         const newDev = {
