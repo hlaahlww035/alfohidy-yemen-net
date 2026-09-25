@@ -13,6 +13,9 @@
     <!-- Chart.js for Dashboards -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
+    <!-- SheetJS (XLSX) library for importing Excel/CSV files -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
     <!-- Firebase SDK (Compat Version للعمل المباشر والسريع مع المتصفح) -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
@@ -375,11 +378,15 @@
                             <select id="filterCategory" class="form-select" onchange="filterDevices()">
                                 <option value="">كل الفئات</option>
                             </select>
-                            <button class="btn btn-outline-info text-nowrap" id="btnImportExcel" onclick="openImportModal()">
-                                <i class="fa-solid fa-file-import me-1"></i> استيراد الأصول
+                            
+                            <!-- زر استيراد ملف Excel/CSV للأجهزة -->
+                            <input type="file" id="importDevicesFileInput" class="d-none" accept=".xlsx, .xls, .csv" onchange="importDevicesExcel(event)">
+                            <button class="btn btn-outline-info text-nowrap" id="btnImportExcel" onclick="document.getElementById('importDevicesFileInput').click()">
+                                <i class="fa-solid fa-file-import me-1"></i> استيراد من Excel
                             </button>
+
                             <button class="btn btn-outline-success text-nowrap" id="btnExportExcel" onclick="exportDevicesExcel()">
-                                <i class="fa-solid fa-file-excel me-1"></i> تصدير البيانات 
+                                <i class="fa-solid fa-file-excel me-1"></i> تصدير (Excel)
                             </button>
                             <button class="btn btn-primary text-nowrap" id="btnCreateDevice" onclick="openAddModal()">
                                 <i class="fa-solid fa-plus me-1"></i> إضافة جهاز جديد
@@ -440,7 +447,7 @@
                         <h3 class="fw-bold"><i class="fa-solid fa-location-dot me-2 text-primary"></i>سجل المخازن والعهدة والمواقع الشاملة</h3>
                         <div class="d-flex gap-2 flex-wrap align-items-center">
                             <div style="width: 250px;">
-                                <input type="text" id="locationsSearchInput" class="form-control" placeholder="بحث في المخازن..." onkeyup="renderLocationsView()">
+                                <input type="text" id="locationsSearchInput" class="form-control" placeholder="بحث ذكي في المخازن..." onkeyup="renderLocationsView()">
                             </div>
                             <div style="width: 200px;">
                                 <select id="locationSelectorFilter" class="form-select" onchange="renderLocationsView()">
@@ -463,7 +470,7 @@
                         <div class="d-flex gap-2 flex-wrap">
                             <input type="text" id="movementSearchInput" class="form-control form-control-sm" placeholder="بحث ذكي في الحركات..." onkeyup="renderMovementsTable()" style="width: 240px;">
                             <button class="btn btn-outline-success btn-sm text-nowrap" onclick="exportMovementsExcel()">
-                                <i class="fa-solid fa-file-excel me-1"></i> تصدير البيانات 
+                                <i class="fa-solid fa-file-excel me-1"></i> تصدير البيانات المحددة (Excel)
                             </button>
                             <button class="btn btn-success btn-sm" id="btnCreateMovement" onclick="openTransferModal()">
                                 <i class="fa-solid fa-arrow-right-arrow-left me-1"></i> تسجيل حركة نقل جديدة
@@ -504,7 +511,7 @@
                                 <i class="fa-solid fa-print me-1"></i> طباعة التقارير
                             </button>
                             <button class="btn btn-success btn-sm" onclick="exportReportsExcel()">
-                                <i class="fa-solid fa-file-excel me-1"></i> تصدير التقرير 
+                                <i class="fa-solid fa-file-excel me-1"></i> تصدير التقرير (Excel)
                             </button>
                         </div>
                     </div>
@@ -830,29 +837,6 @@
                     </div>
                 </div>
 
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Modal: Import Devices -->
-<div class="modal fade" id="importDevicesModal" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
-            <div class="modal-header bg-info text-white px-4 py-3">
-                <h5 class="modal-title fs-5"><i class="fa-solid fa-file-import me-2"></i>استيراد الأصول والأجهزة</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body p-4 bg-light">
-                <div class="mb-3">
-                    <label class="form-label fw-bold small">اختر ملف (JSON أو CSV / Excel منسق)</label>
-                    <input type="file" id="importDevicesFile" class="form-control form-control-sm" accept=".json, .csv, .txt">
-                    <small class="text-muted d-mt-2 mt-1">يجب أن يتطابق ملف الاستيراد مع حقول النظام (اسم الجهاز، الفئة، الموديل، MAC، الموقع، الحالة).</small>
-                </div>
-            </div>
-            <div class="modal-footer bg-white px-4 py-2">
-                <button type="button" class="btn btn-secondary btn-sm px-3" data-bs-dismiss="modal">إلغاء</button>
-                <button type="button" class="btn btn-info btn-sm px-4 fw-bold text-white" onclick="processImportDevices()"><i class="fa-solid fa-upload me-1"></i> قراءة وإضافة للقاعدة</button>
             </div>
         </div>
     </div>
@@ -1287,20 +1271,23 @@
     const db = firebase.firestore();
 
     let isCloudDataLoaded = false;
-    let inactivityTimer = null;
-    const INACTIVITY_LIMIT = 10 * 60 * 1000; // 10 دقائق
+
+    // ميزة تسجيل الخروج التلقائي عند عدم النشاط (10 دقائق = 600000 ملي ثانية)
+    let inactivityTimer;
+    const INACTIVITY_LIMIT = 10 * 60 * 1000;
 
     function resetInactivityTimer() {
-        if (sessionStorage.getItem('mikrotik_logged_in') !== 'true') return;
         clearTimeout(inactivityTimer);
-        inactivityTimer = setTimeout(() => {
-            logoutSystem();
-            alert("تم تسجيل خروجك تلقائياً بسبب عدم النشاط لمدة 10 دقائق.");
-        }, INACTIVITY_LIMIT);
+        if (sessionStorage.getItem('mikrotik_logged_in') === 'true') {
+            inactivityTimer = setTimeout(() => {
+                logoutSystem();
+                showAlert("تم تسجيل خروجك تلقائياً لعدم النشاط لفترة 10 دقائق.", "warning");
+            }, INACTIVITY_LIMIT);
+        }
     }
 
-    ['mousemove', 'keydown', 'click', 'scroll', 'touchstart'].forEach(evt => {
-        document.addEventListener(evt, resetInactivityTimer, true);
+    ['mousemove', 'keydown', 'click', 'scroll', 'touchstart'].forEach(eventName => {
+        window.addEventListener(eventName, resetInactivityTimer, true);
     });
 
     function escapeHtml(value) {
@@ -1337,7 +1324,7 @@
         },
         {
             sectionKey: "towers_section",
-            sectionName: "إدارة الأبراج والمواقع",
+            sectionName: "إدارة الأبراج والمواكب",
             items: [
                 { id: "tower_add_device", label: "زر إضافة جهاز" },
                 { id: "tower_edit", label: "زر تعديل" },
@@ -1483,6 +1470,7 @@
     let statusChartInstance = null;
     let categoryChartInstance = null;
 
+    // دالة الحفظ السحابي الآمنة
     function saveSystemData() {
         if (!isCloudDataLoaded) return;
         
@@ -2247,17 +2235,18 @@
         }
 
         const searchQuery = document.getElementById("locationsSearchInput") ? document.getElementById("locationsSearchInput").value.toLowerCase() : "";
-        const dropdownFilter = document.getElementById("locationSelectorFilter") ? document.getElementById("locationSelectorFilter").value : "";
+        const locationFilter = document.getElementById("locationSelectorFilter") ? document.getElementById("locationSelectorFilter").value : "";
+        
         container.innerHTML = "";
 
         let filtered = customWarehouses.filter(w => {
             const matchesSearch = w.name.toLowerCase().includes(searchQuery) || (w.keeper && w.keeper.toLowerCase().includes(searchQuery));
-            const matchesDropdown = dropdownFilter ? w.name === dropdownFilter : true;
-            return matchesSearch && matchesDropdown;
+            const matchesFilter = locationFilter ? w.name === locationFilter : true;
+            return matchesSearch && matchesFilter;
         });
 
         if(filtered.length === 0) {
-            container.innerHTML = `<div class="col-12 text-center py-4 text-muted">لا توجد مخازن مطابقة لبحثك.</div>`;
+            container.innerHTML = `<div class="col-12 text-center py-4 text-muted">لا توجد مخازن مطابقة للبحث أو الفلترة.</div>`;
             return;
         }
 
@@ -2541,90 +2530,110 @@
         showAlert("تم تصدير البيانات المحددة والمعروضة بنجاح كملف Excel منسق!");
     }
 
-    function openImportModal() {
-        if(!checkUserPermission('dev_add_device')) {
-            showAlert("عذراً، لا تمتلك صلاحية استيراد أصول جديدة!", "danger");
+    // دالة استيراد الأجهزة المحسنة والذكية (v4.7)
+    function importDevicesExcel(e) {
+        if(!checkUserPermission('dev_add_device') && !checkUserPermission('dash_add_device')) {
+            showAlert("عذراً، لا تمتلك صلاحية استيراد الأجهزة!", "danger");
             return;
         }
-        document.getElementById("importDevicesFile").value = "";
-        new bootstrap.Modal(document.getElementById('importDevicesModal')).show();
-    }
 
-    function processImportDevices() {
-        const fileInput = document.getElementById("importDevicesFile");
-        if(fileInput.files.length === 0) {
-            showAlert("يرجى اختيار ملف للاستيراد أولاً.", "warning");
-            return;
-        }
-        const file = fileInput.files[0];
+        const file = e.target.files[0];
+        if(!file) return;
+
         const reader = new FileReader();
-        reader.onload = function(e) {
+        reader.onload = function(evt) {
             try {
-                const content = e.target.result;
-                let importedItems = [];
-                if(file.name.endsWith('.json')) {
-                    const parsed = JSON.parse(content);
-                    importedItems = Array.isArray(parsed) ? parsed : (parsed.devices || []);
-                } else {
-                    // قراءة مبسطة لملفات النص أو CSV
-                    const lines = content.split('\n');
-                    for (let i = 1; i < lines.length; i++) {
-                        const cols = lines[i].split(',');
-                        if(cols.length >= 4) {
-                            importedItems.push({
-                                id: Date.now() + i,
-                                name: cols[0]?.trim() || "جهاز مستورد",
-                                category: cols[1]?.trim() || Object.keys(categoryModelsMap)[0],
-                                model: cols[2]?.trim() || "غير محدد",
-                                mac: cols[3]?.trim().toUpperCase() || "00:00:00:00:00:00",
-                                ip: cols[4]?.trim() || "",
-                                location: cols[5]?.trim() || "المخزن الرئيسي",
-                                status: "سليم",
-                                price: 0,
-                                currency: "USD"
-                            });
-                        }
-                    }
-                }
+                const data = new Uint8Array(evt.target.result);
+                const workbook = XLSX.read(data, {type: 'array'});
+                const firstSheetName = workbook.SheetNames[0];
+                const worksheet = workbook.Sheets[firstSheetName];
+                const jsonRows = XLSX.utils.sheet_to_json(worksheet, {defval: ""});
 
-                if(importedItems.length === 0) {
-                    showAlert("لم يتم العثور على بيانات صالحة للاستيراد في الملف.", "danger");
+                if(jsonRows.length === 0) {
+                    showAlert("الملف فارغ أو لا يحتوي على بيانات صالحة.", "warning");
                     return;
                 }
 
-                let addedCount = 0;
-                importedItems.forEach(item => {
-                    const mac = String(item.mac || "").toUpperCase();
-                    const exists = devices.some(d => String(d.mac || "").toUpperCase() === mac);
-                    if(!exists && mac && mac !== "00:00:00:00:00:00") {
-                        devices.push({
-                            id: item.id || (Date.now() + Math.floor(Math.random()*1000)),
-                            name: item.name || "جهاز جديد",
-                            category: item.category || Object.keys(categoryModelsMap)[0],
-                            model: item.model || "موديل افتراضي",
-                            mac: mac,
-                            ip: item.ip || "",
-                            location: item.location || "المخزن الرئيسي",
-                            status: item.status || "سليم",
-                            supplier: item.supplier || "",
-                            price: item.price || 0,
-                            currency: item.currency || "USD",
-                            purchaseDate: item.purchaseDate || new Date().toISOString().split('T')[0],
-                            createdBy: currentLoggedInUserObj.name
-                        });
-                        addedCount++;
+                let importedCount = 0;
+                let duplicateCount = 0;
+                let errorCount = 0;
+
+                jsonRows.forEach(row => {
+                    // البحث الذكي والمرن عن المفاتيح بغض النظر عن طريقة كتابتها
+                    const keys = Object.keys(row);
+                    const findVal = (possibleNames) => {
+                        for(let k of keys) {
+                            const cleanK = k.trim().toLowerCase();
+                            for(let name of possibleNames) {
+                                if(cleanK === name.toLowerCase() || cleanK.includes(name.toLowerCase())) {
+                                    return row[k];
+                                }
+                            }
+                        }
+                        return "";
+                    };
+
+                    const name = findVal(['اسم الجهاز', 'الاسم', 'name', 'device', 'title']);
+                    let category = findVal(['الفئة', 'النوع', 'category', 'cat']);
+                    let model = findVal(['الموديل', 'model', 'mod']);
+                    let mac = String(findVal(['mac address', 'mac', 'ماك', 'عنوان'])).trim().toUpperCase();
+                    const ip = findVal(['ip address', 'ip', 'اي بي']);
+                    const location = findVal(['الموقع', 'المخزن', 'location', 'warehouse']) || 'المخزن الرئيسي';
+                    const status = findVal(['الحالة', 'status']) || 'سليم';
+                    const price = findVal(['سعر الشراء', 'السعر', 'price', 'cost']) || 0;
+                    const supplier = findVal(['المورد', 'supplier']) || '';
+
+                    // إذا لم يوجد MAC، نقوم بتوليد MAC مؤقت أو تجاهل الصف إذا لم يوجد اسم
+                    if (name) {
+                        if (!mac || mac === 'undefined' || mac === 'NULL') {
+                            mac = 'MAC-' + Math.random().toString(36).substring(2, 8).toUpperCase();
+                        }
+
+                        // التحقق من الفئة والموديل الافتراضي في حال عدم توفرها
+                        const defaultCat = Object.keys(categoryModelsMap)[0] || 'روتر بورد';
+                        if (!category || !categoryModelsMap[category]) {
+                            category = defaultCat;
+                        }
+                        if (!model) {
+                            model = categoryModelsMap[category]?.[0] || 'افتراضي';
+                        }
+
+                        const exists = devices.find(d => String(d.mac || "").toUpperCase() === mac);
+                        if (!exists) {
+                            devices.push({
+                                id: Date.now() + Math.random(),
+                                name: String(name),
+                                category: String(category),
+                                model: String(model),
+                                mac: mac,
+                                ip: String(ip || ''),
+                                location: String(location),
+                                status: String(status),
+                                supplier: String(supplier),
+                                price: parseFloat(price) || 0,
+                                currency: 'USD',
+                                purchaseDate: new Date().toISOString().split('T')[0],
+                                createdBy: currentLoggedInUserObj.name
+                            });
+                            importedCount++;
+                        } else {
+                            duplicateCount++;
+                        }
+                    } else {
+                        errorCount++;
                     }
                 });
 
                 saveSystemData();
                 renderAll();
-                bootstrap.Modal.getInstance(document.getElementById('importDevicesModal')).hide();
-                showAlert(`تم استيراد وإضافة (${addedCount}) جهازاً بنجاح إلى قاعدة بيانات الأصول!`);
-            } catch(err) {
-                showAlert("حدث خطأ أثناء قراءة ومعالجة ملف الاستيراد.", "danger");
+                showAlert(`تم استيراد ${importedCount} جهاز بنجاح! ${duplicateCount > 0 ? `(تم تخطي ${duplicateCount} لتكرار MAC)` : ''}`);
+            } catch (err) {
+                console.error(err);
+                showAlert("حدث خطأ أثناء تحليل ملف الإكسل. تأكد من أن الملف بصيغة صالحة (.xlsx أو .csv).", "danger");
             }
+            e.target.value = ''; // تصفير حقل الملف للاستخدام المتكرر
         };
-        reader.readAsText(file);
+        reader.readAsArrayBuffer(file);
     }
 
     function exportReportsExcel() {
