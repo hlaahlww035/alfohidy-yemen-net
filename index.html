@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>النظام الشامل لإدارة أصول ومخازن الميكروتيك v5.1</title>
+    <title>النظام الشامل لإدارة أصول ومخازن الميكروتيك v5.3</title>
     <!-- Bootstrap 5 RTL CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css">
     <!-- FontAwesome Icons -->
@@ -157,7 +157,7 @@
                 <i class="fa-solid fa-server"></i>
             </div>
             <h4 class="fw-bold text-dark">تسجيل الدخول للنظام</h4>
-            <p class="text-muted small">النظام الشامل لإدارة أصول ومخازن الميكروتيك v5.1</p>
+            <p class="text-muted small">النظام الشامل لإدارة أصول ومخازن الميكروتيك v5.3</p>
         </div>
         
         <div id="loginAlert"></div>
@@ -252,7 +252,7 @@
                 </li>
             </ul>
             <div class="footer text-center text-muted small border-top border-secondary pt-2">
-                الإصدار الاحترافي v5.1 &copy; 2026
+                الإصدار الاحترافي v5.3 &copy; 2026
             </div>
         </div>
 
@@ -284,7 +284,7 @@
                     </div>
 
                     <div class="row g-3 mb-4">
-                        <div class="col-md-3">
+                        <div class="col-md-3" id="card_stat_towers_container">
                             <div class="card stat-card bg-primary text-white p-3">
                                 <div class="d-flex justify-content-between align-items-center">
                                     <div>
@@ -295,7 +295,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="col-md-3">
+                        <div class="col-md-3" id="card_stat_main_container">
                             <div class="card stat-card bg-success text-white p-3">
                                 <div class="d-flex justify-content-between align-items-center">
                                     <div>
@@ -306,7 +306,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="col-md-3">
+                        <div class="col-md-3" id="card_stat_maint_container">
                             <div class="card stat-card bg-warning text-dark p-3">
                                 <div class="d-flex justify-content-between align-items-center">
                                     <div>
@@ -317,7 +317,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="col-md-3">
+                        <div class="col-md-3" id="card_stat_scrap_container">
                             <div class="card stat-card bg-danger text-white p-3">
                                 <div class="d-flex justify-content-between align-items-center">
                                     <div>
@@ -352,17 +352,8 @@
                         <div class="card-body p-0">
                             <div class="table-responsive">
                                 <table class="table table-hover align-middle mb-0" id="dashTable">
-                                    <thead class="table-light">
-                                        <tr>
-                                            <th>اسم الجهاز</th>
-                                            <th>الموديل</th>
-                                            <th>MAC Address</th>
-                                            <th>الموقع الحالي</th>
-                                            <th>السعر وتاريخ الشراء</th>
-                                            <th>الحالة</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody></tbody>
+                                    <thead class="table-light" id="dashTableHeaders"></thead>
+                                    <tbody id="dashTableBody"></tbody>
                                 </table>
                             </div>
                         </div>
@@ -397,21 +388,7 @@
                         <div class="card-body p-0">
                             <div class="table-responsive">
                                 <table class="table table-striped align-middle mb-0">
-                                    <thead class="table-dark">
-                                        <tr>
-                                            <th style="width: 40px;">
-                                                <input type="checkbox" id="selectAllDevicesCheckbox" class="form-check-input" onclick="toggleSelectAllDevices(this)">
-                                            </th>
-                                            <th>#</th>
-                                            <th>الجهاز والفئة</th>
-                                            <th>الموديل</th>
-                                            <th>MAC / IP</th>
-                                            <th>التكلفة والشراء</th>
-                                            <th>الموقع الحالي</th>
-                                            <th>الحالة</th>
-                                            <th>إجراءات وعرض</th>
-                                        </tr>
-                                    </thead>
+                                    <thead class="table-dark" id="devicesTableHeaders"></thead>
                                     <tbody id="devicesTableBody"></tbody>
                                 </table>
                             </div>
@@ -484,19 +461,7 @@
                         <div class="card-body p-0">
                             <div class="table-responsive">
                                 <table class="table table-hover align-middle mb-0">
-                                    <thead class="table-light">
-                                        <tr>
-                                            <th>تاريخ الحركة</th>
-                                            <th>نوع الحركة</th>
-                                            <th>تفاصيل الحزمة / الأجهزة</th>
-                                            <th>من المصدر</th>
-                                            <th>إلى الجهة المستلمة</th>
-                                            <th>سبب التحويل / ملاحظات</th>
-                                            <th>المسؤول / الفني</th>
-                                            <th>الحالة / الاستلام</th>
-                                            <th>الإجراءات</th>
-                                        </tr>
-                                    </thead>
+                                    <thead class="table-light" id="movementsTableHeaders"></thead>
                                     <tbody id="movementsTableBody"></tbody>
                                 </table>
                             </div>
@@ -519,7 +484,7 @@
                     </div>
 
                     <div class="card border-0 shadow-sm p-3 mb-4 rounded-3 bg-white">
-                        <h6 class="fw-bold small mb-3 text-primary"><i class="fa-solid fa-filter me-2"></i>خيارات وفلاتر التقارير والجرد</h6>
+                        <h6 class="fw-bold small mb-3 text-primary"><i class="fa-solid fa-filter me-2"></i>خيارات وفلاتر التقارير والجرد المتقدمة</h6>
                         <div class="row g-2">
                             <div class="col-md-3">
                                 <label class="form-label small fw-bold">نوع التقرير</label>
@@ -528,6 +493,8 @@
                                     <option value="devices_status">تقرير الأصول والأجهزة حسب الحالة</option>
                                     <option value="movements_log">تقرير حركات التحويلات التفصيلي</option>
                                     <option value="maintenance_log">تقرير تكاليف وأعطال الصيانة</option>
+                                    <option value="supplier_report">تقرير الأصول حسب المورد</option>
+                                    <option value="warranty_report">تقرير الضمانات والأجهزة</option>
                                 </select>
                             </div>
                             <div class="col-md-3">
@@ -553,23 +520,29 @@
                                 <label class="form-label small fw-bold">إلى تاريخ</label>
                                 <input type="date" id="reportDateTo" class="form-control form-control-sm" onchange="generateReport()">
                             </div>
+                            <div class="col-md-12 mt-2">
+                                <div class="input-group input-group-sm">
+                                    <span class="input-group-text bg-light"><i class="fa-solid fa-magnifying-glass text-primary"></i></span>
+                                    <input type="text" id="reportFreeSearch" class="form-control" placeholder="بحث حر متقدم داخل التقرير (اسم الجهاز، MAC، IP، المورد، الملاحظات)..." onkeyup="generateReport()">
+                                </div>
+                            </div>
                         </div>
                     </div>
 
                     <div class="row g-3 mb-4" id="reportSummaryCards">
-                        <div class="col-md-4">
+                        <div class="col-md-4" id="rep_card_total_container">
                             <div class="card border-0 shadow-sm p-3 bg-primary text-white rounded-3">
                                 <h6 class="small text-uppercase mb-1">إجمالي العناصر المقيدة</h6>
                                 <h3 class="fw-bold mb-0" id="repStatTotal">0</h3>
                             </div>
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-md-4" id="rep_card_value_container">
                             <div class="card border-0 shadow-sm p-3 bg-success text-white rounded-3">
                                 <h6 class="small text-uppercase mb-1">إجمالي القيمة التقديرية (حسب العملات)</h6>
                                 <h4 class="fw-bold mb-0" id="repStatValue">0</h4>
                             </div>
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-md-4" id="rep_card_status_container">
                             <div class="card border-0 shadow-sm p-3 bg-info text-white rounded-3">
                                 <h6 class="small text-uppercase mb-1">حالة الجرد</h6>
                                 <h3 class="fw-bold mb-0" id="repStatStatus">مطابق وصحيح</h3>
@@ -586,15 +559,7 @@
                             <div class="table-responsive" style="max-height: 450px; overflow-y: auto;">
                                 <table class="table table-striped table-hover align-middle mb-0" id="reportsResultTable">
                                     <thead class="table-dark sticky-top">
-                                        <tr id="reportTableHeaders">
-                                            <th>#</th>
-                                            <th>اسم العنصر</th>
-                                            <th>الفئة والموديل</th>
-                                            <th>الموقع</th>
-                                            <th>MAC / IP</th>
-                                            <th>القيمة</th>
-                                            <th>الحالة</th>
-                                        </tr>
+                                        <tr id="reportTableHeaders"></tr>
                                     </thead>
                                     <tbody id="reportsTableBody"></tbody>
                                 </table>
@@ -616,17 +581,7 @@
                         <div class="card-body p-0">
                             <div class="table-responsive">
                                 <table class="table table-hover align-middle mb-0">
-                                    <thead class="table-light">
-                                        <tr>
-                                            <th>تاريخ الدخول</th>
-                                            <th>الجهاز / MAC</th>
-                                            <th>وصف العطل</th>
-                                            <th>الفني المسؤول</th>
-                                            <th>تكلفة الإصلاح</th>
-                                            <th>حالة الصيانة</th>
-                                            <th>الإجراء</th>
-                                        </tr>
-                                    </thead>
+                                    <thead class="table-light" id="maintenanceTableHeaders"></thead>
                                     <tbody id="maintenanceTableBody"></tbody>
                                 </table>
                             </div>
@@ -650,16 +605,7 @@
                         <div class="card-body p-0">
                             <div class="table-responsive">
                                 <table class="table table-hover align-middle mb-0">
-                                    <thead class="table-light">
-                                        <tr>
-                                            <th>#</th>
-                                            <th>اسم الموظف</th>
-                                            <th>اسم المستخدم</th>
-                                            <th>المسمى الوظيفي</th>
-                                            <th>الحالة</th>
-                                            <th>إجراءات</th>
-                                        </tr>
-                                    </thead>
+                                    <thead class="table-light" id="usersTableHeaders"></thead>
                                     <tbody id="usersTableBody"></tbody>
                                 </table>
                             </div>
@@ -786,7 +732,6 @@
                             </div>
                         </div>
 
-                        <!-- قسم إدارة الفئات وزر إدارة الأصناف والفئات والحقول -->
                         <div class="col-md-12">
                             <div class="card border-0 shadow-sm p-3 rounded-3">
                                 <div class="d-flex justify-content-between align-items-center mb-3">
@@ -1095,13 +1040,13 @@
 
                     <div class="card border-0 shadow-sm rounded-3 p-3 mb-3 bg-white">
                         <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-3">
-                            <h6 class="text-secondary fw-bold m-0"><i class="fa-solid fa-eye me-2"></i>صلاحيات الشاشات والأزرار</h6>
+                            <h6 class="text-secondary fw-bold m-0"><i class="fa-solid fa-eye me-2"></i>صلاحيات الشاشات، الأعضاء، وبطاقات الإحصائيات (لكل الشاشات)</h6>
                             <div class="form-check form-switch m-0">
                                 <input class="form-check-input" type="checkbox" id="selectAllGlobalScreens" onchange="toggleAllSectionScreens(this)">
                                 <label class="form-check-label small fw-bold" for="selectAllGlobalScreens">تحديد الكل</label>
                             </div>
                         </div>
-                        <div class="row g-2" id="permissionsScreensMatrixBody" style="max-height: 220px; overflow-y: auto;"></div>
+                        <div class="row g-2" id="permissionsScreensMatrixBody" style="max-height: 280px; overflow-y: auto;"></div>
                     </div>
 
                     <div class="card border-0 shadow-sm rounded-3 p-3 bg-white">
@@ -1365,49 +1310,85 @@
     const permissionSectionsConfig = [
         {
             sectionKey: "dashboard_section",
-            sectionName: "لوحة التحكم والمؤشرات",
+            sectionName: "لوحة التحكم والإحصائيات",
             items: [
                 { id: "dash_print_report", label: "زر طباعة التقرير" },
-                { id: "dash_add_device", label: "زر إضافة جهاز" }
+                { id: "dash_add_device", label: "زر إضافة جهاز" },
+                { id: "card_stat_towers", label: "[بطاقة] الأبراج الشغالة" },
+                { id: "card_stat_main", label: "[بطاقة] المخزن الرئيسي" },
+                { id: "card_stat_maint", label: "[بطاقة] قيد الصيانة" },
+                { id: "card_stat_scrap", label: "[بطاقة] التالف (سكراب)" },
+                { id: "col_dash_name", label: "[عمود] اسم الجهاز" },
+                { id: "col_dash_model", label: "[عمود] الموديل" },
+                { id: "col_dash_mac", label: "[عمود] MAC Address" },
+                { id: "col_dash_loc", label: "[عمود] الموقع الحالي" },
+                { id: "col_dash_price", label: "[عمود] السعر وتاريخ الشراء" },
+                { id: "col_dash_status", label: "[عمود] الحالة" }
             ]
         },
         {
             sectionKey: "devices_section",
-            sectionName: "سجل الأجهزة والأصول",
+            sectionName: "سجل الأجهزة والأصول (وأعمدتها)",
             items: [
                 { id: "dev_export_excel", label: "زر تصدير اكسل" },
+                { id: "dev_import_excel", label: "زر استيراد اكسل" },
                 { id: "dev_add_device", label: "زر إضافة جهاز" },
                 { id: "dev_edit", label: "زر تعديل" },
-                { id: "dev_delete", label: "زر حذف" }
+                { id: "dev_delete", label: "زر حذف" },
+                { id: "col_dev_select", label: "[عمود] تحديد (Checkbox)" },
+                { id: "col_dev_name", label: "[عمود] اسم الجهاز" },
+                { id: "col_dev_cat", label: "[عمود] الفئة والصنف" },
+                { id: "col_dev_model", label: "[عمود] الموديل" },
+                { id: "col_dev_mac", label: "[عمود] MAC / IP" },
+                { id: "col_dev_price", label: "[عمود] التكلفة والشراء" },
+                { id: "col_dev_loc", label: "[عمود] الموقع الحالي" },
+                { id: "col_dev_status", label: "[عمود] الحالة" }
             ]
         },
         {
             sectionKey: "towers_section",
-            sectionName: "إدارة الأبراج والمواكب",
+            sectionName: "إدارة الأبراج والمواقع",
             items: [
-                { id: "tower_add_device", label: "زر إضافة جهاز" },
+                { id: "tower_add_device", label: "زر إضافة برج" },
                 { id: "tower_edit", label: "زر تعديل" },
-                { id: "tower_delete", label: "زر حذف" }
+                { id: "tower_delete", label: "زر حذف" },
+                { id: "col_tower_dev_index", label: "[عمود] ترقيم أجهزة البرج" },
+                { id: "col_tower_dev_name", label: "[عمود] جهاز البرج" },
+                { id: "col_tower_dev_mac", label: "[عمود] MAC / السيريال" },
+                { id: "col_tower_dev_ip", label: "[عمود] IP البرج" },
+                { id: "col_tower_dev_status", label: "[عمود] حالة جهاز البرج" }
             ]
         },
         {
             sectionKey: "locations_section",
             sectionName: "سجل المخازن والعهدة",
             items: [
-                { id: "loc_add_device", label: "زر إضافة جهاز" },
+                { id: "loc_add_warehouse", label: "زر إضافة مخزن" },
                 { id: "loc_edit", label: "زر تعديل" },
-                { id: "loc_delete", label: "زر حذف" }
+                { id: "loc_delete", label: "زر حذف" },
+                { id: "col_loc_dev_index", label: "[عمود] ترقيم أجهزة المخزن" },
+                { id: "col_loc_dev_name", label: "[عمود] جهاز المخزن" },
+                { id: "col_loc_dev_mac", label: "[عمود] MAC / السيريال" },
+                { id: "col_loc_dev_ip", label: "[عمود] IP المخزن" },
+                { id: "col_loc_dev_status", label: "[عمود] حالة جهاز المخزن" }
             ]
         },
         {
             sectionKey: "movements_section",
-            sectionName: "سجل حركة وتحويلات الأجهزة",
+            sectionName: "سجل التحويلات (وأعمدتها)",
             items: [
                 { id: "move_new", label: "زر تسجيل حركة جديد" },
                 { id: "move_receive", label: "زر استلام" },
                 { id: "move_reject", label: "زر رفض" },
                 { id: "move_edit", label: "زر تعديل" },
-                { id: "move_delete", label: "زر حذف" }
+                { id: "move_delete", label: "زر حذف" },
+                { id: "col_move_date", label: "[عمود] تاريخ الحركة" },
+                { id: "col_move_type", label: "[عمود] نوع الحركة" },
+                { id: "col_move_device", label: "[عمود] تفاصيل الحزمة والأجهزة" },
+                { id: "col_move_fromto", label: "[عمود] المصدر والوجهة" },
+                { id: "col_move_reason", label: "[عمود] سبب التحويل" },
+                { id: "col_move_user", label: "[عمود] المسؤول / الفني" },
+                { id: "col_move_status", label: "[عمود] حالة الاستلاستلام" }
             ]
         },
         {
@@ -1415,14 +1396,31 @@
             sectionName: "شاشة التقارير الشاملة والجرد",
             items: [
                 { id: "report_view", label: "عرض واصدار التقارير" },
-                { id: "report_export", label: "تصدير وطباعة التقارير" }
+                { id: "report_export", label: "تصدير وطباعة التقارير" },
+                { id: "rep_card_total", label: "[بطاقة] إجمالي العناصر المقيدة" },
+                { id: "rep_card_value", label: "[بطاقة] إجمالي القيمة التقديرية" },
+                { id: "rep_card_status", label: "[بطاقة] حالة الجرد" },
+                { id: "col_rep_index", label: "[عمود] ترقيم التقرير" },
+                { id: "col_rep_name", label: "[عمود] اسم العنصر / الجهاز" },
+                { id: "col_rep_cat", label: "[عمود] الصنف والفئة والموديل" },
+                { id: "col_rep_loc", label: "[عمود] الموقع / المخزن" },
+                { id: "col_rep_macip", label: "[عمود] المعرف / MAC / IP" },
+                { id: "col_rep_supplier", label: "[عمود] المورد والضمان" },
+                { id: "col_rep_price", label: "[عمود] السعر والتاريخ" },
+                { id: "col_rep_status", label: "[عمود] حالة العنصر بالتقرير" }
             ]
         },
         {
             sectionKey: "maintenance_section",
             sectionName: "إدارة الصيانة والأعطال",
             items: [
-                { id: "maint_send", label: "زر تسجيل عطل / ارسال" }
+                { id: "maint_send", label: "زر تسجيل عطل / ارسال" },
+                { id: "col_maint_date", label: "[عمود] تاريخ الدخول" },
+                { id: "col_maint_dev", label: "[عمود] الجهاز / MAC" },
+                { id: "col_maint_issue", label: "[عمود] وصف العطل" },
+                { id: "col_maint_tech", label: "[عمود] الفني المسؤول" },
+                { id: "col_maint_cost", label: "[عمود] تكلفة الإصلاح" },
+                { id: "col_maint_status", label: "[عمود] حالة الصيانة" }
             ]
         },
         {
@@ -1431,7 +1429,12 @@
             items: [
                 { id: "user_add_new", label: "زر إضافة مستخدم" },
                 { id: "user_edit", label: "زر تعديل" },
-                { id: "user_delete", label: "زر حذف" }
+                { id: "user_delete", label: "زر حذف" },
+                { id: "col_user_index", label: "[عمود] ترقيم الموظف" },
+                { id: "col_user_name", label: "[عمود] اسم الموظف" },
+                { id: "col_user_username", label: "[عمود] اسم المستخدم" },
+                { id: "col_user_job", label: "[عمود] المسمى الوظيفي" },
+                { id: "col_user_status", label: "[عمود] حالة الحساب" }
             ]
         },
         {
@@ -1526,7 +1529,7 @@
         { key: "ownerName", label: "اسم المالك", type: "text" },
         { key: "inventoryInclusion", label: "ضمن الجرد", type: "select", options: ["نعم", "لا"] },
         { key: "boardColor", label: "لون اللوح", type: "select", options: ["ازرق", "اسود"] },
-        { key: "color", label: "اللون", type: "text", placeholder: "مثلاً احمر - ارق - اخضر" },
+        { key: "color", label: "اللون", type: "text", placeholder: "مثلاً احمر - ازرق - اخضر" },
         { key: "unit", label: "وحدة القياس الأساسية", type: "select", options: ["حبة", "قطعة", "باكت", "كرتون", "كيلو", "انش"] },
         { key: "qtyMeter", label: "الكمية/متر", type: "number", step: "0.01" },
         { key: "qtyLiter", label: "الكمية/لتر", type: "number", step: "0.01" },
@@ -1731,6 +1734,14 @@
         return !!perms.screens[permKey];
     }
 
+    function checkColumnPermission(colKey) {
+        if (!currentLoggedInUserObj) return true;
+        if (currentLoggedInUserObj.username === 'admin') return true;
+        const perms = currentLoggedInUserObj.permissions;
+        if (!perms || !perms.screens) return true;
+        return perms.screens[colKey] !== false;
+    }
+
     function switchSystemTab(tabId, paneId, permKey) {
         if (!checkUserPermission(permKey)) {
             showAlert("عذراً! لا تمتلك صلاحية الدخول لهذه الشاشة.", "danger");
@@ -1793,13 +1804,13 @@
         toggleElementVisibility("btnCreateDevice", checkUserPermission('dev_add_device'));
         toggleElementVisibility("btnCreateDeviceMain", checkUserPermission('dash_add_device'));
         toggleElementVisibility("btnCreateTower", checkUserPermission('tower_add_device'));
-        toggleElementVisibility("btnCreateWarehouse", checkUserPermission('loc_add_device'));
+        toggleElementVisibility("btnCreateWarehouse", checkUserPermission('loc_add_warehouse'));
         toggleElementVisibility("btnCreateMovement", checkUserPermission('move_new'));
         toggleElementVisibility("btnCreateMaint", checkUserPermission('maint_send'));
         toggleElementVisibility("btnCreateUser", checkUserPermission('user_add_new'));
         toggleElementVisibility("btnPrintReport", checkUserPermission('dash_print_report'));
         toggleElementVisibility("btnExportExcel", checkUserPermission('dev_export_excel'));
-        toggleElementVisibility("btnImportExcel", checkUserPermission('dev_add_device'));
+        toggleElementVisibility("btnImportExcel", checkUserPermission('dev_import_excel'));
     }
 
     function toggleElementVisibility(elemId, isVisible) {
@@ -2102,7 +2113,6 @@
     }
 
     function getDynamicFieldValue(key, existing = {}) {
-        if (Object.prototype.hasOwnProperty.call(existing, key)) return existing[key] ?? "";
         return existing[key] ?? "";
     }
 
@@ -2169,13 +2179,11 @@
 
         const status = document.getElementById("devField_status");
         if (status) {
-            const savedStatus = getDynamicFieldValue("status", existing);
-            status.value = savedStatus || "";
+            status.value = getDynamicFieldValue("status", existing) || "";
         }
         const currency = document.getElementById("devField_currency");
         if (currency) {
-            const savedCurrency = getDynamicFieldValue("currency", existing);
-            currency.value = savedCurrency || "";
+            currency.value = getDynamicFieldValue("currency", existing) || "";
         }
         schema.forEach(field => {
             if (field.type === "select") {
@@ -2412,6 +2420,12 @@
             return;
         }
 
+        const showDevIndex = checkColumnPermission('col_tower_dev_index');
+        const showDevName = checkColumnPermission('col_tower_dev_name');
+        const showDevMac = checkColumnPermission('col_tower_dev_mac');
+        const showDevIp = checkColumnPermission('col_tower_dev_ip');
+        const showDevStatus = checkColumnPermission('col_tower_dev_status');
+
         filteredTowers.forEach(tower => {
             const towerDevices = devices.filter(d => d.location === tower.name);
             let devRows = "";
@@ -2420,15 +2434,13 @@
                 devRows = `<tr><td colspan="5" class="text-center text-muted py-2">لا توجد أجهزة مرتبطة به حالياً</td></tr>`;
             } else {
                 towerDevices.forEach((d, idx) => {
-                    devRows += `
-                        <tr>
-                            <td>${idx + 1}</td>
-                            <td class="fw-bold">${escapeHtml(d.name)} (${escapeHtml(d.model)})</td>
-                            <td><code>${escapeHtml(d.mac || d.serial || '-')}</code></td>
-                            <td>${escapeHtml(d.ip || '-')}</td>
-                            <td>${getStatusBadge(d.status)}</td>
-                        </tr>
-                    `;
+                    devRows += `<tr>`;
+                    if(showDevIndex) devRows += `<td>${idx + 1}</td>`;
+                    if(showDevName) devRows += `<td class="fw-bold">${escapeHtml(d.name)} (${escapeHtml(d.model)})</td>`;
+                    if(showDevMac) devRows += `<td><code>${escapeHtml(d.mac || d.serial || '-')}</code></td>`;
+                    if(showDevIp) devRows += `<td>${escapeHtml(d.ip || '-')}</td>`;
+                    if(showDevStatus) devRows += `<td>${getStatusBadge(d.status)}</td>`;
+                    devRows += `</tr>`;
                 });
             }
 
@@ -2454,7 +2466,13 @@
                             <div class="table-responsive">
                                 <table class="table table-striped align-middle mb-0">
                                     <thead class="table-light">
-                                        <tr><th>#</th><th>الجهاز</th><th>MAC / السيريال</th><th>IP</th><th>الحالة</th></tr>
+                                        <tr>
+                                            ${showDevIndex ? '<th>#</th>' : ''}
+                                            ${showDevName ? '<th>الجهاز</th>' : ''}
+                                            ${showDevMac ? '<th>MAC / السيريال</th>' : ''}
+                                            ${showDevIp ? '<th>IP</th>' : ''}
+                                            ${showDevStatus ? '<th>الحالة</th>' : ''}
+                                        </tr>
                                     </thead>
                                     <tbody>${devRows}</tbody>
                                 </table>
@@ -2562,7 +2580,7 @@
     }
 
     function openWarehouseModal() {
-        if(!checkUserPermission('loc_add_device')) {
+        if(!checkUserPermission('loc_add_warehouse')) {
             showAlert("عذراً، لا تمتلك صلاحية إضافة مخازن جديدة!", "danger");
             return;
         }
@@ -2586,7 +2604,7 @@
             showAlert("حماية: لا تمتلك صلاحية التعديل!", "danger");
             return;
         }
-        if(!isEdit && !checkUserPermission('loc_add_device')) {
+        if(!isEdit && !checkUserPermission('loc_add_warehouse')) {
             showAlert("حماية: لا تمتلك صلاحية الإنشاء!", "danger");
             return;
         }
@@ -2688,6 +2706,12 @@
             return;
         }
 
+        const showDevIndex = checkColumnPermission('col_loc_dev_index');
+        const showDevName = checkColumnPermission('col_loc_dev_name');
+        const showDevMac = checkColumnPermission('col_loc_dev_mac');
+        const showDevIp = checkColumnPermission('col_loc_dev_ip');
+        const showDevStatus = checkColumnPermission('col_loc_dev_status');
+
         filtered.forEach(w => {
             const adminPerms = currentLoggedInUserObj?.permissions?.admin || {};
             const scope = adminPerms['admin_inv_reports'] || 'لجميع المخازن';
@@ -2704,15 +2728,13 @@
                 devRows = `<tr><td colspan="5" class="text-center text-muted py-2">لا توجد أجهزة مضافة</td></tr>`;
             } else {
                 warehouseDevices.forEach((d, idx) => {
-                    devRows += `
-                        <tr>
-                            <td>${idx + 1}</td>
-                            <td class="fw-bold">${escapeHtml(d.name)} (${escapeHtml(d.model)})</td>
-                            <td><code>${escapeHtml(d.mac || d.serial || '-')}</code></td>
-                            <td>${escapeHtml(d.ip || '-')}</td>
-                            <td>${getStatusBadge(d.status)}</td>
-                        </tr>
-                    `;
+                    devRows += `<tr>`;
+                    if(showDevIndex) devRows += `<td>${idx + 1}</td>`;
+                    if(showDevName) devRows += `<td class="fw-bold">${escapeHtml(d.name)} (${escapeHtml(d.model)})</td>`;
+                    if(showDevMac) devRows += `<td><code>${escapeHtml(d.mac || d.serial || '-')}</code></td>`;
+                    if(showDevIp) devRows += `<td>${escapeHtml(d.ip || '-')}</td>`;
+                    if(showDevStatus) devRows += `<td>${getStatusBadge(d.status)}</td>`;
+                    devRows += `</tr>`;
                 });
             }
 
@@ -2737,7 +2759,13 @@
                             <div class="table-responsive">
                                 <table class="table table-striped align-middle mb-0">
                                     <thead class="table-light">
-                                        <tr><th>#</th><th>الجهاز</th><th>MAC / السيريال</th><th>IP</th><th>الحالة</th></tr>
+                                        <tr>
+                                            ${showDevIndex ? '<th>#</th>' : ''}
+                                            ${showDevName ? '<th>الجهاز</th>' : ''}
+                                            ${showDevMac ? '<th>MAC / السيريال</th>' : ''}
+                                            ${showDevIp ? '<th>IP</th>' : ''}
+                                            ${showDevStatus ? '<th>الحالة</th>' : ''}
+                                        </tr>
                                     </thead>
                                     <tbody>${devRows}</tbody>
                                 </table>
@@ -2751,10 +2779,30 @@
 
     function renderMovementsTable() {
         const tbody = document.getElementById("movementsTableBody");
-        if(!tbody) return;
+        const theaders = document.getElementById("movementsTableHeaders");
+        if(!tbody || !theaders) return;
         tbody.innerHTML = "";
 
         if(!checkUserPermission('movements_section')) return;
+
+        const showDate = checkColumnPermission('col_move_date');
+        const showType = checkColumnPermission('col_move_type');
+        const showDevice = checkColumnPermission('col_move_device');
+        const showFromTo = checkColumnPermission('col_move_fromto');
+        const showReason = checkColumnPermission('col_move_reason');
+        const showUser = checkColumnPermission('col_move_user');
+        const showStatus = checkColumnPermission('col_move_status');
+
+        let headerHtml = `<tr>`;
+        if(showDate) headerHtml += `<th>تاريخ الحركة</th>`;
+        if(showType) headerHtml += `<th>نوع الحركة</th>`;
+        if(showDevice) headerHtml += `<th>تفاصيل الحزمة والأجهزة</th>`;
+        if(showFromTo) headerHtml += `<th>من المصدر</th><th>إلى الجهة المستلمة</th>`;
+        if(showReason) headerHtml += `<th>سبب التحويل / ملاحظات</th>`;
+        if(showUser) headerHtml += `<th>المسؤول / الفني</th>`;
+        if(showStatus) headerHtml += `<th>الحالة / الاستلام</th>`;
+        headerHtml += `<th>الإجراءات</th></tr>`;
+        theaders.innerHTML = headerHtml;
 
         const searchQuery = document.getElementById("movementSearchInput") ? document.getElementById("movementSearchInput").value.toLowerCase() : "";
         const reversedMovements = [...movements].reverse();
@@ -2791,26 +2839,25 @@
 
             const deviceDisplay = m.device ? `${escapeHtml(m.device)} <br><small class="text-muted">${escapeHtml(m.mac || '')}</small>` : escapeHtml(m.device || '');
 
-            tbody.innerHTML += `
-                <tr>
-                    <td>${escapeHtml(m.date)}</td>
-                    <td><span class="badge bg-info text-dark">${escapeHtml(m.type)}</span></td>
-                    <td class="fw-bold">${deviceDisplay}</td>
-                    <td>${escapeHtml(m.from)}</td>
-                    <td>${escapeHtml(m.to)}</td>
-                    <td><small class="text-secondary">${escapeHtml(m.reason || '-')}</small></td>
-                    <td>${escapeHtml(m.user)}</td>
-                    <td><span class="badge ${badgeClass}">${escapeHtml(m.status)}</span></td>
-                    <td>
-                        <div class="btn-group btn-group-sm">
-                            ${canReceive && m.status === 'معلقة قيد الاستلام' ? `<button class="btn btn-outline-success" title="استلام" onclick="receiveMovement(${index})"><i class="fa-solid fa-check"></i></button>` : ''}
-                            ${canReject && m.status === 'معلقة قيد الاستلام' ? `<button class="btn btn-outline-danger" title="رفض" onclick="rejectMovement(${index})"><i class="fa-solid fa-xmark"></i></button>` : ''}
-                            ${canEdit ? `<button class="btn btn-outline-primary" title="تعديل" onclick="editMovement(${index})"><i class="fa-solid fa-pen"></i></button>` : ''}
-                            ${canDelete ? `<button class="btn btn-outline-secondary" title="حذف" onclick="deleteMovement(${index})"><i class="fa-solid fa-trash"></i></button>` : ''}
-                        </div>
-                    </td>
-                </tr>
-            `;
+            let rowHtml = `<tr>`;
+            if(showDate) rowHtml += `<td>${escapeHtml(m.date)}</td>`;
+            if(showType) rowHtml += `<td><span class="badge bg-info text-dark">${escapeHtml(m.type)}</span></td>`;
+            if(showDevice) rowHtml += `<td class="fw-bold">${deviceDisplay}</td>`;
+            if(showFromTo) rowHtml += `<td>${escapeHtml(m.from)}</td><td>${escapeHtml(m.to)}</td>`;
+            if(showReason) rowHtml += `<td><small class="text-secondary">${escapeHtml(m.reason || '-')}</small></td>`;
+            if(showUser) rowHtml += `<td>${escapeHtml(m.user)}</td>`;
+            if(showStatus) rowHtml += `<td><span class="badge ${badgeClass}">${escapeHtml(m.status)}</span></td>`;
+            rowHtml += `
+                <td>
+                    <div class="btn-group btn-group-sm">
+                        ${canReceive && m.status === 'معلقة قيد الاستلام' ? `<button class="btn btn-outline-success" title="استلام" onclick="receiveMovement(${index})"><i class="fa-solid fa-check"></i></button>` : ''}
+                        ${canReject && m.status === 'معلقة قيد الاستلام' ? `<button class="btn btn-outline-danger" title="رفض" onclick="rejectMovement(${index})"><i class="fa-solid fa-xmark"></i></button>` : ''}
+                        ${canEdit ? `<button class="btn btn-outline-primary" title="تعديل" onclick="editMovement(${index})"><i class="fa-solid fa-pen"></i></button>` : ''}
+                        ${canDelete ? `<button class="btn btn-outline-secondary" title="حذف" onclick="deleteMovement(${index})"><i class="fa-solid fa-trash"></i></button>` : ''}
+                    </div>
+                </td>
+            </tr>`;
+            tbody.insertAdjacentHTML('beforeend', rowHtml);
         });
     }
 
@@ -2969,7 +3016,7 @@
     }
 
     function importDevicesExcel(e) {
-        if(!checkUserPermission('dev_add_device') && !checkUserPermission('dash_add_device')) {
+        if(!checkUserPermission('dev_import_excel') && !checkUserPermission('dev_add_device') && !checkUserPermission('dash_add_device')) {
             showAlert("عذراً، لا تمتلك صلاحية استيراد الأجهزة!", "danger");
             return;
         }
@@ -3198,26 +3245,48 @@
         const statusFilter = document.getElementById("reportStatusFilter").value;
         const dateFrom = document.getElementById("reportDateFrom").value;
         const dateTo = document.getElementById("reportDateTo").value;
+        const freeSearch = document.getElementById("reportFreeSearch") ? document.getElementById("reportFreeSearch").value.toLowerCase().trim() : "";
 
         const tbody = document.getElementById("reportsTableBody");
         const headersTr = document.getElementById("reportTableHeaders");
         const tableTitle = document.getElementById("reportTableTitle");
         const recCountBadge = document.getElementById("reportRecordCount");
 
+        // Visibility of Report Cards
+        document.getElementById("rep_card_total_container").style.display = checkColumnPermission('rep_card_total') ? 'block' : 'none';
+        document.getElementById("rep_card_value_container").style.display = checkColumnPermission('rep_card_value') ? 'block' : 'none';
+        document.getElementById("rep_card_status_container").style.display = checkColumnPermission('rep_card_status') ? 'block' : 'none';
+
         tbody.innerHTML = "";
         let totalCount = 0;
-        let currencyTotals = {}; // تخزين مجاميع الأسعار مصنفة حسب العملة
+        let currencyTotals = {}; 
 
-        if (reportType === 'inventory_stock' || reportType === 'devices_status') {
-            tableTitle.innerHTML = `<i class="fa-solid fa-table-list me-2 text-primary"></i>${reportType === 'inventory_stock' ? 'تقرير جرد رصيد المخازن والأبراج' : 'تقرير الأصول والأجهزة حسب الحالة'}`;
+        const showRepIndex = checkColumnPermission('col_rep_index');
+        const showRepName = checkColumnPermission('col_rep_name');
+        const showRepCat = checkColumnPermission('col_rep_cat');
+        const showRepLoc = checkColumnPermission('col_rep_loc');
+        const showRepMacIp = checkColumnPermission('col_rep_macip');
+        const showRepSupplier = checkColumnPermission('col_rep_supplier');
+        const showRepPrice = checkColumnPermission('col_rep_price');
+        const showRepStatus = checkColumnPermission('col_rep_status');
+
+        if (reportType === 'inventory_stock' || reportType === 'devices_status' || reportType === 'supplier_report' || reportType === 'warranty_report') {
+            let titleText = 'تقرير الجرد الشامل';
+            if(reportType === 'inventory_stock') titleText = 'تقرير جرد رصيد المخازن والأبراج';
+            else if(reportType === 'devices_status') titleText = 'تقرير الأصول والأجهزة حسب الحالة';
+            else if(reportType === 'supplier_report') titleText = 'تقرير الأصول حسب المورد';
+            else if(reportType === 'warranty_report') titleText = 'تقرير متابعة الضمانات';
+
+            tableTitle.innerHTML = `<i class="fa-solid fa-table-list me-2 text-primary"></i>${titleText}`;
             headersTr.innerHTML = `
-                <th>#</th>
-                <th>اسم الجهاز والعنصر</th>
-                <th>نوع الصنف والفئة</th>
-                <th>الموقع / المخزن</th>
-                <th>المعرف / IP</th>
-                <th>تاريخ وسعر الشراء</th>
-                <th>الحالة</th>
+                ${showRepIndex ? '<th>#</th>' : ''}
+                ${showRepName ? '<th>اسم الجهاز والعنصر</th>' : ''}
+                ${showRepCat ? '<th>نوع الصنف والفئة</th>' : ''}
+                ${showRepLoc ? '<th>الموقع / المخزن</th>' : ''}
+                ${showRepMacIp ? '<th>المعرف / IP</th>' : ''}
+                ${showRepSupplier ? '<th>المورد / الضمان</th>' : ''}
+                ${showRepPrice ? '<th>السعر وتاريخ الشراء</th>' : ''}
+                ${showRepStatus ? '<th>الحالة</th>' : ''}
             `;
 
             let filteredDevs = devices.filter(d => {
@@ -3225,7 +3294,18 @@
                 const matchStatus = statusFilter ? d.status === statusFilter : true;
                 const matchDateFrom = dateFrom ? (d.purchaseDate && d.purchaseDate >= dateFrom) : true;
                 const matchDateTo = dateTo ? (d.purchaseDate && d.purchaseDate <= dateTo) : true;
-                return matchLoc && matchStatus && matchDateFrom && matchDateTo;
+                
+                let matchFree = true;
+                if (freeSearch) {
+                    matchFree = (d.name && d.name.toLowerCase().includes(freeSearch)) ||
+                                (d.mac && d.mac.toLowerCase().includes(freeSearch)) ||
+                                (d.serial && d.serial.toLowerCase().includes(freeSearch)) ||
+                                (d.ip && d.ip.toLowerCase().includes(freeSearch)) ||
+                                (d.supplier && d.supplier.toLowerCase().includes(freeSearch)) ||
+                                (d.notes && d.notes.toLowerCase().includes(freeSearch));
+                }
+
+                return matchLoc && matchStatus && matchDateFrom && matchDateTo && matchFree;
             });
 
             totalCount = filteredDevs.length;
@@ -3238,13 +3318,14 @@
 
                 tbody.innerHTML += `
                     <tr>
-                        <td>${idx + 1}</td>
-                        <td class="fw-bold text-primary">${escapeHtml(d.name)}</td>
-                        <td><span class="badge bg-secondary mb-1">${escapeHtml(d.itemType || 'غير محدد')}</span><br>${escapeHtml(d.category)}<br><small class="text-muted">${escapeHtml(d.model)}</small></td>
-                        <td>${escapeHtml(d.location)}</td>
-                        <td><code>${escapeHtml(d.mac || d.serial || '-')}</code><br><small>${escapeHtml(d.ip || '-')}</small></td>
-                        <td>${priceNum ? priceNum + ' ' + curr : '-'} <br><small class="text-muted">${escapeHtml(d.purchaseDate || '-')}</small></td>
-                        <td>${getStatusBadge(d.status)}</td>
+                        ${showRepIndex ? `<td>${idx + 1}</td>` : ''}
+                        ${showRepName ? `<td class="fw-bold text-primary">${escapeHtml(d.name)}</td>` : ''}
+                        ${showRepCat ? `<td><span class="badge bg-secondary mb-1">${escapeHtml(d.itemType || 'غير محدد')}</span><br>${escapeHtml(d.category)}<br><small class="text-muted">${escapeHtml(d.model)}</small></td>` : ''}
+                        ${showRepLoc ? `<td>${escapeHtml(d.location)}</td>` : ''}
+                        ${showRepMacIp ? `<td><code>${escapeHtml(d.mac || d.serial || '-')}</code><br><small>${escapeHtml(d.ip || '-')}</small></td>` : ''}
+                        ${showRepSupplier ? `<td>${escapeHtml(d.supplier || '-')}<br><small class="text-info">${escapeHtml(d.warrantyPeriod || 'بدون ضمان')}</small></td>` : ''}
+                        ${showRepPrice ? `<td>${priceNum ? priceNum + ' ' + curr : '-'} <br><small class="text-muted">${escapeHtml(d.purchaseDate || '-')}</small></td>` : ''}
+                        ${showRepStatus ? `<td>${getStatusBadge(d.status)}</td>` : ''}
                     </tr>
                 `;
             });
@@ -3252,33 +3333,40 @@
         } else if (reportType === 'movements_log') {
             tableTitle.innerHTML = `<i class="fa-solid fa-table-list me-2 text-primary"></i>تقرير حركات التحويلات التفصيلي`;
             headersTr.innerHTML = `
-                <th>#</th>
-                <th>التاريخ</th>
-                <th>نوع الحركة</th>
-                <th>الجهاز / المعرف</th>
-                <th>من المصدر</th>
-                <th>إلى الجهة المستلمة</th>
-                <th>المسؤول</th>
-                <th>الحالة</th>
+                ${showRepIndex ? '<th>#</th>' : ''}
+                ${showRepName ? '<th>التاريخ</th>' : ''}
+                ${showRepCat ? '<th>نوع الحركة</th>' : ''}
+                ${showRepLoc ? '<th>الجهاز / المعرف</th>' : ''}
+                ${showRepMacIp ? '<th>من المصدر</th>' : ''}
+                ${showRepSupplier ? '<th>إلى الجهة المستلمة</th>' : ''}
+                ${showRepPrice ? '<th>المسؤول</th>' : ''}
+                ${showRepStatus ? '<th>الحالة</th>' : ''}
             `;
 
             let filteredMoves = movements.filter(m => {
                 const matchLoc = locationFilter ? (m.from === locationFilter || m.to === locationFilter) : true;
-                return matchLoc;
+                let matchFree = true;
+                if (freeSearch) {
+                    matchFree = (m.device && m.device.toLowerCase().includes(freeSearch)) ||
+                                (m.mac && m.mac.toLowerCase().includes(freeSearch)) ||
+                                (m.reason && m.reason.toLowerCase().includes(freeSearch)) ||
+                                (m.user && m.user.toLowerCase().includes(freeSearch));
+                }
+                return matchLoc && matchFree;
             });
 
             totalCount = filteredMoves.length;
             filteredMoves.forEach((m, idx) => {
                 tbody.innerHTML += `
                     <tr>
-                        <td>${idx + 1}</td>
-                        <td>${escapeHtml(m.date)}</td>
-                        <td><span class="badge bg-info text-dark">${escapeHtml(m.type)}</span></td>
-                        <td class="fw-bold">${escapeHtml(m.device)}<br><small><code>${escapeHtml(m.mac || '')}</code></small></td>
-                        <td>${escapeHtml(m.from)}</td>
-                        <td>${escapeHtml(m.to)}</td>
-                        <td>${escapeHtml(m.user)}</td>
-                        <td><span class="badge ${m.status === 'مكتملة ومستلمة' ? 'bg-success' : 'bg-warning text-dark'}">${escapeHtml(m.status)}</span></td>
+                        ${showRepIndex ? `<td>${idx + 1}</td>` : ''}
+                        ${showRepName ? `<td>${escapeHtml(m.date)}</td>` : ''}
+                        ${showRepCat ? `<td><span class="badge bg-info text-dark">${escapeHtml(m.type)}</span></td>` : ''}
+                        ${showRepLoc ? `<td class="fw-bold">${escapeHtml(m.device)}<br><small><code>${escapeHtml(m.mac || '')}</code></small></td>` : ''}
+                        ${showRepMacIp ? `<td>${escapeHtml(m.from)}</td>` : ''}
+                        ${showRepSupplier ? `<td>${escapeHtml(m.to)}</td>` : ''}
+                        ${showRepPrice ? `<td>${escapeHtml(m.user)}</td>` : ''}
+                        ${showRepStatus ? `<td><span class="badge ${m.status === 'مكتملة ومستلمة' ? 'bg-success' : 'bg-warning text-dark'}">${escapeHtml(m.status)}</span></td>` : ''}
                     </tr>
                 `;
             });
@@ -3286,34 +3374,43 @@
         } else if (reportType === 'maintenance_log') {
             tableTitle.innerHTML = `<i class="fa-solid fa-table-list me-2 text-primary"></i>تقرير تكاليف وأعطال الصيانة`;
             headersTr.innerHTML = `
-                <th>#</th>
-                <th>التاريخ</th>
-                <th>الجهاز والعطل</th>
-                <th>الفني المسؤول</th>
-                <th>التكلفة</th>
-                <th>حالة الصيانة</th>
+                ${showRepIndex ? '<th>#</th>' : ''}
+                ${showRepName ? '<th>التاريخ</th>' : ''}
+                ${showRepCat ? '<th>الجهاز والعطل</th>' : ''}
+                ${showRepLoc ? '<th>الفني المسؤول</th>' : ''}
+                ${showRepPrice ? '<th>التكلفة</th>' : ''}
+                ${showRepStatus ? '<th>حالة الصيانة</th>' : ''}
             `;
 
-            totalCount = maintenance.length;
-            maintenance.forEach((m, idx) => {
+            let filteredMaint = maintenance.filter(m => {
+                let matchFree = true;
+                if (freeSearch) {
+                    matchFree = (m.deviceName && m.deviceName.toLowerCase().includes(freeSearch)) ||
+                                (m.issue && m.issue.toLowerCase().includes(freeSearch)) ||
+                                (m.tech && m.tech.toLowerCase().includes(freeSearch));
+                }
+                return matchFree;
+            });
+
+            totalCount = filteredMaint.length;
+            filteredMaint.forEach((m, idx) => {
                 const costNum = parseFloat(m.cost || 0);
                 if (costNum > 0) {
                     currencyTotals['USD'] = (currencyTotals['USD'] || 0) + costNum;
                 }
                 tbody.innerHTML += `
                     <tr>
-                        <td>${idx + 1}</td>
-                        <td>${escapeHtml(m.date)}</td>
-                        <td class="fw-bold">${escapeHtml(m.deviceName)}<br><small class="text-danger">${escapeHtml(m.issue)}</small></td>
-                        <td>${escapeHtml(m.tech)}</td>
-                        <td>${costNum} $</td>
-                        <td><span class="badge ${m.status === 'تم الإصلاح' ? 'bg-success' : 'bg-warning text-dark'}">${escapeHtml(m.status)}</span></td>
+                        ${showRepIndex ? `<td>${idx + 1}</td>` : ''}
+                        ${showRepName ? `<td>${escapeHtml(m.date)}</td>` : ''}
+                        ${showRepCat ? `<td class="fw-bold">${escapeHtml(m.deviceName)}<br><small class="text-danger">${escapeHtml(m.issue)}</small></td>` : ''}
+                        ${showRepLoc ? `<td>${escapeHtml(m.tech)}</td>` : ''}
+                        ${showRepPrice ? `<td>${costNum} $</td>` : ''}
+                        ${showRepStatus ? `<td><span class="badge ${m.status === 'تم الإصلاح' ? 'bg-success' : 'bg-warning text-dark'}">${escapeHtml(m.status)}</span></td>` : ''}
                     </tr>
                 `;
             });
         }
 
-        // صياغة نص مجاميع العملات بشكل منسق ومفصول
         let formattedCurrencyTotalsText = Object.keys(currencyTotals).length > 0 
             ? Object.entries(currencyTotals).map(([curr, sum]) => `${sum.toLocaleString()} ${curr}`).join(' | ')
             : `0 ${brandingSettings.currency}`;
@@ -3338,20 +3435,44 @@
         document.getElementById("stat-maint").innerText = devices.filter(d => d.status === 'تحت الصيانة').length;
         document.getElementById("stat-scrap").innerText = devices.filter(d => d.status === 'تالف').length;
 
-        const dashTbody = document.querySelector("#dashTable tbody");
-        if(!dashTbody) return;
+        document.getElementById("card_stat_towers_container").style.display = checkColumnPermission('card_stat_towers') ? 'block' : 'none';
+        document.getElementById("card_stat_main_container").style.display = checkColumnPermission('card_stat_main') ? 'block' : 'none';
+        document.getElementById("card_stat_maint_container").style.display = checkColumnPermission('card_stat_maint') ? 'block' : 'none';
+        document.getElementById("card_stat_scrap_container").style.display = checkColumnPermission('card_stat_scrap') ? 'block' : 'none';
+
+        const dashTbody = document.querySelector("#dashTableBody");
+        const dashTheaders = document.querySelector("#dashTableHeaders");
+        if(!dashTbody || !dashTheaders) return;
         dashTbody.innerHTML = "";
+
+        const showName = checkColumnPermission('col_dash_name');
+        const showModel = checkColumnPermission('col_dash_model');
+        const showMac = checkColumnPermission('col_dash_mac');
+        const showLoc = checkColumnPermission('col_dash_loc');
+        const showPrice = checkColumnPermission('col_dash_price');
+        const showStatus = checkColumnPermission('col_dash_status');
+
+        dashTheaders.innerHTML = `
+            <tr>
+                ${showName ? '<th>اسم الجهاز</th>' : ''}
+                ${showModel ? '<th>الموديل</th>' : ''}
+                ${showMac ? '<th>MAC Address</th>' : ''}
+                ${showLoc ? '<th>الموقع الحالي</th>' : ''}
+                ${showPrice ? '<th>السعر وتاريخ الشراء</th>' : ''}
+                ${showStatus ? '<th>الحالة</th>' : ''}
+            </tr>
+        `;
 
         const recentDevices = devices.slice(-5).reverse();
         recentDevices.forEach(d => {
             dashTbody.innerHTML += `
                 <tr>
-                    <td class="fw-bold text-primary">${escapeHtml(d.name)}</td>
-                    <td>${escapeHtml(d.model)}</td>
-                    <td><code>${escapeHtml(d.mac || d.serial || '-')}</code></td>
-                    <td>${escapeHtml(d.location)}</td>
-                    <td>${d.price ? escapeHtml(d.price) + ' ' + escapeHtml(d.currency || '$') : '-'}</td>
-                    <td>${getStatusBadge(d.status)}</td>
+                    ${showName ? `<td class="fw-bold text-primary">${escapeHtml(d.name)}</td>` : ''}
+                    ${showModel ? `<td>${escapeHtml(d.model)}</td>` : ''}
+                    ${showMac ? `<td><code>${escapeHtml(d.mac || d.serial || '-')}</code></td>` : ''}
+                    ${showLoc ? `<td>${escapeHtml(d.location)}</td>` : ''}
+                    ${showPrice ? `<td>${d.price ? escapeHtml(d.price) + ' ' + escapeHtml(d.currency || '$') : '-'}</td>` : ''}
+                    ${showStatus ? `<td>${getStatusBadge(d.status)}</td>` : ''}
                 </tr>
             `;
         });
@@ -3380,34 +3501,57 @@
 
     function renderDevicesTable(devList) {
         const tbody = document.getElementById("devicesTableBody");
-        if(!tbody) return;
+        const theaders = document.getElementById("devicesTableHeaders");
+        if(!tbody || !theaders) return;
         tbody.innerHTML = "";
+
+        const showSelect = checkColumnPermission('col_dev_select');
+        const showIndex = checkColumnPermission('col_dev_index');
+        const showName = checkColumnPermission('col_dev_name');
+        const showCat = checkColumnPermission('col_dev_cat');
+        const showModel = checkColumnPermission('col_dev_model');
+        const showMac = checkColumnPermission('col_dev_mac');
+        const showPrice = checkColumnPermission('col_dev_price');
+        const showLoc = checkColumnPermission('col_dev_loc');
+        const showStatus = checkColumnPermission('col_dev_status');
+
+        let headerHtml = `<tr>`;
+        if(showSelect) headerHtml += `<th style="width: 40px;"><input type="checkbox" id="selectAllDevicesCheckbox" class="form-check-input" onclick="toggleSelectAllDevices(this)"></th>`;
+        if(showIndex) headerHtml += `<th>#</th>`;
+        if(showName) headerHtml += `<th>الجهاز</th>`;
+        if(showCat) headerHtml += `<th>الفئة</th>`;
+        if(showModel) headerHtml += `<th>الموديل</th>`;
+        if(showMac) headerHtml += `<th>MAC / IP</th>`;
+        if(showPrice) headerHtml += `<th>التكلفة والشراء</th>`;
+        if(showLoc) headerHtml += `<th>الموقع الحالي</th>`;
+        if(showStatus) headerHtml += `<th>الحالة</th>`;
+        headerHtml += `<th>إجراءات وعرض</th></tr>`;
+        theaders.innerHTML = headerHtml;
 
         devList.forEach((d, idx) => {
             const canEdit = checkUserPermission('dev_edit');
             const canDelete = checkUserPermission('dev_delete');
 
-            tbody.innerHTML += `
-                <tr>
-                    <td>
-                        <input type="checkbox" class="form-check-input device-select-checkbox" value="${d.id}">
-                    </td>
-                    <td>${idx + 1}</td>
-                    <td class="fw-bold">${escapeHtml(d.name)}<br><small class="text-muted"><span class="badge bg-light text-dark border">${escapeHtml(d.itemType || '-')}</span> / ${escapeHtml(d.category)}</small></td>
-                    <td>${escapeHtml(d.model)}</td>
-                    <td><code>${escapeHtml(d.mac || d.serial || '-')}</code><br><small>${escapeHtml(d.ip || '-')}</small></td>
-                    <td>${d.price ? escapeHtml(d.price) + ' ' + escapeHtml(d.currency || '$') : '-'}</td>
-                    <td>${escapeHtml(d.location)}</td>
-                    <td>${getStatusBadge(d.status)}</td>
-                    <td>
-                        <div class="btn-group btn-group-sm">
-                            <button class="btn btn-outline-info" title="عرض تفاصيل الجهاز" onclick="viewDeviceDetails(${d.id})"><i class="fa-solid fa-eye"></i></button>
-                            ${canEdit ? `<button class="btn btn-outline-primary" title="تعديل" onclick="editDevice(${d.id})"><i class="fa-solid fa-pen"></i></button>` : ''}
-                            ${canDelete ? `<button class="btn btn-outline-danger" title="حذف" onclick="deleteDevice(${d.id})"><i class="fa-solid fa-trash"></i></button>` : ''}
-                        </div>
-                    </td>
-                </tr>
-            `;
+            let rowHtml = `<tr>`;
+            if(showSelect) rowHtml += `<td><input type="checkbox" class="form-check-input device-select-checkbox" value="${d.id}"></td>`;
+            if(showIndex) rowHtml += `<td>${idx + 1}</td>`;
+            if(showName) rowHtml += `<td class="fw-bold">${escapeHtml(d.name)}</td>`;
+            if(showCat) rowHtml += `<td><span class="badge bg-light text-dark border">${escapeHtml(d.itemType || '-')}</span></td>`;
+            if(showModel) rowHtml += `<td>${escapeHtml(d.model)}</td>`;
+            if(showMac) rowHtml += `<td><code>${escapeHtml(d.mac || d.serial || '-')}</code><br><small>${escapeHtml(d.ip || '-')}</small></td>`;
+            if(showPrice) rowHtml += `<td>${d.price ? escapeHtml(d.price) + ' ' + escapeHtml(d.currency || '$') : '-'}</td>`;
+            if(showLoc) rowHtml += `<td>${escapeHtml(d.location)}</td>`;
+            if(showStatus) rowHtml += `<td>${getStatusBadge(d.status)}</td>`;
+            rowHtml += `
+                <td>
+                    <div class="btn-group btn-group-sm">
+                        <button class="btn btn-outline-info" title="عرض تفاصيل الجهاز" onclick="viewDeviceDetails(${d.id})"><i class="fa-solid fa-eye"></i></button>
+                        ${canEdit ? `<button class="btn btn-outline-primary" title="تعديل" onclick="editDevice(${d.id})"><i class="fa-solid fa-pen"></i></button>` : ''}
+                        ${canDelete ? `<button class="btn btn-outline-danger" title="حذف" onclick="deleteDevice(${d.id})"><i class="fa-solid fa-trash"></i></button>` : ''}
+                    </div>
+                </td>
+            </tr>`;
+            tbody.insertAdjacentHTML('beforeend', rowHtml);
         });
     }
 
@@ -3766,7 +3910,7 @@
                     createdBy: currentLoggedInUserObj.name
                 };
                 movements.push(movementRecord);
-                showAlert("تم إنشاء أمر التحويل بنجاح وهو بانتظار الاستلام!");
+                showAlert("تم إنشاء أمر التحويل بنجاح وهو بانتظار الاستلاستلام!");
             }
 
             saveSystemData();
@@ -3919,20 +4063,40 @@
 
     function renderMaintenanceTable() {
         const tbody = document.getElementById("maintenanceTableBody");
-        if(!tbody) return;
+        const theaders = document.getElementById("maintenanceTableHeaders");
+        if(!tbody || !theaders) return;
         tbody.innerHTML = "";
 
         if(!checkUserPermission('maintenance_section')) return;
 
+        const showDate = checkColumnPermission('col_maint_date');
+        const showDev = checkColumnPermission('col_maint_dev');
+        const showIssue = checkColumnPermission('col_maint_issue');
+        const showTech = checkColumnPermission('col_maint_tech');
+        const showCost = checkColumnPermission('col_maint_cost');
+        const showStatus = checkColumnPermission('col_maint_status');
+
+        theaders.innerHTML = `
+            <tr>
+                ${showDate ? '<th>تاريخ الدخول</th>' : ''}
+                ${showDev ? '<th>الجهاز / MAC</th>' : ''}
+                ${showIssue ? '<th>وصف العطل</th>' : ''}
+                ${showTech ? '<th>الفني المسؤول</th>' : ''}
+                ${showCost ? '<th>تكلفة الإصلاح</th>' : ''}
+                ${showStatus ? '<th>حالة الصيانة</th>' : ''}
+                <th>الإجراء</th>
+            </tr>
+        `;
+
         maintenance.forEach((m) => {
             tbody.innerHTML += `
                 <tr>
-                    <td>${escapeHtml(m.date)}</td>
-                    <td class="fw-bold">${escapeHtml(m.deviceName)}</td>
-                    <td>${escapeHtml(m.issue)}</td>
-                    <td>${escapeHtml(m.tech)}</td>
-                    <td>${m.cost ? escapeHtml(m.cost) + ' $' : '-'}</td>
-                    <td><span class="badge ${m.status === 'تم الإصلاح' ? 'bg-success' : 'bg-warning text-dark'}">${escapeHtml(m.status)}</span></td>
+                    ${showDate ? `<td>${escapeHtml(m.date)}</td>` : ''}
+                    ${showDev ? `<td class="fw-bold">${escapeHtml(m.deviceName)}</td>` : ''}
+                    ${showIssue ? `<td>${escapeHtml(m.issue)}</td>` : ''}
+                    ${showTech ? `<td>${escapeHtml(m.tech)}</td>` : ''}
+                    ${showCost ? `<td>${m.cost ? escapeHtml(m.cost) + ' $' : '-'}</td>` : ''}
+                    ${showStatus ? `<td><span class="badge ${m.status === 'تم الإصلاح' ? 'bg-success' : 'bg-warning text-dark'}">${escapeHtml(m.status)}</span></td>` : ''}
                     <td>-</td>
                 </tr>
             `;
@@ -3945,7 +4109,7 @@
             screensBody.innerHTML = "";
             permissionSectionsConfig.forEach(sec => {
                 screensBody.innerHTML += `
-                    <div class="col-md-4">
+                    <div class="col-md-6">
                         <div class="p-2 border rounded bg-light h-100">
                             <div class="form-check fw-bold border-bottom pb-1 mb-1 text-primary">
                                 <input class="form-check-input screen-perm-check" type="checkbox" data-key="${sec.sectionKey}" id="chk_${sec.sectionKey}" onchange="handleSectionToggle(this)">
@@ -4095,10 +4259,28 @@
 
     function renderUsersTable() {
         const tbody = document.getElementById("usersTableBody");
-        if(!tbody) return;
+        const theaders = document.getElementById("usersTableHeaders");
+        if(!tbody || !theaders) return;
         tbody.innerHTML = "";
 
         if(!checkUserPermission('users_section')) return;
+
+        const showIndex = checkColumnPermission('col_user_index');
+        const showName = checkColumnPermission('col_user_name');
+        const showUsername = checkColumnPermission('col_user_username');
+        const showJob = checkColumnPermission('col_user_job');
+        const showStatus = checkColumnPermission('col_user_status');
+
+        theaders.innerHTML = `
+            <tr>
+                ${showIndex ? '<th>#</th>' : ''}
+                ${showName ? '<th>اسم الموظف</th>' : ''}
+                ${showUsername ? '<th>اسم المستخدم</th>' : ''}
+                ${showJob ? '<th>المسمى الوظيفي</th>' : ''}
+                ${showStatus ? '<th>الحالة</th>' : ''}
+                <th>إجراءات</th>
+            </tr>
+        `;
 
         users.forEach((u, idx) => {
             const canEdit = checkUserPermission('user_edit');
@@ -4106,11 +4288,11 @@
 
             tbody.innerHTML += `
                 <tr>
-                    <td>${idx + 1}</td>
-                    <td class="fw-bold">${escapeHtml(u.name)}</td>
-                    <td><code>${escapeHtml(u.username)}</code></td>
-                    <td>${escapeHtml(u.job || '-')}</td>
-                    <td><span class="badge ${u.status === 'نشط' ? 'bg-success' : 'bg-danger'}">${escapeHtml(u.status)}</span></td>
+                    ${showIndex ? `<td>${idx + 1}</td>` : ''}
+                    ${showName ? `<td class="fw-bold">${escapeHtml(u.name)}</td>` : ''}
+                    ${showUsername ? `<td><code>${escapeHtml(u.username)}</code></td>` : ''}
+                    ${showJob ? `<td>${escapeHtml(u.job || '-')}</td>` : ''}
+                    ${showStatus ? `<td><span class="badge ${u.status === 'نشط' ? 'bg-success' : 'bg-danger'}">${escapeHtml(u.status)}</span></td>` : ''}
                     <td>
                         <div class="btn-group btn-group-sm">
                             ${canEdit ? `<button class="btn btn-outline-primary" onclick="openUserModal(${u.id})"><i class="fa-solid fa-pen"></i></button>` : ''}
