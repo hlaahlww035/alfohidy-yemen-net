@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>النظام الشامل لإدارة أصول ومخازن الميكروتيك v4.6</title>
+    <title>النظام الشامل لإدارة أصول ومخازن الميكروتيك v4.9</title>
     <!-- Bootstrap 5 RTL CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css">
     <!-- FontAwesome Icons -->
@@ -12,6 +12,14 @@
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
     <!-- Chart.js for Dashboards -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- SheetJS (XLSX) library for importing Excel/CSV files -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+
     <style>
         :root {
             --bs-body-font-size: 1rem;
@@ -149,7 +157,7 @@
                 <i class="fa-solid fa-server"></i>
             </div>
             <h4 class="fw-bold text-dark">تسجيل الدخول للنظام</h4>
-            <p class="text-muted small">النظام الشامل لإدارة أصول ومخازن الميكروتيك v4.6</p>
+            <p class="text-muted small">النظام الشامل لإدارة أصول ومخازن الميكروتيك v4.9</p>
         </div>
         
         <div id="loginAlert"></div>
@@ -159,14 +167,14 @@
                 <label class="form-label fw-bold">اسم المستخدم</label>
                 <div class="input-group">
                     <span class="input-group-text bg-light"><i class="fa-solid fa-user text-muted"></i></span>
-                    <input type="text" id="loginUsername" class="form-control" required placeholder="أدخل اسم المستخدم " autocomplete="username">
+                    <input type="text" id="loginUsername" class="form-control" required placeholder="أدخل اسم المستخدم" autocomplete="username">
                 </div>
             </div>
             <div class="mb-4">
                 <label class="form-label fw-bold">كلمة المرور</label>
                 <div class="input-group">
                     <span class="input-group-text bg-light"><i class="fa-solid fa-lock text-muted"></i></span>
-                    <input type="password" id="loginPassword" class="form-control" required autocomplete="current-password" placeholder="أدخل كلمة المرور ">
+                    <input type="password" id="loginPassword" class="form-control" required autocomplete="current-password" placeholder="أدخل كلمة المرور">
                 </div>
             </div>
             <button type="submit" class="btn btn-primary w-100 py-2 fw-bold shadow-sm">
@@ -244,7 +252,7 @@
                 </li>
             </ul>
             <div class="footer text-center text-muted small border-top border-secondary pt-2">
-                الإصدار الاحترافي v4.6 &copy; 2026
+                الإصدار الاحترافي v4.9 &copy; 2026
             </div>
         </div>
 
@@ -370,8 +378,14 @@
                             <select id="filterCategory" class="form-select" onchange="filterDevices()">
                                 <option value="">كل الفئات</option>
                             </select>
+                            
+                            <input type="file" id="importDevicesFileInput" class="d-none" accept=".xlsx, .xls, .csv" onchange="importDevicesExcel(event)">
+                            <button class="btn btn-outline-info text-nowrap" id="btnImportExcel" onclick="document.getElementById('importDevicesFileInput').click()">
+                                <i class="fa-solid fa-file-import me-1"></i> استيراد من Excel
+                            </button>
+
                             <button class="btn btn-outline-success text-nowrap" id="btnExportExcel" onclick="exportDevicesExcel()">
-                                <i class="fa-solid fa-file-excel me-1"></i> تصدير البيانات المحددة (Excel)
+                                <i class="fa-solid fa-file-excel me-1"></i> تصدير (Excel)
                             </button>
                             <button class="btn btn-primary text-nowrap" id="btnCreateDevice" onclick="openAddModal()">
                                 <i class="fa-solid fa-plus me-1"></i> إضافة جهاز جديد
@@ -432,7 +446,7 @@
                         <h3 class="fw-bold"><i class="fa-solid fa-location-dot me-2 text-primary"></i>سجل المخازن والعهدة والمواقع الشاملة</h3>
                         <div class="d-flex gap-2 flex-wrap align-items-center">
                             <div style="width: 250px;">
-                                <input type="text" id="locationsSearchInput" class="form-control" placeholder="بحث في المخازن..." onkeyup="renderLocationsView()">
+                                <input type="text" id="locationsSearchInput" class="form-control" placeholder="بحث ذكي في المخازن..." onkeyup="renderLocationsView()">
                             </div>
                             <div style="width: 200px;">
                                 <select id="locationSelectorFilter" class="form-select" onchange="renderLocationsView()">
@@ -769,16 +783,22 @@
                             </div>
                         </div>
 
-                        <!-- قسم إدارة الفئات مع زر التعديل -->
+                        <!-- قسم إدارة الفئات وزر إدارة الأصناف والفئات والحقول -->
                         <div class="col-md-12">
                             <div class="card border-0 shadow-sm p-3 rounded-3">
-                                <h6 class="fw-bold mb-3 text-info"><i class="fa-solid fa-layer-group me-2"></i>إدارة فئات وموديلات الأجهزة</h6>
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <h6 class="fw-bold m-0 text-info"><i class="fa-solid fa-layer-group me-2"></i>إدارة فئات وموديلات الأجهزة</h6>
+                                    <button class="btn btn-info btn-sm text-white fw-bold px-3" onclick="openCategoriesManagerModal()">
+                                        <i class="fa-solid fa-cogs me-1"></i> إدارة الأصناف والفئات والحقول
+                                    </button>
+                                </div>
                                 <input type="hidden" id="editingCategoryOldName" value="">
                                 <div class="table-responsive mb-2" style="max-height: 150px; overflow-y: auto;">
                                     <table class="table table-bordered table-sm align-middle mb-0" style="font-size: 0.85rem;">
                                         <thead class="table-light">
                                             <tr>
-                                                <th>فئة الجهاز</th>
+                                                <th>نوع الصنف</th>
+                                                <th>فئة الصنف</th>
                                                 <th>الموديلات التابعة</th>
                                                 <th style="width: 100px;">الإجراء</th>
                                             </tr>
@@ -827,6 +847,78 @@
     </div>
 </div>
 
+<!-- Modal: Categories & Fields Manager -->
+<div class="modal fade" id="categoriesManagerModal" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+            <div class="modal-header bg-info text-white px-4 py-3">
+                <h5 class="modal-title fs-5"><i class="fa-solid fa-cogs me-2"></i>إدارة الأصناف، الفئات، وحقول شاشة إضافة جهاز</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body bg-light p-4" style="max-height: 80vh; overflow-y: auto;">
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <div class="card border-0 shadow-sm p-3 bg-white rounded-3 h-100">
+                            <h6 class="fw-bold text-primary mb-3">1. إدارة نوع الصنف</h6>
+                            <select id="mgrItemTypeSelect" class="form-select form-select-sm mb-2" onchange="loadMgrCategories()"><option value="" selected disabled>اختر الصنف</option></select>
+                            <div class="btn-group btn-group-sm w-100 mb-3">
+                                <button class="btn btn-outline-primary" onclick="editMgrItemType()"><i class="fa-solid fa-pen"></i> تعديل</button>
+                                <button class="btn btn-outline-danger" onclick="deleteMgrItemType()"><i class="fa-solid fa-trash"></i> حذف</button>
+                            </div>
+                            <div class="input-group input-group-sm"><input type="text" id="newMgrItemTypeName" class="form-control" placeholder="اسم صنف جديد..."><button class="btn btn-primary" onclick="addNewItemType()"><i class="fa-solid fa-plus"></i> إضافة</button></div>
+                            <small class="text-muted d-block mt-2">التعديل يحافظ على الأجهزة المرتبطة بالصنف.</small>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card border-0 shadow-sm p-3 bg-white rounded-3 h-100">
+                            <h6 class="fw-bold text-success mb-3">2. إدارة فئة الصنف</h6>
+                            <select id="mgrCategorySelect" class="form-select form-select-sm mb-2" onchange="loadMgrFieldsConfig()"><option value="" selected disabled>اختر الفئة</option></select>
+                            <div class="btn-group btn-group-sm w-100 mb-3">
+                                <button class="btn btn-outline-success" onclick="editMgrCategory()"><i class="fa-solid fa-pen"></i> تعديل</button>
+                                <button class="btn btn-outline-danger" onclick="deleteMgrCategory()"><i class="fa-solid fa-trash"></i> حذف</button>
+                            </div>
+                            <div class="input-group input-group-sm"><input type="text" id="newMgrCategoryName" class="form-control" placeholder="اسم فئة جديدة..."><button class="btn btn-success" onclick="addNewCategoryToItemType()"><i class="fa-solid fa-plus"></i> إضافة</button></div>
+                            <small class="text-muted d-block mt-2">لكل فئة إعداد مستقل للحقول.</small>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card border-0 shadow-sm p-3 bg-white rounded-3 h-100">
+                            <h6 class="fw-bold text-warning mb-3">3. الموديلات التابعة للفئة</h6>
+                            <div id="mgrModelsListContainer" class="mb-2" style="max-height: 100px; overflow-y: auto;"></div>
+                            <div class="input-group input-group-sm"><input type="text" id="newMgrModelName" class="form-control" placeholder="موديل جديد..."><button class="btn btn-outline-warning text-dark" onclick="addNewModelToCategory()">إضافة</button></div>
+                        </div>
+                    </div>
+                    <div class="col-md-12">
+                        <div class="card border-0 shadow-sm p-3 bg-white rounded-3">
+                            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2">
+                                <h6 class="fw-bold text-dark mb-0"><i class="fa-solid fa-list-check me-2 text-primary"></i>حقول شاشة إضافة جهاز للفئة المختارة</h6>
+                                <button class="btn btn-primary btn-sm" onclick="openCustomFieldModal()"><i class="fa-solid fa-plus me-1"></i> إضافة حقل جديد</button>
+                            </div>
+                            <p class="text-muted small mb-3">حدد الحقول التي تظهر لهذه الفئة. الحقول المخصصة يمكن تعديلها أو حذفها لاحقاً.</p>
+                            <div id="mgrFieldsCheckboxesContainer" class="row g-2"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer bg-white px-4 py-3"><button type="button" class="btn btn-secondary btn-sm px-4" data-bs-dismiss="modal">إغلاق</button><button type="button" class="btn btn-primary btn-sm px-4 fw-bold" onclick="saveCategoryFieldsConfig()"><i class="fa-solid fa-save me-1"></i> حفظ إعدادات الفئة والحقول</button></div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="customFieldModal" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered"><div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+        <div class="modal-header bg-primary text-white"><h5 class="modal-title" id="customFieldModalTitle"><i class="fa-solid fa-square-plus me-2"></i>إضافة حقل جديد</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div>
+        <div class="modal-body bg-light p-4"><input type="hidden" id="customFieldOldKey"><div class="row g-3">
+            <div class="col-md-3"><label class="form-label fw-bold">اسم الحقل الظاهر</label><input id="customFieldLabel" class="form-control" placeholder="مثال: رقم العقد"></div>
+            <div class="col-md-3"><label class="form-label fw-bold">نوع الحقل</label><select id="customFieldType" class="form-select" onchange="toggleCustomFieldOptions()"><option value="text">نص</option><option value="number">رقم</option><option value="date">تاريخ</option><option value="select">قائمة منسدلة</option><option value="textarea">نص طويل</option></select></div>
+            <div class="col-md-3" id="customFieldOptionsWrap"><label class="form-label fw-bold">خيارات القائمة المنسدلة</label><input id="customFieldOptions" class="form-control" placeholder="الخيار 1, الخيار 2, الخيار 3"><small class="text-muted">تستخدم فقط للقائمة المنسدلة.</small></div>
+            <div class="col-md-3"><label class="form-label fw-bold">عرض الحقل</label><select id="customFieldCol" class="form-select"><option value="col-md-6">نصف الشاشة</option><option value="col-12">عرض كامل</option><option value="col-md-4">ثلث الشاشة</option></select></div>
+            <div class="col-12"><div class="form-check form-switch"><input class="form-check-input" type="checkbox" id="customFieldRequired"><label class="form-check-label fw-bold" for="customFieldRequired">حقل إلزامي عند إضافة/تعديل الجهاز</label></div></div>
+        </div></div>
+        <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button><button type="button" class="btn btn-primary fw-bold" onclick="saveCustomField()"><i class="fa-solid fa-save me-1"></i> حفظ الحقل</button></div>
+    </div></div>
+</div>
+
 <!-- Modal: Manage Staff -->
 <div class="modal fade" id="manageStaffModal" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
@@ -849,7 +941,7 @@
 
 <!-- Modal: Tower -->
 <div class="modal fade" id="towerModal" tabindex="-1">
-    <div class="modal-dialog modal-lg">
+    <div class="modal-dialog modal-fullscreen">
         <div class="modal-content">
             <div class="modal-header bg-primary text-white">
                 <h5 class="modal-title" id="towerModalTitle">إضافة برج جديد</h5>
@@ -888,7 +980,7 @@
                         </div>
                         <div class="col-12">
                             <label class="form-label fw-bold">ملاحظات</label>
-                            <textarea id="towerNotes" class="form-control" rows="3"></textarea>
+                            <textarea id="towerNotes" class="form-control" rows="1"></textarea>
                         </div>
                     </div>
                 </form>
@@ -936,7 +1028,7 @@
                     </div>
                     <div class="mb-3">
                         <label class="form-label fw-bold">ملاحظات</label>
-                        <textarea id="newWarehouseNotes" class="form-control" rows="2"></textarea>
+                        <textarea id="newWarehouseNotes" class="form-control" rows="1"></textarea>
                     </div>
                 </form>
             </div>
@@ -950,7 +1042,7 @@
 
 <!-- Modal: Add / Edit User -->
 <div class="modal fade" id="userModal" tabindex="-1">
-    <div class="modal-dialog modal-xl modal-dialog-centered">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
             <div class="modal-header bg-dark text-white px-4 py-3">
                 <h5 class="modal-title fs-5" id="userModalTitle"><i class="fa-solid fa-user-gear me-2"></i>إدارة المستخدم والصلاحيات</h5>
@@ -1026,60 +1118,26 @@
                     <input type="hidden" id="devId">
                     <div class="card border-0 shadow-sm rounded-3 p-3 bg-white">
                         <div class="row g-2">
-                            <div class="col-md-6">
-                                <label class="form-label small fw-bold">فئة الجهاز</label>
-                                <select id="devCategory" class="form-select form-select-sm" onchange="updateModelsDropdown()"></select>
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label small fw-bold">الموديل</label>
-                                <select id="devModel" class="form-select form-select-sm" required></select>
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label small fw-bold">اسم الجهاز</label>
-                                <input type="text" id="devName" class="form-control form-control-sm" required placeholder="اسم الجهاز">
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label small fw-bold">IP Address</label>
-                                <input type="text" id="devIp" class="form-control form-control-sm" placeholder="0.0.0.0">
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label small fw-bold">MAC Address</label>
-                                <input type="text" id="devMac" class="form-control form-control-sm" required placeholder="00:00:00:00:00:00">
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label small fw-bold">الحالة</label>
-                                <select id="devStatus" class="form-select form-select-sm">
-                                    <option value="سليم">سليم</option>
-                                    <option value="تحت الصيانة">تحت الصيانة</option>
-                                    <option value="تالف">تالف</option>
-                                </select>
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label small fw-bold">الموقع</label>
-                                <select id="devLocation" class="form-select form-select-sm"></select>
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label small fw-bold">المورد</label>
-                                <input type="text" id="devSupplier" class="form-control form-control-sm" placeholder="اسم المورد">
-                            </div>
                             <div class="col-md-4">
-                                <label class="form-label small fw-bold">سعر الشراء</label>
-                                <input type="number" step="0.01" id="devPrice" class="form-control form-control-sm" placeholder="0.00">
-                            </div>
-                            <div class="col-md-4">
-                                <label class="form-label small fw-bold">العملة</label>
-                                <select id="devCurrency" class="form-select form-select-sm">
-                                    <option value="USD">USD ($)</option>
-                                    <option value="SAR">SAR</option>
-                                    <option value="EUR">EUR (€)</option>
-                                    <option value="YER">YER</option>
+                                <label class="form-label small fw-bold text-primary">1. نوع الصنف</label>
+                                <select id="devItemType" class="form-select form-select-sm" onchange="updateCategoriesDropdown()" required>
+                                    <option value="" selected disabled>اختر نوع الصنف أولاً</option>
                                 </select>
                             </div>
                             <div class="col-md-4">
-                                <label class="form-label small fw-bold">تاريخ الشراء</label>
-                                <input type="date" id="devPurchaseDate" class="form-control form-control-sm">
+                                <label class="form-label small fw-bold">2. فئة الجهاز</label>
+                                <select id="devCategory" class="form-select form-select-sm" onchange="updateModelsDropdown()" required>
+                                    <option value="" selected disabled>اختر نوع الصنف أولاً</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label small fw-bold">3. الموديل</label>
+                                <select id="devModel" class="form-select form-select-sm" required>
+                                    <option value="" selected disabled>اختر الفئة أولاً</option>
+                                </select>
                             </div>
                         </div>
+                        <div id="dynamicDeviceFields" class="row g-2 mt-1"></div>
                     </div>
                 </form>
             </div>
@@ -1174,7 +1232,7 @@
                         <div class="col-md-12">
                             <div class="card border-0 shadow-sm p-2 bg-white rounded-3">
                                 <label class="form-label small fw-bold text-dark mb-1">ملاحظات التحويل (سبب التحويل)</label>
-                                <textarea id="transferReason" class="form-control form-control-sm" rows="2" placeholder="اكتب سبب التحويل أو أي ملاحظات إضافية هنا..."></textarea>
+                                <textarea id="transferReason" class="form-control form-control-sm" rows="1" placeholder="اكتب سبب التحويل أو أي ملاحظات إضافية هنا..."></textarea>
                             </div>
                         </div>
                     </div>
@@ -1241,17 +1299,37 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
-    function safeJSON(key, fallback) {
-        try {
-            const raw = localStorage.getItem(key);
-            if (raw === null || raw === "") return fallback;
-            const parsed = JSON.parse(raw);
-            return parsed ?? fallback;
-        } catch (err) {
-            console.warn("تعذر قراءة البيانات من التخزين المحلي:", key, err);
-            return fallback;
+    // تهيئة فايربيس (Firebase Initialization)
+    const firebaseConfig = {
+        apiKey: "AIzaSyCgyMhxuD7bTiHeoKPk86jLCm-pVLlnM5M",
+        authDomain: "yemen-net-43ee9.firebaseapp.com",
+        projectId: "yemen-net-43ee9",
+        storageBucket: "yemen-net-43ee9.firebasestorage.app",
+        messagingSenderId: "315180295425",
+        appId: "1:315180295425:web:d8340f72cc9b09a74b6700",
+        measurementId: "G-QEP4GWZNQ1"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    let isCloudDataLoaded = false;
+    let inactivityTimer;
+    const INACTIVITY_LIMIT = 10 * 60 * 1000;
+
+    function resetInactivityTimer() {
+        clearTimeout(inactivityTimer);
+        if (sessionStorage.getItem('mikrotik_logged_in') === 'true') {
+            inactivityTimer = setTimeout(() => {
+                logoutSystem();
+                showAlert("تم تسجيل خروجك تلقائياً لعدم النشاط لفترة 10 دقائق.", "warning");
+            }, INACTIVITY_LIMIT);
         }
     }
+
+    ['mousemove', 'keydown', 'click', 'scroll', 'touchstart'].forEach(eventName => {
+        window.addEventListener(eventName, resetInactivityTimer, true);
+    });
 
     function escapeHtml(value) {
         return String(value ?? "")
@@ -1265,19 +1343,6 @@
     function normalizeArray(value, fallback = []) {
         return Array.isArray(value) ? value : fallback;
     }
-
-    const systemScreens = [
-        { id: "dashboard", name: "لوحة المؤشرات والتحليلات" },
-        { id: "devices", name: "سجل الأصول والأجهزة" },
-        { id: "towers", name: "إدارة الأبراج والمواقع الشغالة" },
-        { id: "locations", name: "سجل المخازن والعهدة" },
-        { id: "movements", name: "سجل التحويلات والحركات" },
-        { id: "reports", name: "التقارير الشاملة والجرد" },
-        { id: "maintenance", name: "إدارة الصيانة والأعطال" },
-        { id: "users", name: "إدارة المستخدمين والصلاحيات" },
-        { id: "search", name: "الاستعلام الذكي الشامل" },
-        { id: "settings", name: "إدارة الإعدادات والتحكم الشامل" }
-    ];
 
     const permissionSectionsConfig = [
         {
@@ -1300,7 +1365,7 @@
         },
         {
             sectionKey: "towers_section",
-            sectionName: "إدارة الأبراج والمواقع",
+            sectionName: "إدارة الأبراج والمواكب",
             items: [
                 { id: "tower_add_device", label: "زر إضافة جهاز" },
                 { id: "tower_edit", label: "زر تعديل" },
@@ -1371,18 +1436,18 @@
     ];
 
     const adminPermissionsConfig = [
-        { id: "admin_inv_reports", label: "صلاحية استعراض تقارير المخزون:", options: ["غير مصرح", "لجميع المخازن", "للمخازن والمواقع/الابراج المسؤل عنها فقط"] },
-        { id: "admin_transfers_view_m", label: "صلاحية استعراض التحويلات المجوله:", options: ["غير مصرح", "لجميع المخازن", "للمخازن والمواقع/الابراج المسؤل عنها فقط"] },
-        { id: "admin_transfers_create", label: "صلاحية انشاء تحويل:", options: ["غير مصرح", "من جميع المخازن", "من المخازن والمواقع/الابراج المسؤل عنها فقط"] },
-        { id: "admin_transfer_action", label: "صلاحية التحويل:", options: ["غير مصرح", "لجميع المخازن", "للمخازن والمواقع/الابراج المسؤل عنها فقط"] },
-        { id: "admin_transfers_receive", label: "صلاحية استلام التحويلات:", options: ["غير مصرح", "لجميع المخازن", "للمخازن والمواقع/الابراج المسؤل عنها فقط"] },
-        { id: "admin_transfers_receive_out", label: "صلاحية استلام التحويلات الصادرة:", options: ["غير مصرح", "لجميع المخازن", "للمخازن والمواقع/الابراج المسؤل عنها فقط"] },
-        { id: "admin_transfers_reject", label: "صلاحية رفض التحويلات:", options: ["غير مصرح", "لجميع المخازن", "للمخازن والمواقع/الابراج المسؤل عنها فقط"] },
-        { id: "admin_transfers_reject_out", label: "صلاحية رفض التحويلات الصادرة:", options: ["غير مصرح", "لجميع المخازن", "للمخازن والمواقع/الابراج المسؤل عنها فقط"] },
-        { id: "admin_transfers_edit", label: "صلاحية تعديل التحويلات:", options: ["غير مصرح", "لجميع المخازن", "للمخازن والمواقع/الابراج المسؤل عنها فقط"] },
+        { id: "admin_inv_reports", label: "صلاحية استعراض تقارير المخزون:", options: ["غير مصرح", "لجميع المخازن", "للمسؤل عنها فقط"] },
+        { id: "admin_transfers_view_m", label: "صلاحية استعراض التحويلات المجوله:", options: ["غير مصرح", "لجميع المخازن", "للمسؤل عنها فقط"] },
+        { id: "admin_transfers_create", label: "صلاحية انشاء تحويل:", options: ["غير مصرح", "من جميع المخازن", "من المسؤل عنها فقط"] },
+        { id: "admin_transfer_action", label: "صلاحية التحويل:", options: ["غير مصرح", "لجميع المخازن", "للمسؤل عنها فقط"] },
+        { id: "admin_transfers_receive", label: "صلاحية استلام التحويلات:", options: ["غير مصرح", "لجميع المخازن", "للمسؤل عنها فقط"] },
+        { id: "admin_transfers_receive_out", label: "صلاحية استلام التحويلات الصادرة:", options: ["غير مصرح", "لجميع المخازن", "للمسؤل عنها فقط"] },
+        { id: "admin_transfers_reject", label: "صلاحية رفض التحويلات:", options: ["غير مصرح", "للمسؤل عنها فقط"] },
+        { id: "admin_transfers_reject_out", label: "صلاحية رفض التحويلات الصادرة:", options: ["غير مصرح", "لجميع المخازن", "للمسؤل عنها فقط"] },
+        { id: "admin_transfers_edit", label: "صلاحية تعديل التحويلات:", options: ["غير مصرح", "لجميع المخازن", "للمسؤل عنها فقط"] },
         { id: "admin_transfers_edit_out", label: "صلاحية تعديل التحويلات الصادرة:", options: ["غير مصرح", "لجميع المخازن", "للمخازن والمواقع/الابراج المسؤل عنها فقط"] },
-        { id: "admin_transfers_delete", label: "صلاحية حذف التحويلات:", options: ["غير مصرح", "لجميع المخازن", "للمخازن والمواقع/الابراج المسؤل عنها فقط"] },
-        { id: "admin_transfers_delete_out", label: "صلاحية حذف التحويلات الصادرة:", options: ["غير مصرح", "لجميع المخازن", "للمخازن والمواقع/الابراج المسؤل عنها فقط"] }
+        { id: "admin_transfers_delete", label: "صلاحية حذف التحويلات:", options: ["غير مصرح", "لجميع المخازن", "للمسؤل عنها فقط"] },
+        { id: "admin_transfers_delete_out", label: "صلاحية حذف التحويلات الصادرة:", options: ["غير مصرح", "لجميع المخازن", "لللمسؤل عنها فقط"] }
     ];
 
     let defaultTowers = [
@@ -1390,68 +1455,122 @@
         { type: "فرعي", name: "برج جبل حديد - 02", owner: "أحمد سعيد", ownerPhone: "733000000", location: "المرتفعات الشرقية", device: "NanoStation M5", notes: "الربط الرئيسي لخطوط الميكروويف", createdBy: "admin" }
     ];
 
-    let towers = safeJSON('mikrotik_towers', defaultTowers);
-
     let defaultWarehouses = [
         { name: "المخزن الرئيسي", keeper: "مدير النظام الرئيسي", type: "رئيسي", status: "مفعل", notes: "المخزن الافتراضي الرئيسي للنظام", createdBy: "admin" },
         { name: "عهدة مدير الصيانة", keeper: "مدير النظام الرئيسي", type: "فرعي", status: "مفعل", notes: "عهدة مخصصة لقطع الغيار السريعة", createdBy: "admin" },
         { name: "عهدة فني الصيانة", keeper: "مدير النظام الرئيسي", type: "فرعي", status: "مفعل", notes: "عهدة الفنيين الميدانيين", createdBy: "admin" },
         { name: "الأجهزة التالفة (سكراب)", keeper: "مدير النظام الرئيسي", type: "رئيسي", status: "مفعل", notes: "مخزن التالف والخراب", createdBy: "admin" }
     ];
-    let customWarehouses = safeJSON('mikrotik_custom_warehouses', defaultWarehouses);
 
-    function getAllWarehouses() {
-        return customWarehouses;
-    }
-
-    let defaultCategoryModelsMap = {
-        "روتر بورد": ["RB1100 X4", "RB2011"],
-        "أجهزة البث الاسلكي M2": ["PowerBeam M2", "NanoStation M2"],
-        "أجهزة البث الاسلكي M5": ["PowerBeam M5", "NanoStation M5", "NanoStation M5 LOCO", "PowerBeam AC 620", "Rocket Dish", "Air Fiber"],
-        "أجهزة البث الاسلكي ( الموديمات )": ["TOTO ADSL", "TOTO N300RH", "TP-WA801N", "TP-WA901N"],
-        "سويتش ( Switch 1000 )": ["RB2011", "TOTO 1000 8-PORT", "TP-Link 1000 8-Port"],
-        "سويتش ( Switch 100 )": ["TOTO 100 8P-9V", "TP-Link 100 8P-9V"]
+    let itemTypesCategoriesMap = {
+        "أجهزة شبكية": {
+            "روتر بورد": ["RB1100 X4", "RB2011"],
+            "أجهزة النقل M5": ["PowerBeam M5", "NanoStation M5", "NanoStation M5 LOCO", "PowerBeam AC 620", "Rocket Dish", "Air Fiber"],
+            "أجهزة النقل M2": ["PowerBeam M2", "NanoStation M2"],
+            "Switch": ["TOTO 1000 8-PORT", "TP-Link 1000 8-Port", "TOTO 100 8P-9V", "TP-Link 100 8P-9V"],
+            "Access Point": ["TP-WA801N", "TP-WA901N"]
+        },
+        "أجهزة كهربائية": {
+            "بطاريات": ["50 A", "70 A", "100 A", "120 A", "150 A", "200 A"],
+            "الواح شمسية": ["100 W", "150 W", "160 W", "165 W", "170 W", "175 W", "220 W"],
+            "محول كهرباء (انفلتر)": ["300 W", "500 W", "600 W", "700 W", "1000 W", "1500 W"],
+            "منظم شحن بطاريات": ["20 A", "30 A", "50 A", "60 A"]
+        },
+        "أجهزة صيانة": {
+            "أجهزة فحص واختبار": ["Multimeter Digital", "LAN Cable Tester", "Optical Power Meter"],
+            "أدوات صيانة عامة": ["لحام قصدير", "فكاك مفاتيح", "مفكات عزل"]
+        },
+        "اجهزة خاص بالعملاء": {
+            "موديمات منزلية": ["TOTO ADSL", "TOTO N300RH", "TP-WA801N", "TP-WA901N", "ديلينك"],
+            "أجهزة استقبال عملاء": ["NanoStation M5 LOCO", "PowerBeam M2"]
+        },
+        "الاصول ثابتة": {
+            "أبراج ومعدات ثقيلة": ["برج حديدي 18 متر", "مولد كهربائي 5 KVA", "منظومة طاقة متكاملة"],
+            "أثاث ومكاتب": ["مكتب إداري", "دولاب حفظ أرشيف"]
+        }
     };
 
-    let categoryModelsMap = safeJSON('mikrotik_cat_models', defaultCategoryModelsMap);
+    let defaultCategoryModelsMap = {};
+    for (let itemType in itemTypesCategoriesMap) {
+        for (let cat in itemTypesCategoriesMap[itemType]) {
+            defaultCategoryModelsMap[cat] = itemTypesCategoriesMap[itemType][cat];
+        }
+    }
 
-    let brandingSettings = safeJSON('mikrotik_branding', {
-        companyName: "نظام الميكروتيك الاحترافي",
-        currency: "$"
-    });
+    // القائمة الشاملة لكافة الحقول المطلوبة بدقة لربطها بالفئات وشاشة إضافة جهاز
+    const availableSystemFields = [
+        { key: "name", label: "اسم الجهاز / الصنف", type: "text", required: true },
+        { key: "deviceClassification", label: "نوع الجهاز / الصنف", type: "select", options: ["محلي", "خارجي", "اساسي", "احتياطي"] },
+        { key: "ip", label: "عنوان IP الافتراضي", type: "text" },
+        { key: "mac", label: "عنوان MAC Address", type: "text", required: true },
+        { key: "serial", label: "رقم السيريال", type: "text" },
+        { key: "pinsCount", label: "عدد الدقلات", type: "select", options: ["2 دقلات", "3 دقلات"] },
+        { key: "ownership", label: "ملكية الجهاز", type: "select", options: ["يمن نت", "خاص"] },
+        { key: "ownerName", label: "اسم المالك", type: "text" },
+        { key: "inventoryInclusion", label: "ضمن الجرد", type: "select", options: ["نعم", "لا"] },
+        { key: "boardColor", label: "لون اللوح", type: "select", options: ["ازرق", "اسود"] },
+        { key: "color", label: "اللون", type: "text", placeholder: "مثلاً احمر - ازرق - اخضر" },
+        { key: "unit", label: "وحدة القياس الأساسية", type: "select", options: ["حبة", "قطعة", "باكت", "كرتون", "كيلو", "انش"] },
+        { key: "qtyMeter", label: "الكمية/متر", type: "number", step: "0.01" },
+        { key: "qtyLiter", label: "الكمية/لتر", type: "number", step: "0.01" },
+        { key: "dimensions", label: "الأبعاد (الارتفاع × العرض × العمق) سم", type: "text" },
+        { key: "boardDimensions", label: "ابعاد اللوح (الطول × العرض) سم", type: "text" },
+        { key: "weight", label: "الوزن (بالكيلوجرام)", type: "number", step: "0.01" },
+        { key: "portsCount", label: "عدد المنافذ", type: "select", options: ["5 Port", "8 port", "10 Port"] },
+        { key: "switchVoltage", label: "فولتية السويتش", type: "select", options: ["5V", "9V", "12V", "220V"] },
+        { key: "portType", label: "نوع المنفذ", type: "select", options: ["اصباع", "مسمار"] },
+        { key: "batteryVoltage", label: "جهد البطارية (Voltage)", type: "select", options: ["12V", "24V"] },
+        { key: "batteryCapacity", label: "سعة البطارية (Ah)", type: "select", options: ["50 A", "70 A", "100 A", "120 A", "150 A", "200 A"] },
+        { key: "solarPower", label: "القدرة/لوح شمسي (Watt)", type: "select", options: ["100 W", "150 W", "160 W", "165 W", "170 W", "175 W", "220 W"] },
+        { key: "solarChargePower", label: "القدرة/منظم شحن البطارية", type: "select", options: ["20 A", "30 A", "50 A", "60 A"] },
+        { key: "inverterPower", label: "القدرة/محول الكهرباء (انفلتر)", type: "select", options: ["300 W", "500 W", "600 W", "700 W", "1000 W", "1500 W"] },
+        { key: "chargerPower", label: "القدرة/محول شحن البطارية من الكهرباء", type: "select", options: ["30 A", "50 A", "60 A"] },
+        { key: "warrantyPeriod", label: "مدة الضمان", type: "select", options: ["3 اشهر", "6 اشهر", "سنة"] },
+        { key: "minStock", label: "الحد الأدنى للمخزون", type: "number", min: "0" },
+        { key: "location", label: "الموقع / المخزن الحالي", type: "location", required: true },
+        { key: "status", label: "حالة الجهاز", type: "status" },
+        { key: "supplier", label: "المورد / الشركة", type: "text" },
+        { key: "price", label: "سعر الشراء", type: "number", step: "0.01" },
+        { key: "currency", label: "نوع العملة", type: "currency" },
+        { key: "purchaseDate", label: "تاريخ الشراء (الإضافة)", type: "date" },
+        { key: "quantity", label: "الكمية", type: "number", min: "0" },
+        { key: "notes", label: "ملاحظات", type: "textarea", col: "12" }
+    ];
 
-    let uiCustomization = safeJSON('mikrotik_ui_customization', {
-        fontSize: "1rem",
-        primaryColor: "#0d6efd",
-        bgColor: "#f1f5f9",
-        textColor: "#212529"
-    });
+    let categoryAssignedFieldsMap = {
+        "روتر بورد": ["name", "deviceClassification", "ip", "mac", "serial", "ownership", "location", "status", "supplier", "price", "currency", "purchaseDate", "warrantyPeriod", "notes"],
+        "أجهزة النقل M5": ["name", "deviceClassification", "ip", "mac", "serial", "pinsCount", "ownership", "location", "status", "supplier", "price", "currency", "purchaseDate", "warrantyPeriod", "notes"],
+        "أجهزة النقل M2": ["name", "deviceClassification", "ip", "mac", "serial", "pinsCount", "ownership", "location", "status", "supplier", "price", "currency", "purchaseDate", "warrantyPeriod", "notes"],
+        "Access Point": ["name", "deviceClassification", "ip", "mac", "serial", "ownership", "location", "status", "supplier", "price", "currency", "purchaseDate", "warrantyPeriod", "notes"],
+        "Switch": ["name", "deviceClassification", "serial", "portsCount", "switchVoltage", "portType", "ownership", "location", "status", "supplier", "price", "currency", "purchaseDate", "quantity", "warrantyPeriod", "notes"],
+        "بطاريات": ["name", "deviceClassification", "serial", "batteryVoltage", "batteryCapacity", "ownership", "location", "status", "supplier", "price", "currency", "purchaseDate", "quantity", "warrantyPeriod", "notes"],
+        "الواح شمسية": ["name", "deviceClassification", "serial", "solarPower", "boardColor", "boardDimensions", "weight", "ownership", "location", "status", "supplier", "price", "currency", "purchaseDate", "quantity", "warrantyPeriod", "notes"],
+        "محول كهرباء (انفلتر)": ["name", "deviceClassification", "serial", "inverterPower", "ownership", "location", "status", "supplier", "price", "currency", "purchaseDate", "quantity", "warrantyPeriod", "notes"],
+        "منظم شحن بطاريات": ["name", "deviceClassification", "serial", "solarChargePower", "ownership", "location", "status", "supplier", "price", "currency", "purchaseDate", "quantity", "warrantyPeriod", "notes"]
+    };
 
-    let tabVisibility = safeJSON('mikrotik_tabs_vis', {
-        "dashboard-tab": true,
-        "devices-tab": true,
-        "towers-tab": true,
-        "locations-tab": true,
-        "movements-tab": true,
-        "reports-tab": true,
-        "maintenance-tab": true,
-        "users-tab": true,
-        "search-tab": true,
-        "settings-tab": true
-    });
+    let defaultDevices = [
+        { id: 1, name: "Main-Tower-M5", itemType: "أجهزة شبكية", category: "أجهزة النقل M5", model: "NanoStation M5", deviceClassification: "خارجي", mac: "E0:63:DA:11:22:33", ip: "10.0.1.50", ownership: "يمن نت", location: "برج المطار الرئيسي - 01", status: "سليم", supplier: "مؤسسة الاتصالات", price: 120, currency: "USD", purchaseDate: "2026-01-15", warrantyPeriod: "سنة", createdBy: "admin" },
+        { id: 2, name: "Core-RB750", itemType: "أجهزة شبكية", category: "روتر بورد", model: "RB2011", deviceClassification: "اساسي", mac: "68:72:51:AA:BB:CC", ip: "10.0.0.1", ownership: "خاص", location: "المخزن الرئيسي", status: "سليم", supplier: "الوكيل المحلي", price: 85, currency: "USD", purchaseDate: "2026-02-10", warrantyPeriod: "6 اشهر", createdBy: "admin" }
+    ];
 
-    let devices = normalizeArray(safeJSON('mikrotik_devices', [
-        { id: 1, name: "Main-Tower-M5", category: "أجهزة البث الاسلكي M5", model: "NanoStation M5", mac: "E0:63:DA:11:22:33", ip: "10.0.1.50", location: "برج المطار الرئيسي - 01", status: "سليم", supplier: "مؤسسة الاتصالات", price: 120, currency: "USD", purchaseDate: "2026-01-15", createdBy: "admin" },
-        { id: 2, name: "Core-RB750", category: "روتر بورد", model: "RB2011", mac: "68:72:51:AA:BB:CC", ip: "10.0.0.1", location: "المخزن الرئيسي", status: "سليم", supplier: "الوكيل المحلي", price: 85, currency: "USD", purchaseDate: "2026-02-10", createdBy: "admin" }
-    ]));
+    let customSystemFields = {};
 
-    let movements = normalizeArray(safeJSON('mikrotik_movements', []));
-    let maintenance = normalizeArray(safeJSON('mikrotik_maint', []));
-    let users = normalizeArray(safeJSON('mikrotik_users', [
+    let defaultUsers = [
         { id: 1, name: "مدير النظام الرئيسي", username: "admin", password: "admin123", job: "مدير عام", status: "نشط", permissions: generateFullPermissionsObject(true), createdBy: "admin" }
-    ]));
+    ];
 
-    let targetStaffAssignments = safeJSON('mikrotik_target_staff', {});
+    let towers = [];
+    let customWarehouses = [];
+    let categoryModelsMap = defaultCategoryModelsMap;
+    let brandingSettings = { companyName: "نظام الميكروتيك الاحترافي", currency: "$" };
+    let uiCustomization = { fontSize: "1rem", primaryColor: "#0d6efd", bgColor: "#f1f5f9", textColor: "#212529" };
+    let tabVisibility = { "dashboard-tab": true, "devices-tab": true, "towers-tab": true, "locations-tab": true, "movements-tab": true, "reports-tab": true, "maintenance-tab": true, "users-tab": true, "search-tab": true, "settings-tab": true };
+    let devices = [];
+    let movements = [];
+    let maintenance = [];
+    let users = [];
+    let targetStaffAssignments = {};
     let currentLoggedInUserObj = null;
 
     function generateFullPermissionsObject(val) {
@@ -1469,78 +1588,130 @@
         return { screens: screensObj, admin: adminObj };
     }
 
-    users = users.map((u, index) => ({
-        ...u,
-        id: Number.isFinite(Number(u.id)) ? Number(u.id) : Date.now() + index,
-        password: typeof u.password === "string" ? u.password : (u.username === "admin" ? "admin123" : ""),
-        status: u.status || "نشط",
-        permissions: u.permissions || generateFullPermissionsObject(false),
-        createdBy: u.createdBy || "admin"
-    }));
+    function saveSystemData() {
+        if (!isCloudDataLoaded) return;
+        
+        const payload = {
+            devices: devices,
+            towers: towers,
+            customWarehouses: customWarehouses,
+            movements: movements,
+            maintenance: maintenance,
+            users: users,
+            targetStaffAssignments: targetStaffAssignments,
+            categoryModelsMap: categoryModelsMap,
+            itemTypesCategoriesMap: itemTypesCategoriesMap,
+            categoryAssignedFieldsMap: categoryAssignedFieldsMap,
+            customSystemFields: customSystemFields,
+            brandingSettings: brandingSettings,
+            uiCustomization: uiCustomization,
+            tabVisibility: tabVisibility
+        };
 
-    if (!users.some(u => u.username === "admin")) {
-        users.unshift({
-            id: Date.now(),
-            name: "مدير النظام الرئيسي",
-            username: "admin",
-            password: "admin123",
-            job: "مدير عام",
-            status: "نشط",
-            permissions: generateFullPermissionsObject(true),
-            createdBy: "admin"
-        });
+        db.collection("mikrotik_system").doc("main_data").set(payload)
+          .then(() => {
+              console.log("تم حفظ وتحديث البيانات سحابياً بنجاح.");
+          })
+          .catch((error) => {
+              console.error("خطأ في المزامنة السحابية: ", error);
+          });
     }
 
-    towers = normalizeArray(towers, []);
-    customWarehouses = normalizeArray(customWarehouses, []);
-    devices = normalizeArray(devices, []);
-    movements = normalizeArray(movements, []);
-    maintenance = normalizeArray(maintenance, []);
-    categoryModelsMap = (categoryModelsMap && typeof categoryModelsMap === "object" && !Array.isArray(categoryModelsMap))
-        ? categoryModelsMap : defaultCategoryModelsMap;
-    tabVisibility = { 
-        "dashboard-tab": true, "devices-tab": true, "towers-tab": true,
-        "locations-tab": true, "movements-tab": true, "reports-tab": true, "maintenance-tab": true,
-        "users-tab": true, "search-tab": true, "settings-tab": true,
-        ...(tabVisibility || {})
-    };
-
-    let statusChartInstance = null;
-    let categoryChartInstance = null;
-
-    function saveSystemData() {
-        localStorage.setItem('mikrotik_devices', JSON.stringify(devices));
-        localStorage.setItem('mikrotik_towers', JSON.stringify(towers));
-        localStorage.setItem('mikrotik_custom_warehouses', JSON.stringify(customWarehouses));
-        localStorage.setItem('mikrotik_movements', JSON.stringify(movements));
-        localStorage.setItem('mikrotik_maint', JSON.stringify(maintenance));
-        localStorage.setItem('mikrotik_users', JSON.stringify(users));
-        localStorage.setItem('mikrotik_target_staff', JSON.stringify(targetStaffAssignments));
-        localStorage.setItem('mikrotik_cat_models', JSON.stringify(categoryModelsMap));
-        localStorage.setItem('mikrotik_branding', JSON.stringify(brandingSettings));
-        localStorage.setItem('mikrotik_ui_customization', JSON.stringify(uiCustomization));
-        localStorage.setItem('mikrotik_tabs_vis', JSON.stringify(tabVisibility));
+    function loadSystemDataFromCloud(callback) {
+        db.collection("mikrotik_system").doc("main_data").get()
+          .then((doc) => {
+              if (doc.exists) {
+                  const data = doc.data();
+                  devices = normalizeArray(data.devices, defaultDevices);
+                  towers = normalizeArray(data.towers, defaultTowers);
+                  customWarehouses = normalizeArray(data.customWarehouses, defaultWarehouses);
+                  movements = normalizeArray(data.movements, []);
+                  maintenance = normalizeArray(data.maintenance, []);
+                  users = normalizeArray(data.users, defaultUsers);
+                  targetStaffAssignments = data.targetStaffAssignments || {};
+                  categoryModelsMap = data.categoryModelsMap || defaultCategoryModelsMap;
+                  if (data.itemTypesCategoriesMap) itemTypesCategoriesMap = data.itemTypesCategoriesMap;
+                  if (data.categoryAssignedFieldsMap) categoryAssignedFieldsMap = data.categoryAssignedFieldsMap;
+                  if (data.customSystemFields) customSystemFields = data.customSystemFields;
+                  brandingSettings = data.brandingSettings || brandingSettings;
+                  uiCustomization = data.uiCustomization || uiCustomization;
+                  tabVisibility = data.tabVisibility || tabVisibility;
+              } else {
+                  devices = defaultDevices;
+                  towers = defaultTowers;
+                  customWarehouses = defaultWarehouses;
+                  users = defaultUsers;
+                  db.collection("mikrotik_system").doc("main_data").set({
+                      devices: devices,
+                      towers: towers,
+                      customWarehouses: customWarehouses,
+                      movements: movements,
+                      maintenance: maintenance,
+                      users: users,
+                      targetStaffAssignments: targetStaffAssignments,
+                      categoryModelsMap: categoryModelsMap,
+                      itemTypesCategoriesMap: itemTypesCategoriesMap,
+                      categoryAssignedFieldsMap: categoryAssignedFieldsMap,
+                      brandingSettings: brandingSettings,
+                      uiCustomization: uiCustomization,
+                      tabVisibility: tabVisibility
+                  });
+              }
+              isCloudDataLoaded = true;
+              if(callback) callback();
+          })
+          .catch((error) => {
+              console.error("خطأ في جلب البيانات:", error);
+              devices = defaultDevices;
+              towers = defaultTowers;
+              customWarehouses = defaultWarehouses;
+              users = defaultUsers;
+              isCloudDataLoaded = true;
+              if(callback) callback();
+          });
     }
 
     document.addEventListener("DOMContentLoaded", () => {
-        applySettingsToUI();
-        
-        if(sessionStorage.getItem('mikrotik_logged_in') === 'true') {
-            const currentId = Number(sessionStorage.getItem('mikrotik_current_user_id'));
-            const currentName = sessionStorage.getItem('mikrotik_current_user');
-            currentLoggedInUserObj = users.find(u => Number(u.id) === currentId)
-                || users.find(u => u.name === currentName)
-                || users.find(u => u.username === 'admin')
-                || users[0];
-            document.getElementById("loginScreen").style.display = "none";
-            applyUserPermissionsRestriction();
-            renderAll();
-            buildPermissionsMatrixUI();
-        }
+        loadSystemDataFromCloud(() => {
+            applySettingsToUI();
+            
+            if(sessionStorage.getItem('mikrotik_logged_in') === 'true') {
+                const currentId = Number(sessionStorage.getItem('mikrotik_current_user_id'));
+                const currentName = sessionStorage.getItem('mikrotik_current_user');
+                currentLoggedInUserObj = users.find(u => Number(u.id) === currentId)
+                    || users.find(u => u.name === currentName)
+                    || users.find(u => u.username === 'admin')
+                    || users[0];
+                document.getElementById("loginScreen").style.display = "none";
+                applyUserPermissionsRestriction();
+                renderAll();
+                buildPermissionsMatrixUI();
+                resetInactivityTimer();
+            }
 
-        if(localStorage.getItem('sidebar_minimized') === 'true') {
-            document.body.classList.add('sidebar-minimized');
-        }
+            if(localStorage.getItem('sidebar_minimized') === 'true') {
+                document.body.classList.add('sidebar-minimized');
+            }
+        });
+
+        db.collection("mikrotik_system").doc("main_data")
+          .onSnapshot((doc) => {
+              if (doc.exists && isCloudDataLoaded && sessionStorage.getItem('mikrotik_logged_in') === 'true') {
+                  const data = doc.data();
+                  devices = normalizeArray(data.devices, devices);
+                  towers = normalizeArray(data.towers, towers);
+                  customWarehouses = normalizeArray(data.customWarehouses, customWarehouses);
+                  movements = normalizeArray(data.movements, movements);
+                  maintenance = normalizeArray(data.maintenance, maintenance);
+                  users = normalizeArray(data.users, users);
+                  targetStaffAssignments = data.targetStaffAssignments || targetStaffAssignments;
+                  categoryModelsMap = data.categoryModelsMap || categoryModelsMap;
+                  if(data.itemTypesCategoriesMap) itemTypesCategoriesMap = data.itemTypesCategoriesMap;
+                  if(data.categoryAssignedFieldsMap) categoryAssignedFieldsMap = data.categoryAssignedFieldsMap;
+                  if(data.customSystemFields) customSystemFields = data.customSystemFields;
+                  renderAll();
+              }
+          });
     });
 
     function checkUserPermission(permKey) {
@@ -1551,20 +1722,17 @@
         return !!perms.screens[permKey];
     }
 
-    // دالة تحكم صارمة لمنع التجاوز وعرض الشاشة المطلوبة فقط إذا كان مسموحاً
     function switchSystemTab(tabId, paneId, permKey) {
         if (!checkUserPermission(permKey)) {
             showAlert("عذراً! لا تمتلك صلاحية الدخول لهذه الشاشة.", "danger");
             return false;
         }
 
-        // إزالة التفعيل والنشاط من كل التبويبات والشاشات
         document.querySelectorAll('.sidebar .nav-link').forEach(el => el.classList.remove('active'));
         document.querySelectorAll('.tab-pane').forEach(el => {
             el.classList.remove('show', 'active');
         });
 
-        // تفعيل التبويب والشاشة المستهدفة حصراً
         const tabElem = document.getElementById(tabId);
         const paneElem = document.getElementById(paneId);
 
@@ -1609,7 +1777,6 @@
             }
         });
 
-        // فرض التوجيه التلقائي حصراً على أول شاشة مصرحة للمستخدم الحالي ومنع ظهور شاشات سابقة
         if (firstAllowedPane && firstAllowedTab) {
             switchSystemTab(firstAllowedTab, firstAllowedPane, permissionSectionsConfig.find(s => s.sectionKey.includes(firstAllowedPane))?.sectionKey || '');
         }
@@ -1623,6 +1790,7 @@
         toggleElementVisibility("btnCreateUser", checkUserPermission('user_add_new'));
         toggleElementVisibility("btnPrintReport", checkUserPermission('dash_print_report'));
         toggleElementVisibility("btnExportExcel", checkUserPermission('dev_export_excel'));
+        toggleElementVisibility("btnImportExcel", checkUserPermission('dev_add_device'));
     }
 
     function toggleElementVisibility(elemId, isVisible) {
@@ -1672,10 +1840,12 @@
         applyUserPermissionsRestriction();
         renderAll();
         buildPermissionsMatrixUI();
+        resetInactivityTimer();
         showAlert(`مرحباً بك، ${escapeHtml(foundUser.name)}`);
     }
 
     function logoutSystem() {
+        clearTimeout(inactivityTimer);
         sessionStorage.clear();
         currentLoggedInUserObj = null;
         document.getElementById("loginScreen").style.display = "flex";
@@ -1794,6 +1964,10 @@
         showNotification(message, type);
     }
 
+    function getAllWarehouses() {
+        return customWarehouses;
+    }
+
     function populateLocationSelects() {
         const devLocSelect = document.getElementById("devLocation");
         const filterSelect = document.getElementById("locationSelectorFilter");
@@ -1873,27 +2047,178 @@
     }
 
     function populateCategorySelects() {
-        const addDevCat = document.getElementById("devCategory");
         const filterCat = document.getElementById("filterCategory");
         const cats = Object.keys(categoryModelsMap);
 
-        if(addDevCat) addDevCat.innerHTML = "";
         if(filterCat) filterCat.innerHTML = '<option value="">كل الفئات</option>';
 
         cats.forEach(cat => {
-            if(addDevCat) addDevCat.innerHTML += `<option value="${escapeHtml(cat)}">${escapeHtml(cat)}</option>`;
             if(filterCat) filterCat.innerHTML += `<option value="${escapeHtml(cat)}">${escapeHtml(cat)}</option>`;
         });
     }
 
-    function updateModelsDropdown(selectedModel = "") {
+    function populateDeviceItemTypeSelect(selected = "") {
+        const select = document.getElementById("devItemType");
+        if(!select) return;
+        select.innerHTML = '<option value="" selected disabled>اختر نوع الصنف أولاً</option>';
+        Object.keys(itemTypesCategoriesMap).forEach(it => {
+            const option = document.createElement("option");
+            option.value = it; option.textContent = it;
+            if(it === selected) option.selected = true;
+            select.appendChild(option);
+        });
+    }
+
+    function updateCategoriesDropdown(selectedCategory = "", selectedModel = "", existing = null) {
+        const itemTypeSelect = document.getElementById("devItemType");
+        const categorySelect = document.getElementById("devCategory");
+        if (!itemTypeSelect || !categorySelect) return;
+
+        const selectedItemType = itemTypeSelect.value;
+        categorySelect.innerHTML = '<option value="" selected disabled>اختر فئة الجهاز</option>';
+
+        const categoriesObj = itemTypesCategoriesMap[selectedItemType] || {};
+        const categories = Object.keys(categoriesObj);
+
+        categories.forEach(cat => {
+            const option = document.createElement("option");
+            option.value = cat;
+            option.textContent = cat;
+            if (cat === selectedCategory) option.selected = true;
+            categorySelect.appendChild(option);
+        });
+
+        if (selectedCategory && !categories.includes(selectedCategory)) {
+            const option = document.createElement("option");
+            option.value = selectedCategory;
+            option.textContent = selectedCategory;
+            option.selected = true;
+            categorySelect.appendChild(option);
+        }
+
+        updateModelsDropdown(selectedModel, existing);
+    }
+
+    function getAllSystemFields() {
+        return availableSystemFields.concat(Object.values(customSystemFields || {}));
+    }
+
+    function getCategoryConfigKey(itemType, category) {
+        return itemType && category ? `${itemType}::${category}` : category;
+    }
+
+    function getAssignedFieldKeys(itemType, category) {
+        const pairKey = getCategoryConfigKey(itemType, category);
+        return categoryAssignedFieldsMap[pairKey] || categoryAssignedFieldsMap[category] || ["name", "ip", "mac", "location", "status", "supplier", "price", "currency", "purchaseDate", "notes"];
+    }
+
+    function getDeviceFieldSchema(category, itemType = "") {
+        const assignedKeys = getAssignedFieldKeys(itemType, category);
+        return getAllSystemFields().filter(f => assignedKeys.includes(f.key));
+    }
+
+    function getDynamicFieldValue(key, existing = {}) {
+        if (Object.prototype.hasOwnProperty.call(existing, key)) return existing[key] ?? "";
+        return existing[key] ?? "";
+    }
+
+    function renderDynamicDeviceFields(existing = {}) {
+        const container = document.getElementById("dynamicDeviceFields");
+        const categorySelect = document.getElementById("devCategory");
+        if (!container || !categorySelect) return;
+        const category = categorySelect.value;
+        const itemType = document.getElementById("devItemType")?.value || "";
+        const schema = getDeviceFieldSchema(category, itemType);
+        container.innerHTML = "";
+
+        schema.forEach(field => {
+            const col = field.col === "12" ? "col-12" : (field.col || "col-md-3");
+            const value = getDynamicFieldValue(field.key, existing);
+            const required = field.required ? " required" : "";
+            const id = "devField_" + field.key;
+            let control = "";
+
+            if (field.type === "textarea") {
+                control = `<textarea id="${id}" data-device-field="${escapeHtml(field.key)}" class="form-control form-control-sm" rows="2"${required}>${escapeHtml(value)}</textarea>`;
+            } else if (field.type === "location") {
+                control = `<select id="${id}" data-device-field="${escapeHtml(field.key)}" class="form-select form-select-sm"${required}></select>`;
+            } else if (field.type === "status") {
+                control = `<select id="${id}" data-device-field="${escapeHtml(field.key)}" class="form-select form-select-sm"${required}>
+                    <option value="" selected disabled>اختر الحالة</option>
+                    <option value="جديد">جديد</option>
+                    <option value="مستخدم">مستخدم</option>
+                    <option value="سليم">سليم</option>
+                    <option value="تحت الصيانة">تحت الصيانة</option>
+                    <option value="تالف">تالف</option>
+                </select>`;
+            } else if (field.type === "currency") {
+                control = `<select id="${id}" data-device-field="${escapeHtml(field.key)}" class="form-select form-select-sm"${required}>
+                    <option value="" selected disabled>اختر العملة</option>
+                    <option value="USD">USD ($)</option>
+                    <option value="SAR">SAR</option>
+                    <option value="EUR">EUR (€)</option>
+                    <option value="YER">YER</option>
+                </select>`;
+            } else if (field.type === "select") {
+                control = `<select id="${id}" data-device-field="${escapeHtml(field.key)}" class="form-select form-select-sm"${required}>
+                    <option value="" selected disabled>اختر ${escapeHtml(field.label)}</option>
+                    ${(field.options || []).map(o => `<option value="${escapeHtml(o)}">${escapeHtml(o)}</option>`).join("")}
+                </select>`;
+            } else {
+                control = `<input id="${id}" data-device-field="${escapeHtml(field.key)}" type="${field.type || "text"}" class="form-control form-control-sm"${field.step ? ` step="${escapeHtml(field.step)}"` : ""}${field.min ? ` min="${escapeHtml(field.min)}"` : ""}${required} value="${escapeHtml(value)}"${field.placeholder ? ` placeholder="${escapeHtml(field.placeholder)}"` : ""}>`;
+            }
+
+            container.insertAdjacentHTML("beforeend", `<div class="${col}"><label class="form-label small fw-bold">${escapeHtml(field.label)}</label>${control}</div>`);
+        });
+
+        const location = document.getElementById("devField_location");
+        if (location) {
+            const oldLocation = getDynamicFieldValue("location", existing);
+            let optionsHtml = `<option value="">اختر الموقع / المخزن الحالي</option>`;
+            optionsHtml += `<optgroup label="الأبراج الشغالة">`;
+            towers.forEach(t => optionsHtml += `<option value="${escapeHtml(t.name)}">${escapeHtml(t.name)} (${escapeHtml(t.type)})</option>`);
+            optionsHtml += `</optgroup><optgroup label="المخازن">`;
+            getAllWarehouses().forEach(w => optionsHtml += `<option value="${escapeHtml(w.name)}">${escapeHtml(w.name)}</option>`);
+            optionsHtml += `</optgroup>`;
+            location.innerHTML = optionsHtml;
+            if (oldLocation) location.value = oldLocation;
+        }
+
+        const status = document.getElementById("devField_status");
+        if (status) {
+            const savedStatus = getDynamicFieldValue("status", existing);
+            status.value = savedStatus || "";
+        }
+        const currency = document.getElementById("devField_currency");
+        if (currency) {
+            const savedCurrency = getDynamicFieldValue("currency", existing);
+            currency.value = savedCurrency || "";
+        }
+        // تعبئة القوائم المنسدلة المخصصة بالقيم الحالية إن وجدت
+        schema.forEach(field => {
+            if (field.type === "select") {
+                const el = document.getElementById("devField_" + field.key);
+                if (el) {
+                    const val = getDynamicFieldValue(field.key, existing);
+                    if (val) el.value = val;
+                }
+            }
+        });
+    }
+
+    function updateModelsDropdown(selectedModel = "", existing = null) {
+        const itemTypeSelect = document.getElementById("devItemType");
         const categorySelect = document.getElementById("devCategory");
         const modelSelect = document.getElementById("devModel");
-        if(!categorySelect || !modelSelect) return;
+        if(!itemTypeSelect || !categorySelect || !modelSelect) return;
+
+        const selectedItemType = itemTypeSelect.value;
         const selectedCategory = categorySelect.value;
 
-        modelSelect.innerHTML = "";
-        const models = categoryModelsMap[selectedCategory] || [];
+        modelSelect.innerHTML = '<option value="" selected disabled>اختر الموديل</option>';
+        
+        const models = (itemTypesCategoriesMap[selectedItemType] && itemTypesCategoriesMap[selectedItemType][selectedCategory]) 
+                       || categoryModelsMap[selectedCategory] || [];
 
         models.forEach(model => {
             const option = document.createElement("option");
@@ -1902,7 +2227,132 @@
             if (model === selectedModel) option.selected = true;
             modelSelect.appendChild(option);
         });
+
+        if (selectedModel && !models.includes(selectedModel)) {
+            const option = document.createElement("option");
+            option.value = selectedModel;
+            option.textContent = selectedModel;
+            option.selected = true;
+            modelSelect.appendChild(option);
+        }
+        renderDynamicDeviceFields(existing || {});
     }
+
+    function collectDynamicDeviceFields() {
+        const result = {};
+        document.querySelectorAll("#dynamicDeviceFields [data-device-field]").forEach(el => {
+            result[el.getAttribute("data-device-field")] = el.value;
+        });
+        return result;
+    }
+
+    // دوال إدارة الأصناف والفئات والحقول
+    function openCategoriesManagerModal() {
+        if(!checkUserPermission('set_cat_models')) return showAlert("عذراً، لا تمتلك الصلاحية لإدارة الفئات والأصناف!", "danger");
+        const sel = document.getElementById("mgrItemTypeSelect");
+        sel.innerHTML = '<option value="" selected disabled>اختر الصنف</option>';
+        Object.keys(itemTypesCategoriesMap).forEach(it => sel.innerHTML += `<option value="${escapeHtml(it)}">${escapeHtml(it)}</option>`);
+        document.getElementById("mgrCategorySelect").innerHTML = '<option value="" selected disabled>اختر الفئة</option>';
+        document.getElementById("mgrModelsListContainer").innerHTML = '<small class="text-muted">اختر الصنف والفئة أولاً</small>';
+        document.getElementById("mgrFieldsCheckboxesContainer").innerHTML = '<small class="text-muted">اختر الفئة لعرض الحقول المتاحة</small>';
+        new bootstrap.Modal(document.getElementById('categoriesManagerModal')).show();
+    }
+
+    function addNewItemType() {
+        if(!checkUserPermission('set_cat_models')) return;
+        const name = document.getElementById("newMgrItemTypeName").value.trim();
+        if(!name) return showAlert("أدخل اسم الصنف الجديد.", "warning");
+        if(itemTypesCategoriesMap[name]) return showAlert("هذا الصنف موجود مسبقاً.", "danger");
+        itemTypesCategoriesMap[name] = {};
+        document.getElementById("newMgrItemTypeName").value = "";
+        saveSystemData(); openCategoriesManagerModal();
+        document.getElementById("mgrItemTypeSelect").value = name; loadMgrCategories();
+        showAlert("تم إضافة الصنف بنجاح!");
+    }
+
+    function editMgrItemType() {
+        if(!checkUserPermission('set_cat_models')) return;
+        const oldName = document.getElementById("mgrItemTypeSelect").value;
+        if(!oldName) return showAlert("اختر الصنف المراد تعديله أولاً.", "warning");
+        const newName = prompt("أدخل الاسم الجديد للصنف:", oldName);
+        if(newName === null) return;
+        const clean = newName.trim();
+        if(!clean || clean === oldName) return;
+        if(itemTypesCategoriesMap[clean]) return showAlert("يوجد صنف بهذا الاسم مسبقاً.", "danger");
+        itemTypesCategoriesMap[clean] = itemTypesCategoriesMap[oldName]; delete itemTypesCategoriesMap[oldName];
+        devices.forEach(d => { if(d.itemType === oldName) d.itemType = clean; });
+        Object.keys(categoryAssignedFieldsMap).forEach(k => { if(k.startsWith(oldName + "::")) { const nk = clean + k.substring(oldName.length); categoryAssignedFieldsMap[nk] = categoryAssignedFieldsMap[k]; delete categoryAssignedFieldsMap[k]; }});
+        saveSystemData(); openCategoriesManagerModal(); document.getElementById("mgrItemTypeSelect").value = clean; loadMgrCategories(); renderAll();
+        showAlert("تم تعديل اسم الصنف بنجاح!");
+    }
+
+    function deleteMgrItemType() {
+        if(!checkUserPermission('set_cat_models')) return;
+        const it = document.getElementById("mgrItemTypeSelect").value;
+        if(!it) return showAlert("اختر الصنف المراد حذفه أولاً.", "warning");
+        if(!confirm(`هل تريد حذف الصنف (${it})؟\nسيتم حذف ارتباط فئاته بهذا الصنف، مع الإبقاء على سجلات الأجهزة التاريخية.`)) return;
+        const categories = Object.keys(itemTypesCategoriesMap[it] || {}); delete itemTypesCategoriesMap[it];
+        categories.forEach(cat => { delete categoryAssignedFieldsMap[getCategoryConfigKey(it, cat)]; const used = Object.values(itemTypesCategoriesMap).some(c => Object.prototype.hasOwnProperty.call(c, cat)); if(!used){delete categoryModelsMap[cat]; delete categoryAssignedFieldsMap[cat];} });
+        saveSystemData(); openCategoriesManagerModal(); renderAll(); showAlert("تم حذف الصنف بنجاح!");
+    }
+
+    function loadMgrCategories() {
+        const it = document.getElementById("mgrItemTypeSelect").value, catSelect = document.getElementById("mgrCategorySelect");
+        catSelect.innerHTML = '<option value="" selected disabled>اختر الفئة</option>';
+        Object.keys(itemTypesCategoriesMap[it] || {}).forEach(c => catSelect.innerHTML += `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`);
+        document.getElementById("mgrModelsListContainer").innerHTML = '<small class="text-muted">اختر الفئة لعرض الموديلات والحقول.</small>';
+        document.getElementById("mgrFieldsCheckboxesContainer").innerHTML = '<small class="text-muted">اختر الفئة لعرض الحقول.</small>';
+    }
+
+    function addNewCategoryToItemType() {
+        if(!checkUserPermission('set_cat_models')) return;
+        const it = document.getElementById("mgrItemTypeSelect").value, catName = document.getElementById("newMgrCategoryName").value.trim();
+        if(!it) return showAlert("يرجى اختيار الصنف أولاً.", "warning");
+        if(!catName) return showAlert("يرجى إدخال اسم الفئة.", "warning");
+        if(itemTypesCategoriesMap[it][catName]) return showAlert("هذه الفئة موجودة مسبقاً داخل الصنف المحدد.", "danger");
+        itemTypesCategoriesMap[it][catName] = []; if(!categoryModelsMap[catName]) categoryModelsMap[catName] = [];
+        categoryAssignedFieldsMap[getCategoryConfigKey(it, catName)] = ["name", "location", "status", "price", "currency", "notes"];
+        document.getElementById("newMgrCategoryName").value = ""; saveSystemData(); loadMgrCategories(); document.getElementById("mgrCategorySelect").value = catName; loadMgrFieldsConfig(); populateCategorySelects(); showAlert("تم إضافة الفئة بنجاح!");
+    }
+
+    function editMgrCategory() {
+        if(!checkUserPermission('set_cat_models')) return;
+        const it = document.getElementById("mgrItemTypeSelect").value, oldCat = document.getElementById("mgrCategorySelect").value;
+        if(!it || !oldCat) return showAlert("اختر الصنف والفئة المراد تعديلهما أولاً.", "warning");
+        const v = prompt("أدخل الاسم الجديد للفئة:", oldCat); if(v === null) return; const clean = v.trim();
+        if(!clean || clean === oldCat) return; if(itemTypesCategoriesMap[it][clean]) return showAlert("هذه الفئة موجودة مسبقاً داخل الصنف المحدد.", "danger");
+        itemTypesCategoriesMap[it][clean] = itemTypesCategoriesMap[it][oldCat]; delete itemTypesCategoriesMap[it][oldCat];
+        if(!categoryModelsMap[clean]) categoryModelsMap[clean] = [...(categoryModelsMap[oldCat] || itemTypesCategoriesMap[it][clean])];
+        const oldKey=getCategoryConfigKey(it,oldCat), newKey=getCategoryConfigKey(it,clean); if(categoryAssignedFieldsMap[oldKey]){categoryAssignedFieldsMap[newKey]=categoryAssignedFieldsMap[oldKey];delete categoryAssignedFieldsMap[oldKey];}
+        devices.forEach(d=>{if(d.itemType===it&&d.category===oldCat)d.category=clean;}); saveSystemData(); openCategoriesManagerModal(); document.getElementById("mgrItemTypeSelect").value=it; loadMgrCategories(); document.getElementById("mgrCategorySelect").value=clean; loadMgrFieldsConfig(); renderAll(); showAlert("تم تعديل اسم الفئة بنجاح!");
+    }
+
+    function deleteMgrCategory() {
+        if(!checkUserPermission('set_cat_models')) return;
+        const it=document.getElementById("mgrItemTypeSelect").value, cat=document.getElementById("mgrCategorySelect").value; if(!it||!cat)return showAlert("اختر الصنف والفئة المراد حذفهما أولاً.","warning");
+        if(!confirm(`هل تريد حذف الفئة (${cat}) من الصنف (${it})؟\nسيتم الإبقاء على سجلات الأجهزة السابقة.`))return; delete itemTypesCategoriesMap[it][cat]; delete categoryAssignedFieldsMap[getCategoryConfigKey(it,cat)];
+        const used=Object.values(itemTypesCategoriesMap).some(c=>Object.prototype.hasOwnProperty.call(c,cat)); if(!used){delete categoryModelsMap[cat];delete categoryAssignedFieldsMap[cat];}
+        saveSystemData();loadMgrCategories();renderCategoriesConfigTable();populateCategorySelects();renderAll();showAlert("تم حذف الفئة بنجاح!");
+    }
+
+    function loadMgrFieldsConfig() {
+        const cat=document.getElementById("mgrCategorySelect").value,it=document.getElementById("mgrItemTypeSelect").value;if(!cat||!it)return;
+        const modelsContainer=document.getElementById("mgrModelsListContainer"),models=itemTypesCategoriesMap[it]?.[cat]||categoryModelsMap[cat]||[]; modelsContainer.innerHTML=models.length?"":'<small class="text-muted">لا توجد موديلات.</small>';
+        models.forEach((m,idx)=>{modelsContainer.innerHTML+=`<div class="d-flex justify-content-between align-items-center bg-light border p-1 rounded mb-1 small"><span>${escapeHtml(m)}</span><button class="btn btn-sm btn-outline-danger py-0 px-1" onclick="removeModelFromMgr('${escapeHtml(cat)}',${idx})"><i class="fa-solid fa-xmark"></i></button></div>`;});
+        const fc=document.getElementById("mgrFieldsCheckboxesContainer");fc.innerHTML="";const assigned=getAssignedFieldKeys(it,cat);getAllSystemFields().forEach(f=>{const checked=assigned.includes(f.key)?'checked':'';const custom=Object.prototype.hasOwnProperty.call(customSystemFields||{},f.key);fc.innerHTML+=`<div class="col-md-3"><div class="border rounded bg-light p-2 h-100"><div class="d-flex align-items-center justify-content-between gap-2"><div class="form-check flex-grow-1"><input class="form-check-input mgr-field-checkbox" type="checkbox" value="${escapeHtml(f.key)}" id="mgr_f_${escapeHtml(f.key)}" ${checked}><label class="form-check-label small fw-bold text-dark" for="mgr_f_${escapeHtml(f.key)}">${escapeHtml(f.label)} ${custom?'<span class="badge bg-info text-dark">مخصص</span>':'<span class="badge bg-secondary">نظامي</span>'}</label></div>${custom?`<div class="btn-group btn-group-sm"><button class="btn btn-outline-primary py-0" title="تعديل" onclick="editCustomField('${escapeHtml(f.key)}')"><i class="fa-solid fa-pen"></i></button><button class="btn btn-outline-danger py-0" title="حذف" onclick="deleteCustomField('${escapeHtml(f.key)}')"><i class="fa-solid fa-trash"></i></button></div>`:''}</div></div></div>`;});
+    }
+
+    function addNewModelToCategory() { const it=document.getElementById("mgrItemTypeSelect").value,cat=document.getElementById("mgrCategorySelect").value,name=document.getElementById("newMgrModelName").value.trim(); if(!it||!cat)return showAlert("اختر الصنف والفئة أولاً.","warning");if(!name)return showAlert("أدخل اسم الموديل.","warning");const arr=itemTypesCategoriesMap[it][cat]||(itemTypesCategoriesMap[it][cat]=[]);if(arr.includes(name))return showAlert("هذا الموديل موجود مسبقاً.","danger");arr.push(name);if(!categoryModelsMap[cat])categoryModelsMap[cat]=[];if(!categoryModelsMap[cat].includes(name))categoryModelsMap[cat].push(name);document.getElementById("newMgrModelName").value="";saveSystemData();loadMgrFieldsConfig();renderCategoriesConfigTable();showAlert("تم إضافة الموديل بنجاح!"); }
+
+    function removeModelFromMgr(cat,index){const it=document.getElementById("mgrItemTypeSelect").value;if(!it||!itemTypesCategoriesMap[it]?.[cat])return;if(!confirm("هل تريد حذف هذا الموديل من الفئة؟"))return;itemTypesCategoriesMap[it][cat].splice(index,1);const remaining=Object.values(itemTypesCategoriesMap).flatMap(c=>c[cat]||[]);categoryModelsMap[cat]=[...new Set(remaining)];saveSystemData();loadMgrFieldsConfig();renderCategoriesConfigTable();showAlert("تم حذف الموديل بنجاح!");}
+
+    function saveCategoryFieldsConfig(){const it=document.getElementById("mgrItemTypeSelect").value,cat=document.getElementById("mgrCategorySelect").value;if(!it||!cat)return showAlert("يرجى اختيار الصنف والفئة أولاً.","warning");const selected=[];document.querySelectorAll('.mgr-field-checkbox:checked').forEach(cb=>selected.push(cb.value));categoryAssignedFieldsMap[getCategoryConfigKey(it,cat)]=selected;saveSystemData();loadMgrFieldsConfig();showAlert("تم حفظ الحقول المرتبطة بالصنف والفئة بنجاح!");}
+
+    function toggleCustomFieldOptions(){document.getElementById("customFieldOptionsWrap").style.display=document.getElementById("customFieldType").value==='select'?'':'none';}
+    function openCustomFieldModal(){if(!checkUserPermission('set_cat_models'))return;if(!document.getElementById("mgrItemTypeSelect").value||!document.getElementById("mgrCategorySelect").value)return showAlert("اختر الصنف والفئة أولاً قبل إضافة حقل.","warning");document.getElementById("customFieldOldKey").value="";document.getElementById("customFieldLabel").value="";document.getElementById("customFieldType").value="text";document.getElementById("customFieldOptions").value="";document.getElementById("customFieldCol").value="col-md-6";document.getElementById("customFieldRequired").checked=false;document.getElementById("customFieldModalTitle").innerHTML='<i class="fa-solid fa-square-plus me-2"></i>إضافة حقل جديد';toggleCustomFieldOptions();new bootstrap.Modal(document.getElementById('customFieldModal')).show();}
+    function editCustomField(key){const f=customSystemFields[key];if(!f)return;document.getElementById("customFieldOldKey").value=key;document.getElementById("customFieldLabel").value=f.label||"";document.getElementById("customFieldType").value=f.type||"text";document.getElementById("customFieldOptions").value=(f.options||[]).join(', ');document.getElementById("customFieldCol").value=f.col||"col-md-6";document.getElementById("customFieldRequired").checked=!!f.required;document.getElementById("customFieldModalTitle").innerHTML='<i class="fa-solid fa-pen me-2"></i>تعديل الحقل';toggleCustomFieldOptions();new bootstrap.Modal(document.getElementById('customFieldModal')).show();}
+    function saveCustomField(){if(!checkUserPermission('set_cat_models'))return;const oldKey=document.getElementById("customFieldOldKey").value,label=document.getElementById("customFieldLabel").value.trim(),type=document.getElementById("customFieldType").value,options=document.getElementById("customFieldOptions").value.split(',').map(v=>v.trim()).filter(Boolean),col=document.getElementById("customFieldCol").value,required=document.getElementById("customFieldRequired").checked;if(!label)return showAlert("أدخل اسم الحقل.","warning");if(type==='select'&&!options.length)return showAlert("أدخل خيارات القائمة المنسدلة.","warning");const key=oldKey||('custom_'+Date.now().toString(36)+'_'+Math.random().toString(36).slice(2,7));customSystemFields[key]={key,label,type,options:type==='select'?options:[],col,required,custom:true};const it=document.getElementById("mgrItemTypeSelect").value,cat=document.getElementById("mgrCategorySelect").value,pair=getCategoryConfigKey(it,cat);if(!oldKey){const assigned=getAssignedFieldKeys(it,cat).slice();if(!assigned.includes(key))assigned.push(key);categoryAssignedFieldsMap[pair]=assigned;}saveSystemData();bootstrap.Modal.getInstance(document.getElementById('customFieldModal')).hide();loadMgrFieldsConfig();showAlert(oldKey?"تم تعديل الحقل بنجاح!":"تم إضافة الحقل وربطه بالفئة الحالية بنجاح!");}
+    function deleteCustomField(key){if(!checkUserPermission('set_cat_models'))return;const f=customSystemFields[key];if(!f)return;if(!confirm(`هل تريد حذف الحقل (${f.label}) نهائياً؟\nسيتم إزالته من جميع الفئات.`))return;delete customSystemFields[key];Object.keys(categoryAssignedFieldsMap).forEach(k=>{categoryAssignedFieldsMap[k]=(categoryAssignedFieldsMap[k]||[]).filter(x=>x!==key);});saveSystemData();loadMgrFieldsConfig();showAlert("تم حذف الحقل المخصص بنجاح!");}
 
     function renderTowersView() {
         const container = document.getElementById("towersContainer");
@@ -1941,7 +2391,7 @@
                         <tr>
                             <td>${idx + 1}</td>
                             <td class="fw-bold">${escapeHtml(d.name)} (${escapeHtml(d.model)})</td>
-                            <td><code>${escapeHtml(d.mac)}</code></td>
+                            <td><code>${escapeHtml(d.mac || d.serial || '-')}</code></td>
                             <td>${escapeHtml(d.ip || '-')}</td>
                             <td>${getStatusBadge(d.status)}</td>
                         </tr>
@@ -1971,7 +2421,7 @@
                             <div class="table-responsive">
                                 <table class="table table-striped align-middle mb-0">
                                     <thead class="table-light">
-                                        <tr><th>#</th><th>الجهاز</th><th>MAC</th><th>IP</th><th>الحالة</th></tr>
+                                        <tr><th>#</th><th>الجهاز</th><th>MAC / السيريال</th><th>IP</th><th>الحالة</th></tr>
                                     </thead>
                                     <tbody>${devRows}</tbody>
                                 </table>
@@ -2190,12 +2640,20 @@
         }
 
         const searchQuery = document.getElementById("locationsSearchInput") ? document.getElementById("locationsSearchInput").value.toLowerCase() : "";
+        const locationFilter = document.getElementById("locationSelectorFilter") ? document.getElementById("locationSelectorFilter").value : "";
+        
         container.innerHTML = "";
 
         let filtered = customWarehouses.filter(w => {
-            const matchesSearch = w.name.toLowerCase().includes(searchQuery);
-            return matchesSearch;
+            const matchesSearch = w.name.toLowerCase().includes(searchQuery) || (w.keeper && w.keeper.toLowerCase().includes(searchQuery));
+            const matchesFilter = locationFilter ? w.name === locationFilter : true;
+            return matchesSearch && matchesFilter;
         });
+
+        if(filtered.length === 0) {
+            container.innerHTML = `<div class="col-12 text-center py-4 text-muted">لا توجد مخازن مطابقة للبحث أو الفلترة.</div>`;
+            return;
+        }
 
         filtered.forEach(w => {
             const adminPerms = currentLoggedInUserObj?.permissions?.admin || {};
@@ -2217,7 +2675,7 @@
                         <tr>
                             <td>${idx + 1}</td>
                             <td class="fw-bold">${escapeHtml(d.name)} (${escapeHtml(d.model)})</td>
-                            <td><code>${escapeHtml(d.mac)}</code></td>
+                            <td><code>${escapeHtml(d.mac || d.serial || '-')}</code></td>
                             <td>${escapeHtml(d.ip || '-')}</td>
                             <td>${getStatusBadge(d.status)}</td>
                         </tr>
@@ -2246,7 +2704,7 @@
                             <div class="table-responsive">
                                 <table class="table table-striped align-middle mb-0">
                                     <thead class="table-light">
-                                        <tr><th>#</th><th>الجهاز</th><th>MAC</th><th>IP</th><th>الحالة</th></tr>
+                                        <tr><th>#</th><th>الجهاز</th><th>MAC / السيريال</th><th>IP</th><th>الحالة</th></tr>
                                     </thead>
                                     <tbody>${devRows}</tbody>
                                 </table>
@@ -2266,7 +2724,6 @@
         if(!checkUserPermission('movements_section')) return;
 
         const searchQuery = document.getElementById("movementSearchInput") ? document.getElementById("movementSearchInput").value.toLowerCase() : "";
-
         const reversedMovements = [...movements].reverse();
 
         reversedMovements.forEach((m) => {
@@ -2326,7 +2783,6 @@
 
     function exportMovementsExcel() {
         const searchQuery = document.getElementById("movementSearchInput") ? document.getElementById("movementSearchInput").value.toLowerCase() : "";
-        
         const filtered = movements.filter(m => {
             const matchesSearch = 
                 (m.device && m.device.toLowerCase().includes(searchQuery)) ||
@@ -2400,7 +2856,7 @@
         document.body.appendChild(link);
         link.click();
         link.remove();
-        showAlert("تم تصدير البيانات المحددة والمعروضة بنجاح كملف Excel منسق!");
+        showAlert("تم تصدير البيانات بنجاح كملف Excel!");
     }
 
     function exportDevicesExcel() {
@@ -2408,7 +2864,7 @@
         const cat = document.getElementById("filterCategory") ? document.getElementById("filterCategory").value : "";
 
         const filtered = devices.filter(d => {
-            const matchesSearch = d.name.toLowerCase().includes(search) || d.mac.toLowerCase().includes(search) || (d.ip && d.ip.toLowerCase().includes(search));
+            const matchesSearch = d.name.toLowerCase().includes(search) || (d.mac && d.mac.toLowerCase().includes(search)) || (d.ip && d.ip.toLowerCase().includes(search));
             const matchesCat = cat ? d.category === cat : true;
             return matchesSearch && matchesCat;
         });
@@ -2436,9 +2892,10 @@
                     <tr>
                         <th>#</th>
                         <th>اسم الجهاز</th>
+                        <th>نوع الصنف</th>
                         <th>الفئة</th>
                         <th>الموديل</th>
-                        <th>MAC Address</th>
+                        <th>MAC / السيريال</th>
                         <th>IP Address</th>
                         <th>سعر الشراء</th>
                         <th>الموقع الحالي</th>
@@ -2453,9 +2910,10 @@
                 <tr>
                     <td>${idx + 1}</td>
                     <td>${escapeHtml(d.name)}</td>
+                    <td>${escapeHtml(d.itemType || '-')}</td>
                     <td>${escapeHtml(d.category)}</td>
                     <td>${escapeHtml(d.model)}</td>
-                    <td>${escapeHtml(d.mac)}</td>
+                    <td>${escapeHtml(d.mac || d.serial || '-')}</td>
                     <td>${escapeHtml(d.ip || '-')}</td>
                     <td>${d.price ? d.price + ' ' + (d.currency || '$') : '-'}</td>
                     <td>${escapeHtml(d.location)}</td>
@@ -2474,7 +2932,100 @@
         document.body.appendChild(link);
         link.click();
         link.remove();
-        showAlert("تم تصدير البيانات المحددة والمعروضة بنجاح كملف Excel منسق!");
+        showAlert("تم تصدير البيانات بنجاح كملف Excel!");
+    }
+
+    function importDevicesExcel(e) {
+        if(!checkUserPermission('dev_add_device') && !checkUserPermission('dash_add_device')) {
+            showAlert("عذراً، لا تمتلك صلاحية استيراد الأجهزة!", "danger");
+            return;
+        }
+
+        const file = e.target.files[0];
+        if(!file) return;
+
+        const reader = new FileReader();
+        reader.onload = function(evt) {
+            try {
+                const data = new Uint8Array(evt.target.result);
+                const workbook = XLSX.read(data, {type: 'array'});
+                const firstSheetName = workbook.SheetNames[0];
+                const worksheet = workbook.Sheets[firstSheetName];
+                const jsonRows = XLSX.utils.sheet_to_json(worksheet, {defval: ""});
+
+                if(jsonRows.length === 0) {
+                    showAlert("الملف فارغ أو لا يحتوي على بيانات صالحة.", "warning");
+                    return;
+                }
+
+                let importedCount = 0;
+                let duplicateCount = 0;
+
+                jsonRows.forEach(row => {
+                    const keys = Object.keys(row);
+                    const findVal = (possibleNames) => {
+                        for(let k of keys) {
+                            const cleanK = k.trim().toLowerCase();
+                            for(let name of possibleNames) {
+                                if(cleanK === name.toLowerCase() || cleanK.includes(name.toLowerCase())) {
+                                    return row[k];
+                                }
+                            }
+                        }
+                        return "";
+                    };
+
+                    const name = findVal(['اسم الجهاز', 'الاسم', 'name', 'device', 'title']);
+                    let itemType = findVal(['نوع الصنف', 'itemtype', 'type']) || 'أجهزة شبكية';
+                    let category = findVal(['الفئة', 'النوع', 'category', 'cat']) || 'روتر بورد';
+                    let model = findVal(['الموديل', 'model', 'mod']) || 'RB2011';
+                    let mac = String(findVal(['mac address', 'mac', 'ماك', 'عنوان', 'سيريال', 'serial'])).trim().toUpperCase();
+                    const ip = findVal(['ip address', 'ip', 'اي بي']);
+                    const location = findVal(['الموقع', 'المخزن', 'location', 'warehouse']) || 'المخزن الرئيسي';
+                    const status = findVal(['الحالة', 'status']) || 'سليم';
+                    const price = findVal(['سعر الشراء', 'السعر', 'price', 'cost']) || 0;
+                    const supplier = findVal(['المورد', 'supplier']) || '';
+
+                    if (name) {
+                        if (!mac || mac === 'undefined' || mac === 'NULL') {
+                            mac = 'DEV-' + Math.random().toString(36).substring(2, 8).toUpperCase();
+                        }
+
+                        const exists = devices.find(d => String(d.mac || d.serial || "").toUpperCase() === mac);
+                        if (!exists) {
+                            devices.push({
+                                id: Date.now() + Math.random(),
+                                name: String(name),
+                                itemType: String(itemType),
+                                category: String(category),
+                                model: String(model),
+                                mac: mac,
+                                ip: String(ip || ''),
+                                location: String(location),
+                                status: String(status),
+                                supplier: String(supplier),
+                                price: parseFloat(price) || 0,
+                                currency: 'USD',
+                                purchaseDate: new Date().toISOString().split('T')[0],
+                                createdBy: currentLoggedInUserObj.name
+                            });
+                            importedCount++;
+                        } else {
+                            duplicateCount++;
+                        }
+                    }
+                });
+
+                saveSystemData();
+                renderAll();
+                showAlert(`تم استيراد ${importedCount} جهاز بنجاح!`);
+            } catch (err) {
+                console.error(err);
+                showAlert("حدث خطأ أثناء تحليل ملف الإكسل.", "danger");
+            }
+            e.target.value = '';
+        };
+        reader.readAsArrayBuffer(file);
     }
 
     function exportReportsExcel() {
@@ -2517,93 +3068,35 @@
         document.body.appendChild(link);
         link.click();
         link.remove();
-        showAlert("تم تصدير التقرير كملف Excel منسق بنجاح!");
+        showAlert("تم تصدير التقرير كملف Excel بنجاح!");
     }
 
     function renderCategoriesConfigTable() {
         const tbody = document.getElementById("categoriesConfigBody");
         if(!tbody) return;
         tbody.innerHTML = "";
-
-        for (const [cat, models] of Object.entries(categoryModelsMap)) {
-            tbody.innerHTML += `
-                <tr>
-                    <td class="fw-bold">${escapeHtml(cat)}</td>
-                    <td>${escapeHtml(models.join(", "))}</td>
-                    <td>
-                        <div class="btn-group btn-group-sm">
-                            <button class="btn btn-outline-primary py-0 px-2" title="تعديل" onclick="editCategoryConfig('${escapeHtml(cat)}')"><i class="fa-solid fa-pen"></i></button>
-                            <button class="btn btn-outline-danger py-0 px-2" title="حذف" onclick="deleteCategoryConfig('${escapeHtml(cat)}')"><i class="fa-solid fa-trash"></i></button>
-                        </div>
-                    </td>
-                </tr>
-            `;
-        }
+        Object.entries(itemTypesCategoriesMap).forEach(([it, cats]) => {
+            Object.entries(cats || {}).forEach(([cat, models]) => {
+                tbody.innerHTML += `<tr><td class="fw-bold">${escapeHtml(it)}</td><td class="fw-bold text-success">${escapeHtml(cat)}</td><td>${escapeHtml((models || []).join(", "))}</td><td><div class="btn-group btn-group-sm"><button class="btn btn-outline-primary py-0 px-2" title="تعديل" onclick="openMgrForPair('${escapeHtml(it)}','${escapeHtml(cat)}')"><i class="fa-solid fa-pen"></i></button><button class="btn btn-outline-danger py-0 px-2" title="حذف" onclick="deleteCategoryPairFromConfig('${escapeHtml(it)}','${escapeHtml(cat)}')"><i class="fa-solid fa-trash"></i></button></div></td></tr>`;
+            });
+        });
     }
 
-    function editCategoryConfig(catName) {
-        if(!checkUserPermission('set_cat_models')) {
-            showAlert("عذراً، لا تمتلك الصلاحية لتعديل الفئات!", "danger");
-            return;
-        }
-        const models = categoryModelsMap[catName] || [];
-        document.getElementById("editingCategoryOldName").value = catName;
-        document.getElementById("newCategoryName").value = catName;
-        document.getElementById("newCategoryModels").value = models.join(", ");
-        
-        const btn = document.getElementById("saveCategoryBtn");
-        btn.innerHTML = `<i class="fa-solid fa-save me-1"></i> حفظ التعديل`;
-        btn.className = "btn btn-success btn-sm w-100";
+    function openMgrForPair(itemType, category) {
+        if(!checkUserPermission('set_cat_models')) return showAlert("عذراً، لا تمتلك الصلاحية لتعديل الفئات!", "danger");
+        openCategoriesManagerModal();
+        const it=document.getElementById("mgrItemTypeSelect"); it.value=itemType; loadMgrCategories();
+        const cat=document.getElementById("mgrCategorySelect"); cat.value=category; loadMgrFieldsConfig();
     }
 
-    function saveCategoryConfig() {
-        if(!checkUserPermission('set_cat_models')) {
-            showAlert("عذراً، لا تمتلك الصلاحية لتعديل الفئات!", "danger");
-            return;
-        }
-        const oldName = document.getElementById("editingCategoryOldName").value;
-        const name = document.getElementById("newCategoryName").value.trim();
-        const modelsStr = document.getElementById("newCategoryModels").value.trim();
-
-        if(!name || !modelsStr) {
-            showAlert("يرجى إدخال اسم الفئة والموديلات التابعة.", "warning");
-            return;
-        }
-
-        const modelsArr = modelsStr.split(',').map(m => m.trim()).filter(Boolean);
-
-        if (oldName && oldName !== name) {
-            delete categoryModelsMap[oldName];
-        }
-
-        categoryModelsMap[name] = modelsArr;
-
-        document.getElementById("editingCategoryOldName").value = "";
-        document.getElementById("newCategoryName").value = "";
-        document.getElementById("newCategoryModels").value = "";
-        
-        const btn = document.getElementById("saveCategoryBtn");
-        btn.innerHTML = `<i class="fa-solid fa-plus me-1"></i> إضافة`;
-        btn.className = "btn btn-outline-primary btn-sm w-100";
-
-        saveSystemData();
-        renderCategoriesConfigTable();
-        populateCategorySelects();
-        showAlert("تم حفظ الفئة والموديلات بنجاح!");
-    }
-
-    function deleteCategoryConfig(cat) {
-        if(!checkUserPermission('set_cat_models')) {
-            showAlert("عذراً، لا تمتلك الصلاحية للحذف!", "danger");
-            return;
-        }
-        if(confirm(`هل تريد حذف الفئة (${cat})؟`)) {
-            delete categoryModelsMap[cat];
-            saveSystemData();
-            renderCategoriesConfigTable();
-            populateCategorySelects();
-            showAlert("تم الحذف بنجاح!");
-        }
+    function deleteCategoryPairFromConfig(itemType, category) {
+        if(!checkUserPermission('set_cat_models')) return showAlert("عذراً، لا تمتلك صلاحية الحذف!", "danger");
+        if(!confirm(`هل تريد حذف الفئة (${category}) من الصنف (${itemType})؟`)) return;
+        delete itemTypesCategoriesMap[itemType][category];
+        delete categoryAssignedFieldsMap[getCategoryConfigKey(itemType, category)];
+        const used=Object.values(itemTypesCategoriesMap).some(c=>Object.prototype.hasOwnProperty.call(c,category));
+        if(!used){delete categoryModelsMap[category]; delete categoryAssignedFieldsMap[category];}
+        saveSystemData(); renderCategoriesConfigTable(); populateCategorySelects(); populateDeviceItemTypeSelect(document.getElementById("devItemType")?.value || ""); renderAll(); showAlert("تم حذف الفئة بنجاح!");
     }
 
     function generateReport() {
@@ -2621,7 +3114,6 @@
         const recCountBadge = document.getElementById("reportRecordCount");
 
         tbody.innerHTML = "";
-
         let totalCount = 0;
         let totalValue = 0;
 
@@ -2630,9 +3122,9 @@
             headersTr.innerHTML = `
                 <th>#</th>
                 <th>اسم الجهاز والعنصر</th>
-                <th>الفئة والموديل</th>
+                <th>نوع الصنف والفئة</th>
                 <th>الموقع / المخزن</th>
-                <th>MAC / IP Address</th>
+                <th>المعرف / IP</th>
                 <th>تاريخ وسعر الشراء</th>
                 <th>الحالة</th>
             `;
@@ -2653,9 +3145,9 @@
                     <tr>
                         <td>${idx + 1}</td>
                         <td class="fw-bold text-primary">${escapeHtml(d.name)}</td>
-                        <td>${escapeHtml(d.category)}<br><small class="text-muted">${escapeHtml(d.model)}</small></td>
+                        <td><span class="badge bg-secondary mb-1">${escapeHtml(d.itemType || 'غير محدد')}</span><br>${escapeHtml(d.category)}<br><small class="text-muted">${escapeHtml(d.model)}</small></td>
                         <td>${escapeHtml(d.location)}</td>
-                        <td><code>${escapeHtml(d.mac)}</code><br><small>${escapeHtml(d.ip || '-')}</small></td>
+                        <td><code>${escapeHtml(d.mac || d.serial || '-')}</code><br><small>${escapeHtml(d.ip || '-')}</small></td>
                         <td>${priceNum ? priceNum + ' ' + (d.currency || '$') : '-'} <br><small class="text-muted">${escapeHtml(d.purchaseDate || '-')}</small></td>
                         <td>${getStatusBadge(d.status)}</td>
                     </tr>
@@ -2668,7 +3160,7 @@
                 <th>#</th>
                 <th>التاريخ</th>
                 <th>نوع الحركة</th>
-                <th>الجهاز / MAC</th>
+                <th>الجهاز / المعرف</th>
                 <th>من المصدر</th>
                 <th>إلى الجهة المستلمة</th>
                 <th>المسؤول</th>
@@ -2687,7 +3179,7 @@
                         <td>${idx + 1}</td>
                         <td>${escapeHtml(m.date)}</td>
                         <td><span class="badge bg-info text-dark">${escapeHtml(m.type)}</span></td>
-                        <td class="fw-bold">${escapeHtml(m.device)}<br><small><code>${escapeHtml(m.mac)}</code></small></td>
+                        <td class="fw-bold">${escapeHtml(m.device)}<br><small><code>${escapeHtml(m.mac || '')}</code></small></td>
                         <td>${escapeHtml(m.from)}</td>
                         <td>${escapeHtml(m.to)}</td>
                         <td>${escapeHtml(m.user)}</td>
@@ -2731,9 +3223,9 @@
     }
 
     function getStatusBadge(status) {
-        if(status === 'سليم') return `<span class="badge bg-success badge-status">سليم</span>`;
-        if(status === 'تحت الصيانة') return `<span class="badge bg-warning text-dark badge-status">تحت الصيانة</span>`;
-        return `<span class="badge bg-danger badge-status">تالف</span>`;
+        if(status === 'سليم' || status === 'جديد') return `<span class="badge bg-success badge-status">${escapeHtml(status)}</span>`;
+        if(status === 'مستخدم' || status === 'تحت الصيانة') return `<span class="badge bg-warning text-dark badge-status">${escapeHtml(status)}</span>`;
+        return `<span class="badge bg-danger badge-status">${escapeHtml(status || 'تالف')}</span>`;
     }
 
     function renderDashboard() {
@@ -2754,7 +3246,7 @@
                 <tr>
                     <td class="fw-bold text-primary">${escapeHtml(d.name)}</td>
                     <td>${escapeHtml(d.model)}</td>
-                    <td><code>${escapeHtml(d.mac)}</code></td>
+                    <td><code>${escapeHtml(d.mac || d.serial || '-')}</code></td>
                     <td>${escapeHtml(d.location)}</td>
                     <td>${d.price ? escapeHtml(d.price) + ' ' + escapeHtml(d.currency || '$') : '-'}</td>
                     <td>${getStatusBadge(d.status)}</td>
@@ -2770,7 +3262,7 @@
         const cat = document.getElementById("filterCategory") ? document.getElementById("filterCategory").value : "";
 
         const filtered = devices.filter(d => {
-            const matchesSearch = d.name.toLowerCase().includes(search) || d.mac.toLowerCase().includes(search) || (d.ip && d.ip.toLowerCase().includes(search));
+            const matchesSearch = d.name.toLowerCase().includes(search) || (d.mac && d.mac.toLowerCase().includes(search)) || (d.ip && d.ip.toLowerCase().includes(search));
             const matchesCat = cat ? d.category === cat : true;
             return matchesSearch && matchesCat;
         });
@@ -2790,9 +3282,9 @@
             tbody.innerHTML += `
                 <tr>
                     <td>${idx + 1}</td>
-                    <td class="fw-bold">${escapeHtml(d.name)}<br><small class="text-muted">${escapeHtml(d.category)}</small></td>
+                    <td class="fw-bold">${escapeHtml(d.name)}<br><small class="text-muted"><span class="badge bg-light text-dark border">${escapeHtml(d.itemType || '-')}</span> / ${escapeHtml(d.category)}</small></td>
                     <td>${escapeHtml(d.model)}</td>
-                    <td><code>${escapeHtml(d.mac)}</code><br><small>${escapeHtml(d.ip || '-')}</small></td>
+                    <td><code>${escapeHtml(d.mac || d.serial || '-')}</code><br><small>${escapeHtml(d.ip || '-')}</small></td>
                     <td>${d.price ? escapeHtml(d.price) + ' ' + escapeHtml(d.currency || '$') : '-'}</td>
                     <td>${escapeHtml(d.location)}</td>
                     <td>${getStatusBadge(d.status)}</td>
@@ -2814,6 +3306,14 @@
         }
         document.getElementById("deviceForm").reset();
         document.getElementById("devId").value = "";
+        document.getElementById("modalTitle").innerHTML = '<i class="fa-solid fa-server me-2"></i>إضافة جهاز جديد';
+        
+        const itemTypeSelect = document.getElementById("devItemType");
+        if (itemTypeSelect) populateDeviceItemTypeSelect("");
+        
+        const categorySelect = document.getElementById("devCategory");
+        if (categorySelect) categorySelect.innerHTML = '<option value="" selected disabled>اختر نوع الصنف أولاً</option>';
+
         updateModelsDropdown();
         new bootstrap.Modal(document.getElementById('addDeviceModal')).show();
     }
@@ -2831,37 +3331,52 @@
             return;
         }
 
-        const name = document.getElementById("devName").value.trim();
-        const mac = document.getElementById("devMac").value.trim().toUpperCase();
+        const itemType = document.getElementById("devItemType").value;
         const category = document.getElementById("devCategory").value;
         const model = document.getElementById("devModel").value;
-        const location = document.getElementById("devLocation").value;
+        const dynamic = collectDynamicDeviceFields();
+        const name = String(dynamic.name || "").trim();
+        const mac = String(dynamic.mac || dynamic.serial || "").trim().toUpperCase();
+        const location = String(dynamic.location || "").trim();
+        const schema = getDeviceFieldSchema(category, itemType);
 
-        if (!name || !category || !model || !mac || !location) {
-            showAlert("يرجى تعبئة جميع الحقول الأساسية للجهاز.", "warning");
+        if (!itemType || !category || !model) {
+            showAlert("يرجى تحديد نوع الصنف، الفئة، والموديل.", "warning");
             return;
         }
-        const duplicateMac = devices.find(d => String(d.mac || "").toUpperCase() === mac && Number(d.id) !== Number(id || 0));
-        if (duplicateMac) {
-            showAlert("عنوان MAC مستخدم مسبقاً لجهاز آخر.", "danger");
+        const missing = schema.find(f => f.required && !String(dynamic[f.key] ?? "").trim());
+        if (missing) {
+            showAlert(`يرجى تعبئة الحقل الإلزامي: ${missing.label}`, "warning");
             return;
         }
+        if (mac) {
+            const duplicateMac = devices.find(d => String(d.mac || d.serial || "").toUpperCase() === mac && Number(d.id) !== Number(id || 0));
+            if (duplicateMac) {
+                showAlert("المعرف (MAC أو السيريال) مستخدم مسبقاً لجهاز آخر.", "danger");
+                return;
+            }
+        }
 
+        const oldDevice = isEdit ? devices.find(d => d.id === parseInt(id)) : null;
         const devData = {
+            ...(oldDevice || {}),
             id: isEdit ? parseInt(id) : Date.now(),
             name: name,
+            itemType: itemType,
             category: category,
             model: model,
-            mac: mac,
-            ip: document.getElementById("devIp").value.trim(),
-            status: document.getElementById("devStatus").value,
-            location: document.getElementById("devLocation").value,
-            supplier: document.getElementById("devSupplier").value.trim(),
-            price: document.getElementById("devPrice").value,
-            currency: document.getElementById("devCurrency").value,
-            purchaseDate: document.getElementById("devPurchaseDate").value,
-            createdBy: isEdit ? (devices.find(d=>d.id===parseInt(id))?.createdBy || currentLoggedInUserObj.name) : currentLoggedInUserObj.name
+            createdBy: isEdit ? (oldDevice?.createdBy || currentLoggedInUserObj.name) : currentLoggedInUserObj.name,
+            ...dynamic
         };
+
+        devData.mac = mac;
+        devData.ip = String(dynamic.ip || "").trim();
+        devData.location = location;
+        devData.status = dynamic.status || "سليم";
+        devData.supplier = String(dynamic.supplier || "").trim();
+        devData.price = dynamic.price ?? "";
+        devData.currency = dynamic.currency || "USD";
+        devData.purchaseDate = dynamic.purchaseDate || "";
 
         if(isEdit) {
             const idx = devices.findIndex(d => d.id === parseInt(id));
@@ -2885,18 +3400,11 @@
         }
 
         document.getElementById("devId").value = d.id;
-        document.getElementById("devCategory").value = d.category;
-        updateModelsDropdown(d.model);
-        document.getElementById("devName").value = d.name;
-        document.getElementById("devMac").value = d.mac;
-        document.getElementById("devIp").value = d.ip || '';
-        document.getElementById("devStatus").value = d.status;
-        document.getElementById("devLocation").value = d.location;
-        document.getElementById("devSupplier").value = d.supplier || '';
-        document.getElementById("devPrice").value = d.price || '';
-        document.getElementById("devCurrency").value = d.currency || 'USD';
-        document.getElementById("devPurchaseDate").value = d.purchaseDate || '';
-
+        populateDeviceItemTypeSelect(d.itemType || "");
+        document.getElementById("devItemType").value = d.itemType || "أجهزة شبكية";
+        document.getElementById("modalTitle").innerHTML = '<i class="fa-solid fa-pen-to-square me-2"></i>تعديل بيانات الجهاز';
+        
+        updateCategoriesDropdown(d.category, d.model, d);
         new bootstrap.Modal(document.getElementById('addDeviceModal')).show();
     }
 
@@ -3299,14 +3807,14 @@
             return;
         }
         if(!issue || !tech) {
-            showAlert("يرجى إدخال وصف العطل وتحديد الفني المسؤول.", "warning");
+            showAlert("يرجى إدخال وصف العطل وتحديد الفني.", "warning");
             return;
         }
 
         const maintRecord = {
             date: new Date().toLocaleDateString('ar-EG'),
             deviceId: dev.id,
-            deviceName: dev.name + " (" + dev.mac + ")",
+            deviceName: dev.name + " (" + (dev.mac || dev.serial) + ")",
             issue: issue,
             tech: tech,
             cost: document.getElementById("maintCost").value,
@@ -3387,7 +3895,7 @@
                     optionsHtml += `<option value="${escapeHtml(opt)}">${escapeHtml(opt)}</option>`;
                 });
                 adminContainer.innerHTML += `
-                    <div class="col-md-6">
+                    <div class="col-md-3">
                         <div class="p-2 border rounded bg-light h-100">
                             <label class="form-label small fw-bold text-dark mb-1">${escapeHtml(adm.label)}</label>
                             <select class="form-select form-select-sm admin-perm-select" data-admin-key="${adm.id}">
@@ -3401,19 +3909,16 @@
     }
 
     function handleSectionToggle(masterCheckbox) {
-        const key = masterCheckbox.getAttribute("data-key");
-        const isChecked = masterCheckbox.checked;
         const parentDiv = masterCheckbox.closest('.p-2');
         if(parentDiv) {
             parentDiv.querySelectorAll('input.screen-perm-check').forEach(cb => {
-                cb.checked = isChecked;
+                cb.checked = masterCheckbox.checked;
             });
         }
     }
 
     function toggleAllSectionScreens(masterCheckbox) {
-        const isChecked = masterCheckbox.checked;
-        document.querySelectorAll('.screen-perm-check').forEach(cb => cb.checked = isChecked);
+        document.querySelectorAll('.screen-perm-check').forEach(cb => cb.checked = masterCheckbox.checked);
     }
 
     function openUserModal(userId = null) {
@@ -3471,26 +3976,18 @@
         const status = document.getElementById("userStatus").value;
 
         if(!name || !username) {
-            showAlert("يرجى إدخال اسم الموظف واسم المستخدم.", "warning");
-            return;
-        }
-
-        const duplicate = users.find(u => u.username.toLowerCase() === username.toLowerCase() && Number(u.id) !== Number(idVal || 0));
-        if (duplicate) {
-            showAlert("اسم المستخدم مسجل مسبقاً لموظف آخر.", "danger");
+            showAlert("يرجى إدخال الاسم واسم المستخدم.", "warning");
             return;
         }
 
         let screensPerms = {};
         document.querySelectorAll('.screen-perm-check').forEach(cb => {
-            const key = cb.getAttribute("data-key");
-            screensPerms[key] = cb.checked;
+            screensPerms[cb.getAttribute("data-key")] = cb.checked;
         });
 
         let adminPerms = {};
         document.querySelectorAll('.admin-perm-select').forEach(sel => {
-            const key = sel.getAttribute("data-admin-key");
-            adminPerms[key] = sel.value;
+            adminPerms[sel.getAttribute("data-admin-key")] = sel.value;
         });
 
         const userData = {
@@ -3514,7 +4011,7 @@
         saveSystemData();
         renderUsersTable();
         bootstrap.Modal.getInstance(document.getElementById('userModal')).hide();
-        showAlert("تم حفظ بيانات المستخدم والصلاحيات بنجاح!");
+        showAlert("تم حفظ بيانات المستخدم بنجاح!");
     }
 
     function renderUsersTable() {
@@ -3559,50 +4056,6 @@
         }
     }
 
-    function renderCharts() {
-        if(!checkUserPermission('dashboard_section')) return;
-
-        const statusCtx = document.getElementById('statusChart');
-        if (statusCtx) {
-            if (statusChartInstance) statusChartInstance.destroy();
-            const healthyCount = devices.filter(d => d.status === 'سليم').length;
-            const maintCount = devices.filter(d => d.status === 'تحت الصيانة').length;
-            const scrapCount = devices.filter(d => d.status === 'تالف').length;
-
-            statusChartInstance = new Chart(statusCtx, {
-                type: 'doughnut',
-                data: {
-                    labels: ['سليم', 'تحت الصيانة', 'تالف'],
-                    datasets: [{
-                        data: [healthyCount, maintCount, scrapCount],
-                        backgroundColor: ['#198754', '#ffc107', '#dc3545']
-                    }]
-                },
-                options: { responsive: true, maintainAspectRatio: false }
-            });
-        }
-
-        const catCtx = document.getElementById('categoryChart');
-        if (catCtx) {
-            if (categoryChartInstance) categoryChartInstance.destroy();
-            const cats = Object.keys(categoryModelsMap);
-            const counts = cats.map(c => devices.filter(d => d.category === c).length);
-
-            categoryChartInstance = new Chart(catCtx, {
-                type: 'bar',
-                data: {
-                    labels: cats,
-                    datasets: [{
-                        label: 'عدد الأجهزة',
-                        data: counts,
-                        backgroundColor: '#0d6efd'
-                    }]
-                },
-                options: { responsive: true, maintainAspectRatio: false }
-            });
-        }
-    }
-
     function searchDevice() {
         const query = document.getElementById("queryInput").value.trim().toLowerCase();
         const resultsContainer = document.getElementById("searchResults");
@@ -3615,7 +4068,7 @@
 
         const found = devices.filter(d => 
             d.name.toLowerCase().includes(query) ||
-            d.mac.toLowerCase().includes(query) ||
+            (d.mac && d.mac.toLowerCase().includes(query)) ||
             (d.ip && d.ip.toLowerCase().includes(query))
         );
 
@@ -3631,9 +4084,10 @@
                     <div class="card border-0 shadow-sm p-4 mb-3">
                         <h4 class="fw-bold text-primary mb-3"><i class="fa-solid fa-server me-2"></i>${escapeHtml(d.name)}</h4>
                         <div class="row g-2">
+                            <div class="col-md-6"><strong>نوع الصنف:</strong> ${escapeHtml(d.itemType || '-')}</div>
                             <div class="col-md-6"><strong>الفئة:</strong> ${escapeHtml(d.category)}</div>
                             <div class="col-md-6"><strong>الموديل:</strong> ${escapeHtml(d.model)}</div>
-                            <div class="col-md-6"><strong>MAC:</strong> <code>${escapeHtml(d.mac)}</code></div>
+                            <div class="col-md-6"><strong>المعرف:</strong> <code>${escapeHtml(d.mac || d.serial || '-')}</code></div>
                             <div class="col-md-6"><strong>IP:</strong> ${escapeHtml(d.ip || '-')}</div>
                             <div class="col-md-6"><strong>الموقع الحالي:</strong> ${escapeHtml(d.location)}</div>
                             <div class="col-md-6"><strong>الحالة:</strong> ${getStatusBadge(d.status)}</div>
@@ -3645,7 +4099,7 @@
     }
 
     function exportBackup() {
-        const data = { devices, towers, customWarehouses, movements, maintenance, users, categoryModelsMap, brandingSettings, uiCustomization, tabVisibility };
+        const data = { devices, towers, customWarehouses, movements, maintenance, users, categoryModelsMap, itemTypesCategoriesMap, categoryAssignedFieldsMap, customSystemFields, brandingSettings, uiCustomization, tabVisibility };
         const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
         const url = URL.createObjectURL(blob);
         const link = document.createElement('a');
@@ -3677,6 +4131,9 @@
                 if(parsed.maintenance) maintenance = parsed.maintenance;
                 if(parsed.users) users = parsed.users;
                 if(parsed.categoryModelsMap) categoryModelsMap = parsed.categoryModelsMap;
+                if(parsed.itemTypesCategoriesMap) itemTypesCategoriesMap = parsed.itemTypesCategoriesMap;
+                if(parsed.categoryAssignedFieldsMap) categoryAssignedFieldsMap = parsed.categoryAssignedFieldsMap;
+                if(parsed.customSystemFields) customSystemFields = parsed.customSystemFields;
                 if(parsed.brandingSettings) brandingSettings = parsed.brandingSettings;
                 if(parsed.uiCustomization) uiCustomization = parsed.uiCustomization;
                 if(parsed.tabVisibility) tabVisibility = parsed.tabVisibility;
@@ -3698,8 +4155,15 @@
             return;
         }
         if(confirm("هل تريد إعادة تحميل البيانات الافتراضية؟")) {
-            localStorage.clear();
-            location.reload();
+            devices = [...defaultDevices];
+            towers = [...defaultTowers];
+            customWarehouses = [...defaultWarehouses];
+            movements = [];
+            maintenance = [];
+            users = [...defaultUsers];
+            saveSystemData();
+            renderAll();
+            showAlert("تم استعادة البيانات الافتراضية بنجاح!");
         }
     }
 
@@ -3709,9 +4173,14 @@
             return;
         }
         if(confirm("تحذير: سيتم حذف كافة البيانات وإعادة تعيين النظام بالكامل! هل أنت متأكد؟")) {
-            localStorage.clear();
-            sessionStorage.clear();
-            location.reload();
+            devices = [];
+            towers = [];
+            customWarehouses = [{ name: "المخزن الرئيسي", keeper: "مدير النظام", type: "رئيسي", status: "مفعل" }];
+            movements = [];
+            maintenance = [];
+            saveSystemData();
+            renderAll();
+            showAlert("تم تصفير النظام بنجاح!", "danger");
         }
     }
 </script>
