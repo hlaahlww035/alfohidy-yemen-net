@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>النظام الشامل لإدارة شبكة يمن نت v4.9</title>
+    <title>النظام الشامل لإدارة أصول ومخازن الميكروتيك v4.9</title>
     <!-- Bootstrap 5 RTL CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css">
     <!-- FontAwesome Icons -->
@@ -849,7 +849,7 @@
 
 <!-- Modal: Categories & Fields Manager -->
 <div class="modal fade" id="categoriesManagerModal" tabindex="-1">
-    <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
         <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
             <div class="modal-header bg-info text-white px-4 py-3">
                 <h5 class="modal-title fs-5"><i class="fa-solid fa-cogs me-2"></i>إدارة الأصناف، الفئات، وحقول شاشة إضافة جهاز</h5>
@@ -909,10 +909,10 @@
     <div class="modal-dialog modal-lg modal-dialog-centered"><div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
         <div class="modal-header bg-primary text-white"><h5 class="modal-title" id="customFieldModalTitle"><i class="fa-solid fa-square-plus me-2"></i>إضافة حقل جديد</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div>
         <div class="modal-body bg-light p-4"><input type="hidden" id="customFieldOldKey"><div class="row g-3">
-            <div class="col-md-3"><label class="form-label fw-bold">اسم الحقل الظاهر</label><input id="customFieldLabel" class="form-control" placeholder="مثال: رقم العقد"></div>
-            <div class="col-md-3"><label class="form-label fw-bold">نوع الحقل</label><select id="customFieldType" class="form-select" onchange="toggleCustomFieldOptions()"><option value="text">نص</option><option value="number">رقم</option><option value="date">تاريخ</option><option value="select">قائمة منسدلة</option><option value="textarea">نص طويل</option></select></div>
-            <div class="col-md-3" id="customFieldOptionsWrap"><label class="form-label fw-bold">خيارات القائمة المنسدلة</label><input id="customFieldOptions" class="form-control" placeholder="الخيار 1, الخيار 2, الخيار 3"><small class="text-muted">تستخدم فقط للقائمة المنسدلة.</small></div>
-            <div class="col-md-3"><label class="form-label fw-bold">عرض الحقل</label><select id="customFieldCol" class="form-select"><option value="col-md-6">نصف الشاشة</option><option value="col-12">عرض كامل</option><option value="col-md-4">ثلث الشاشة</option></select></div>
+            <div class="col-md-6"><label class="form-label fw-bold">اسم الحقل الظاهر</label><input id="customFieldLabel" class="form-control" placeholder="مثال: رقم العقد"></div>
+            <div class="col-md-6"><label class="form-label fw-bold">نوع الحقل</label><select id="customFieldType" class="form-select" onchange="toggleCustomFieldOptions()"><option value="text">نص</option><option value="number">رقم</option><option value="date">تاريخ</option><option value="select">قائمة منسدلة</option><option value="textarea">نص طويل</option></select></div>
+            <div class="col-md-8" id="customFieldOptionsWrap"><label class="form-label fw-bold">خيارات القائمة المنسدلة</label><input id="customFieldOptions" class="form-control" placeholder="الخيار 1, الخيار 2, الخيار 3"><small class="text-muted">تستخدم فقط للقائمة المنسدلة.</small></div>
+            <div class="col-md-4"><label class="form-label fw-bold">عرض الحقل</label><select id="customFieldCol" class="form-select"><option value="col-md-6">نصف الشاشة</option><option value="col-12">عرض كامل</option><option value="col-md-4">ثلث الشاشة</option></select></div>
             <div class="col-12"><div class="form-check form-switch"><input class="form-check-input" type="checkbox" id="customFieldRequired"><label class="form-check-label fw-bold" for="customFieldRequired">حقل إلزامي عند إضافة/تعديل الجهاز</label></div></div>
         </div></div>
         <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button><button type="button" class="btn btn-primary fw-bold" onclick="saveCustomField()"><i class="fa-solid fa-save me-1"></i> حفظ الحقل</button></div>
@@ -980,7 +980,7 @@
                         </div>
                         <div class="col-12">
                             <label class="form-label fw-bold">ملاحظات</label>
-                            <textarea id="towerNotes" class="form-control" rows="1"></textarea>
+                            <textarea id="towerNotes" class="form-control" rows="3"></textarea>
                         </div>
                     </div>
                 </form>
@@ -1028,7 +1028,7 @@
                     </div>
                     <div class="mb-3">
                         <label class="form-label fw-bold">ملاحظات</label>
-                        <textarea id="newWarehouseNotes" class="form-control" rows="1"></textarea>
+                        <textarea id="newWarehouseNotes" class="form-control" rows="2"></textarea>
                     </div>
                 </form>
             </div>
@@ -1042,7 +1042,7 @@
 
 <!-- Modal: Add / Edit User -->
 <div class="modal fade" id="userModal" tabindex="-1">
-    <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
         <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
             <div class="modal-header bg-dark text-white px-4 py-3">
                 <h5 class="modal-title fs-5" id="userModalTitle"><i class="fa-solid fa-user-gear me-2"></i>إدارة المستخدم والصلاحيات</h5>
@@ -1107,7 +1107,7 @@
 
 <!-- Modal: Add Device -->
 <div class="modal fade" id="addDeviceModal" tabindex="-1">
-    <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
         <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
             <div class="modal-header bg-primary text-white px-4 py-3">
                 <h5 class="modal-title fs-5" id="modalTitle"><i class="fa-solid fa-server me-2"></i>إضافة جهاز جديد</h5>
@@ -1232,7 +1232,7 @@
                         <div class="col-md-12">
                             <div class="card border-0 shadow-sm p-2 bg-white rounded-3">
                                 <label class="form-label small fw-bold text-dark mb-1">ملاحظات التحويل (سبب التحويل)</label>
-                                <textarea id="transferReason" class="form-control form-control-sm" rows="1" placeholder="اكتب سبب التحويل أو أي ملاحظات إضافية هنا..."></textarea>
+                                <textarea id="transferReason" class="form-control form-control-sm" rows="2" placeholder="اكتب سبب التحويل أو أي ملاحظات إضافية هنا..."></textarea>
                             </div>
                         </div>
                     </div>
@@ -2132,7 +2132,7 @@
         container.innerHTML = "";
 
         schema.forEach(field => {
-            const col = field.col === "12" ? "col-12" : (field.col || "col-md-3");
+            const col = field.col === "12" ? "col-12" : (field.col || "col-md-6");
             const value = getDynamicFieldValue(field.key, existing);
             const required = field.required ? " required" : "";
             const id = "devField_" + field.key;
@@ -2339,7 +2339,7 @@
         const cat=document.getElementById("mgrCategorySelect").value,it=document.getElementById("mgrItemTypeSelect").value;if(!cat||!it)return;
         const modelsContainer=document.getElementById("mgrModelsListContainer"),models=itemTypesCategoriesMap[it]?.[cat]||categoryModelsMap[cat]||[]; modelsContainer.innerHTML=models.length?"":'<small class="text-muted">لا توجد موديلات.</small>';
         models.forEach((m,idx)=>{modelsContainer.innerHTML+=`<div class="d-flex justify-content-between align-items-center bg-light border p-1 rounded mb-1 small"><span>${escapeHtml(m)}</span><button class="btn btn-sm btn-outline-danger py-0 px-1" onclick="removeModelFromMgr('${escapeHtml(cat)}',${idx})"><i class="fa-solid fa-xmark"></i></button></div>`;});
-        const fc=document.getElementById("mgrFieldsCheckboxesContainer");fc.innerHTML="";const assigned=getAssignedFieldKeys(it,cat);getAllSystemFields().forEach(f=>{const checked=assigned.includes(f.key)?'checked':'';const custom=Object.prototype.hasOwnProperty.call(customSystemFields||{},f.key);fc.innerHTML+=`<div class="col-md-3"><div class="border rounded bg-light p-2 h-100"><div class="d-flex align-items-center justify-content-between gap-2"><div class="form-check flex-grow-1"><input class="form-check-input mgr-field-checkbox" type="checkbox" value="${escapeHtml(f.key)}" id="mgr_f_${escapeHtml(f.key)}" ${checked}><label class="form-check-label small fw-bold text-dark" for="mgr_f_${escapeHtml(f.key)}">${escapeHtml(f.label)} ${custom?'<span class="badge bg-info text-dark">مخصص</span>':'<span class="badge bg-secondary">نظامي</span>'}</label></div>${custom?`<div class="btn-group btn-group-sm"><button class="btn btn-outline-primary py-0" title="تعديل" onclick="editCustomField('${escapeHtml(f.key)}')"><i class="fa-solid fa-pen"></i></button><button class="btn btn-outline-danger py-0" title="حذف" onclick="deleteCustomField('${escapeHtml(f.key)}')"><i class="fa-solid fa-trash"></i></button></div>`:''}</div></div></div>`;});
+        const fc=document.getElementById("mgrFieldsCheckboxesContainer");fc.innerHTML="";const assigned=getAssignedFieldKeys(it,cat);getAllSystemFields().forEach(f=>{const checked=assigned.includes(f.key)?'checked':'';const custom=Object.prototype.hasOwnProperty.call(customSystemFields||{},f.key);fc.innerHTML+=`<div class="col-md-6"><div class="border rounded bg-light p-2 h-100"><div class="d-flex align-items-center justify-content-between gap-2"><div class="form-check flex-grow-1"><input class="form-check-input mgr-field-checkbox" type="checkbox" value="${escapeHtml(f.key)}" id="mgr_f_${escapeHtml(f.key)}" ${checked}><label class="form-check-label small fw-bold text-dark" for="mgr_f_${escapeHtml(f.key)}">${escapeHtml(f.label)} ${custom?'<span class="badge bg-info text-dark">مخصص</span>':'<span class="badge bg-secondary">نظامي</span>'}</label></div>${custom?`<div class="btn-group btn-group-sm"><button class="btn btn-outline-primary py-0" title="تعديل" onclick="editCustomField('${escapeHtml(f.key)}')"><i class="fa-solid fa-pen"></i></button><button class="btn btn-outline-danger py-0" title="حذف" onclick="deleteCustomField('${escapeHtml(f.key)}')"><i class="fa-solid fa-trash"></i></button></div>`:''}</div></div></div>`;});
     }
 
     function addNewModelToCategory() { const it=document.getElementById("mgrItemTypeSelect").value,cat=document.getElementById("mgrCategorySelect").value,name=document.getElementById("newMgrModelName").value.trim(); if(!it||!cat)return showAlert("اختر الصنف والفئة أولاً.","warning");if(!name)return showAlert("أدخل اسم الموديل.","warning");const arr=itemTypesCategoriesMap[it][cat]||(itemTypesCategoriesMap[it][cat]=[]);if(arr.includes(name))return showAlert("هذا الموديل موجود مسبقاً.","danger");arr.push(name);if(!categoryModelsMap[cat])categoryModelsMap[cat]=[];if(!categoryModelsMap[cat].includes(name))categoryModelsMap[cat].push(name);document.getElementById("newMgrModelName").value="";saveSystemData();loadMgrFieldsConfig();renderCategoriesConfigTable();showAlert("تم إضافة الموديل بنجاح!"); }
@@ -3895,7 +3895,7 @@
                     optionsHtml += `<option value="${escapeHtml(opt)}">${escapeHtml(opt)}</option>`;
                 });
                 adminContainer.innerHTML += `
-                    <div class="col-md-3">
+                    <div class="col-md-6">
                         <div class="p-2 border rounded bg-light h-100">
                             <label class="form-label small fw-bold text-dark mb-1">${escapeHtml(adm.label)}</label>
                             <select class="form-select form-select-sm admin-perm-select" data-admin-key="${adm.id}">
