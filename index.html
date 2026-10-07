@@ -833,10 +833,11 @@
                         </div>
 
                         <div class="col-md-6">
-                            <div class="card border-danger shadow-sm p-3 h-100 rounded-3">
-                                <h6 class="fw-bold small text-danger mb-2"><i class="fa-solid fa-triangle-exclamation me-2"></i>منطقة الخطر والتحكم</h6>
-                                <button class="btn btn-outline-secondary btn-sm w-100 mb-2" onclick="loadSampleData()"><i class="fa-solid fa-rotate me-1"></i> إعادة تحميل البيانات الافتراضية</button>
-                                <button class="btn btn-danger btn-sm w-100" onclick="resetSystem()"><i class="fa-solid fa-trash-can me-1"></i> تصفير واعادة تعيين النظام</button>
+                            <div class="card border-secondary shadow-sm p-3 h-100 rounded-3 bg-light">
+                                <h6 class="fw-bold small text-secondary mb-2"><i class="fa-solid fa-shield-halved me-2"></i>منطقة الخطر والتحكم</h6>
+                                <div class="alert alert-secondary py-2 mb-0 small text-center">
+                                    <i class="fa-solid fa-lock me-1"></i> تم تعطيل إعادة تحميل البيانات الافتراضية وتصفير/إعادة تعيين النظام حفاظاً على بيانات النظام.
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -1429,8 +1430,7 @@
                 { id: "set_branding", label: "هوية النظام" },
                 { id: "set_toggle_screens", label: "التحكم بالشاشات" },
                 { id: "set_cat_models", label: "إدارة الفئات" },
-                { id: "set_backup", label: "النسخ الاحتياطي" },
-                { id: "set_danger", label: "منطقة الخطر" }
+                { id: "set_backup", label: "النسخ الاحتياطي" }
             ]
         }
     ];
@@ -4149,40 +4149,7 @@
         reader.readAsText(file);
     }
 
-    function loadSampleData() {
-        if(!checkUserPermission('set_danger')) {
-            showAlert("عذراً، لا تمتلك صلاحية تنفيذ هذا الإجراء.", "danger");
-            return;
-        }
-        if(confirm("هل تريد إعادة تحميل البيانات الافتراضية؟")) {
-            devices = [...defaultDevices];
-            towers = [...defaultTowers];
-            customWarehouses = [...defaultWarehouses];
-            movements = [];
-            maintenance = [];
-            users = [...defaultUsers];
-            saveSystemData();
-            renderAll();
-            showAlert("تم استعادة البيانات الافتراضية بنجاح!");
-        }
-    }
 
-    function resetSystem() {
-        if(!checkUserPermission('set_danger')) {
-            showAlert("عذراً، لا تمتلك صلاحية تصفير النظام.", "danger");
-            return;
-        }
-        if(confirm("تحذير: سيتم حذف كافة البيانات وإعادة تعيين النظام بالكامل! هل أنت متأكد؟")) {
-            devices = [];
-            towers = [];
-            customWarehouses = [{ name: "المخزن الرئيسي", keeper: "مدير النظام", type: "رئيسي", status: "مفعل" }];
-            movements = [];
-            maintenance = [];
-            saveSystemData();
-            renderAll();
-            showAlert("تم تصفير النظام بنجاح!", "danger");
-        }
-    }
 </script>
 </body>
 </html>
