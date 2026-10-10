@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>النظام الشامل لإدارة أصول ومخازن الميكروتيك v4.9</title>
+    <title>النظام الشامل لإدارة أصول ومخازن شبكة يمن نت v4.9</title>
     <!-- Bootstrap 5 RTL CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css">
     <!-- FontAwesome Icons -->
@@ -387,6 +387,9 @@
                             <button class="btn btn-outline-success text-nowrap" id="btnExportExcel" onclick="exportDevicesExcel()">
                                 <i class="fa-solid fa-file-excel me-1"></i> تصدير (Excel)
                             </button>
+                            <button class="btn btn-danger text-nowrap" id="btnDeleteSelectedDevices" onclick="deleteSelectedDevices()">
+                                <i class="fa-solid fa-trash-can me-1"></i> حذف المحدد
+                            </button>
                             <button class="btn btn-primary text-nowrap" id="btnCreateDevice" onclick="openAddModal()">
                                 <i class="fa-solid fa-plus me-1"></i> إضافة جهاز جديد
                             </button>
@@ -399,6 +402,7 @@
                                 <table class="table table-striped align-middle mb-0">
                                     <thead class="table-dark">
                                         <tr>
+                                            <th><input type="checkbox" id="selectAllDevices" class="form-check-input" title="تحديد كل الأجهزة الظاهرة" onchange="toggleAllVisibleDevices(this.checked)"></th>
                                             <th>#</th>
                                             <th>الجهاز والفئة</th>
                                             <th>الموديل</th>
@@ -3281,6 +3285,7 @@
 
             tbody.innerHTML += `
                 <tr>
+                    <td><input type="checkbox" class="form-check-input device-row-select" data-device-id="${Number(d.id)}" aria-label="تحديد ${escapeHtml(d.name)}" onchange="updateSelectedDevicesCount()"></td>
                     <td>${idx + 1}</td>
                     <td class="fw-bold">${escapeHtml(d.name)}<br><small class="text-muted"><span class="badge bg-light text-dark border">${escapeHtml(d.itemType || '-')}</span> / ${escapeHtml(d.category)}</small></td>
                     <td>${escapeHtml(d.model)}</td>
@@ -3297,6 +3302,47 @@
                 </tr>
             `;
         });
+        updateSelectedDevicesCount();
+    }
+
+    function toggleAllVisibleDevices(checked) {
+        document.querySelectorAll("#devicesTableBody .device-row-select").forEach(box => {
+            box.checked = checked;
+        });
+        updateSelectedDevicesCount();
+    }
+
+    function updateSelectedDevicesCount() {
+        const selected = document.querySelectorAll("#devicesTableBody .device-row-select:checked");
+        const btn = document.getElementById("btnDeleteSelectedDevices");
+        if (btn) {
+            btn.innerHTML = `<i class="fa-solid fa-trash-can me-1"></i> حذف المحدد (${selected.length})`;
+        }
+        const all = document.getElementById("selectAllDevices");
+        const visible = document.querySelectorAll("#devicesTableBody .device-row-select");
+        if (all) {
+            all.checked = visible.length > 0 && selected.length === visible.length;
+            all.indeterminate = selected.length > 0 && selected.length < visible.length;
+        }
+    }
+
+    function deleteSelectedDevices() {
+        if (!checkUserPermission('dev_delete')) {
+            showAlert("عذراً، لا تمتلك صلاحية حذف الأجهزة!", "danger");
+            return;
+        }
+        const boxes = Array.from(document.querySelectorAll("#devicesTableBody .device-row-select:checked"));
+        const ids = new Set(boxes.map(box => Number(box.dataset.deviceId)));
+        if (!ids.size) {
+            showAlert("يرجى تحديد جهاز واحد على الأقل لحذفه.", "warning");
+            return;
+        }
+        if (!confirm(`هل أنت متأكد من حذف ${ids.size} جهاز/أجهزة محددة؟ لا يمكن التراجع عن هذه العملية.`)) return;
+
+        devices = devices.filter(device => !ids.has(Number(device.id)));
+        saveSystemData();
+        renderAll();
+        showAlert(`تم حذف ${ids.size} جهاز/أجهزة محددة بنجاح.`);
     }
 
     function openAddModal() {
