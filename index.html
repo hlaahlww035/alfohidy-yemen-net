@@ -352,9 +352,9 @@
                                         <tr>
                                             <th>اسم الجهاز</th>
                                             <th>الموديل</th>
-                                            <th>MAC Address</th>
-                                            <th>الموقع الحالي</th>
-                                            <th>السعر وتاريخ الشراء</th>
+                                            <th>MAC</th>
+                                            <th>الموقع / المخزن</th>
+                                            <th>السعر والتاريخ</th>
                                             <th>الحالة</th>
                                         </tr>
                                     </thead>
@@ -404,7 +404,7 @@
                                             <th>الموديل</th>
                                             <th>MAC / IP</th>
                                             <th>التكلفة والشراء</th>
-                                            <th>الموقع الحالي</th>
+                                            <th>الموقع / المخزن</th>
                                             <th>الحالة</th>
                                             <th>إجراءات</th>
                                         </tr>
@@ -483,7 +483,7 @@
                                 <table class="table table-hover align-middle mb-0">
                                     <thead class="table-light">
                                         <tr>
-                                            <th>تاريخ الحركة</th>
+                                            <th>التاريخ</th>
                                             <th>نوع الحركة</th>
                                             <th>تفاصيل الحزمة / الأجهزة</th>
                                             <th>من المصدر</th>
@@ -528,13 +528,13 @@
                                 </select>
                             </div>
                             <div class="col-md-3">
-                                <label class="form-label small fw-bold">الموقع أو المخزن</label>
+                                <label class="form-label small fw-bold">الموقع / المخزن</label>
                                 <select id="reportLocationFilter" class="form-select form-select-sm" onchange="generateReport()">
                                     <option value="">جميع المواقع والمخازن</option>
                                 </select>
                             </div>
                             <div class="col-md-2">
-                                <label class="form-label small fw-bold">حالة الجهاز / الأسلوب</label>
+                                <label class="form-label small fw-bold">الحالة</label>
                                 <select id="reportStatusFilter" class="form-select form-select-sm" onchange="generateReport()">
                                     <option value="">الكل</option>
                                     <option value="سليم">سليم</option>
@@ -585,11 +585,11 @@
                                     <thead class="table-dark sticky-top">
                                         <tr id="reportTableHeaders">
                                             <th>#</th>
-                                            <th>اسم العنصر</th>
+                                            <th>اسم الجهاز</th>
                                             <th>الفئة والموديل</th>
-                                            <th>الموقع</th>
+                                            <th>الموقع / المخزن</th>
                                             <th>MAC / IP</th>
-                                            <th>القيمة</th>
+                                            <th>السعر</th>
                                             <th>الحالة</th>
                                         </tr>
                                     </thead>
@@ -615,12 +615,12 @@
                                 <table class="table table-hover align-middle mb-0">
                                     <thead class="table-light">
                                         <tr>
-                                            <th>تاريخ الدخول</th>
+                                            <th>التاريخ</th>
                                             <th>الجهاز / MAC</th>
                                             <th>وصف العطل</th>
                                             <th>الفني المسؤول</th>
                                             <th>تكلفة الإصلاح</th>
-                                            <th>حالة الصيانة</th>
+                                            <th>الحالة</th>
                                             <th>الإجراء</th>
                                         </tr>
                                     </thead>
@@ -730,7 +730,7 @@
                                             <input type="text" id="settingCompanyName" class="form-control form-control-sm" placeholder="اسم الشركة">
                                         </div>
                                         <div class="col-md-6">
-                                            <label class="form-label small fw-bold">العملة الافتراضية</label>
+                                            <label class="form-label small fw-bold">العملة</label>
                                             <input type="text" id="settingCurrency" class="form-control form-control-sm" placeholder="$">
                                         </div>
                                     </div>
@@ -797,8 +797,8 @@
                                     <table class="table table-bordered table-sm align-middle mb-0" style="font-size: 0.85rem;">
                                         <thead class="table-light">
                                             <tr>
-                                                <th>نوع الصنف</th>
-                                                <th>فئة الصنف</th>
+                                                <th>الصنف</th>
+                                                <th>الفئة</th>
                                                 <th>الموديلات التابعة</th>
                                                 <th style="width: 100px;">الإجراء</th>
                                             </tr>
@@ -860,7 +860,7 @@
                 <div class="row g-3">
                     <div class="col-md-4">
                         <div class="card border-0 shadow-sm p-3 bg-white rounded-3 h-100">
-                            <h6 class="fw-bold text-primary mb-3">1. إدارة نوع الصنف</h6>
+                            <h6 class="fw-bold text-primary mb-3">1. إدارة الصنف</h6>
                             <select id="mgrItemTypeSelect" class="form-select form-select-sm mb-2" onchange="loadMgrCategories()"><option value="" selected disabled>اختر الصنف</option></select>
                             <div class="btn-group btn-group-sm w-100 mb-3">
                                 <button class="btn btn-outline-primary" onclick="editMgrItemType()"><i class="fa-solid fa-pen"></i> تعديل</button>
@@ -872,7 +872,7 @@
                     </div>
                     <div class="col-md-4">
                         <div class="card border-0 shadow-sm p-3 bg-white rounded-3 h-100">
-                            <h6 class="fw-bold text-success mb-3">2. إدارة فئة الصنف</h6>
+                            <h6 class="fw-bold text-success mb-3">2. إدارة الفئة</h6>
                             <select id="mgrCategorySelect" class="form-select form-select-sm mb-2" onchange="loadMgrFieldsConfig()"><option value="" selected disabled>اختر الفئة</option></select>
                             <div class="btn-group btn-group-sm w-100 mb-3">
                                 <button class="btn btn-outline-success" onclick="editMgrCategory()"><i class="fa-solid fa-pen"></i> تعديل</button>
@@ -1120,15 +1120,15 @@
                     <div class="card border-0 shadow-sm rounded-3 p-3 bg-white">
                         <div class="row g-2">
                             <div class="col-md-4">
-                                <label class="form-label small fw-bold text-primary">1. نوع الصنف</label>
+                                <label class="form-label small fw-bold text-primary">1. الصنف</label>
                                 <select id="devItemType" class="form-select form-select-sm" onchange="updateCategoriesDropdown()" required>
-                                    <option value="" selected disabled>اختر نوع الصنف أولاً</option>
+                                    <option value="" selected disabled>اختر الصنف أولاً</option>
                                 </select>
                             </div>
                             <div class="col-md-4">
-                                <label class="form-label small fw-bold">2. فئة الجهاز</label>
+                                <label class="form-label small fw-bold">2. الفئة</label>
                                 <select id="devCategory" class="form-select form-select-sm" onchange="updateModelsDropdown()" required>
-                                    <option value="" selected disabled>اختر نوع الصنف أولاً</option>
+                                    <option value="" selected disabled>اختر الصنف أولاً</option>
                                 </select>
                             </div>
                             <div class="col-md-4">
@@ -1207,23 +1207,23 @@
                                 <h6 class="text-success fw-bold small mb-2 border-bottom pb-1"><i class="fa-solid fa-microchip me-1"></i>تحديد الجهاز المراد تحويله وبياناته</h6>
                                 <div class="row g-2">
                                     <div class="col-md-4">
-                                        <label class="form-label small fw-bold">فئة الجهاز</label>
+                                        <label class="form-label small fw-bold">الفئة</label>
                                         <select id="transferCategory" class="form-select form-select-sm" onchange="onTransferCategoryChange()" required></select>
                                     </div>
                                     <div class="col-md-4">
-                                        <label class="form-label small fw-bold">موديل الجهاز</label>
+                                        <label class="form-label small fw-bold">الموديل</label>
                                         <select id="transferModel" class="form-select form-select-sm" onchange="onTransferModelChange()" required></select>
                                     </div>
                                     <div class="col-md-4">
-                                        <label class="form-label small fw-bold">اسم الجهاز المحدد</label>
+                                        <label class="form-label small fw-bold">اسم الجهاز</label>
                                         <select id="transferDeviceItem" class="form-select form-select-sm" onchange="onTransferDeviceItemChange()" required></select>
                                     </div>
                                     <div class="col-md-6">
-                                        <label class="form-label small fw-bold">عنوان MAC Address</label>
+                                        <label class="form-label small fw-bold">MAC</label>
                                         <input type="text" id="transferDeviceMac" class="form-control form-control-sm bg-white" readonly placeholder="يظهر تلقائياً...">
                                     </div>
                                     <div class="col-md-6">
-                                        <label class="form-label small fw-bold">عنوان IP Address</label>
+                                        <label class="form-label small fw-bold">IP</label>
                                         <input type="text" id="transferDeviceIp" class="form-control form-control-sm bg-white" readonly placeholder="يظهر تلقائياً...">
                                     </div>
                                 </div>
@@ -1273,7 +1273,7 @@
                                 <input type="number" step="0.01" id="maintCost" class="form-control form-control-sm" value="0.00">
                             </div>
                             <div class="col-md-12">
-                                <label class="form-label small fw-bold">حالة الصيانة</label>
+                                <label class="form-label small fw-bold">الحالة</label>
                                 <select id="maintStatus" class="form-select form-select-sm">
                                     <option value="قيد الفحص">قيد الفحص</option>
                                     <option value="تم الإصلاح">تم الإصلاح</option>
@@ -1483,60 +1483,54 @@
         }
     }
 
+    // الحقول المحدثة حسب طلبك بدقة
     const availableSystemFields = [
-        { key: "name", label: "اسم الجهاز / الصنف", type: "text", required: true },
-        { key: "deviceClassification", label: "نوع الجهاز / الصنف", type: "select", options: ["محلي", "خارجي", "اساسي", "احتياطي"] },
-        { key: "ip", label: "عنوان IP الافتراضي", type: "text" },
-        { key: "mac", label: "عنوان MAC Address", type: "text", required: true },
+        { key: "name", label: "اسم الجهاز", type: "text", required: true },
+        { key: "deviceClassification", label: "نوع الجهاز", type: "select", options: ["محلي", "خارجي", "اساسي", "احتياطي"] },
+        { key: "ip", label: "IP", type: "text" },
+        { key: "mac", label: "MAC", type: "text", required: true },
         { key: "serial", label: "رقم السيريال", type: "text" },
-        { key: "pinsCount", label: "عدد الدقلات", type: "select", options: ["2 دقلات", "3 دقلات"] },
-        { key: "ownership", label: "ملكية الجهاز", type: "select", options: ["يمن نت", "خاص"] },
-        { key: "ownerName", label: "اسم المالك", type: "text" },
-        { key: "inventoryInclusion", label: "ضمن الجرد", type: "select", options: ["نعم", "لا"] },
+        { key: "pinsCount", label: "الدقلات", type: "select", options: ["2 دقلات", "3 دقلات"] },
         { key: "boardColor", label: "لون اللوح", type: "select", options: ["ازرق", "اسود"] },
         { key: "color", label: "اللون", type: "text", placeholder: "مثلاً احمر - ازرق - اخضر" },
-        { key: "unit", label: "وحدة القياس الأساسية", type: "select", options: ["حبة", "قطعة", "باكت", "كرتون", "كيلو", "انش"] },
-        { key: "qtyMeter", label: "الكمية/متر", type: "number", step: "0.01" },
-        { key: "qtyLiter", label: "الكمية/لتر", type: "number", step: "0.01" },
-        { key: "dimensions", label: "الأبعاد (الارتفاع × العرض × العمق) سم", type: "text" },
-        { key: "boardDimensions", label: "ابعاد اللوح (الطول × العرض) سم", type: "text" },
-        { key: "weight", label: "الوزن (بالكيلوجرام)", type: "number", step: "0.01" },
-        { key: "portsCount", label: "عدد المنافذ", type: "select", options: ["5 Port", "8 port", "10 Port"] },
-        { key: "switchVoltage", label: "فولتية السويتش", type: "select", options: ["5V", "9V", "12V", "220V"] },
+        { key: "unit", label: "وحدة القياس", type: "select", options: ["حبة", "قطعة", "باكت", "كرتون", "كيلو", "انش"] },
+        { key: "dimensions", label: "ارتفاع × عرض × عمق", type: "text" },
+        { key: "boardDimensions", label: "الطول × العرض", type: "text" },
+        { key: "portsCount", label: "المنافذ", type: "select", options: ["5 Port", "8 port", "10 Port"] },
+        { key: "switchVoltage", label: "SW / V", type: "select", options: ["5V", "9V", "12V", "220V"] },
         { key: "portType", label: "نوع المنفذ", type: "select", options: ["اصباع", "مسمار"] },
-        { key: "batteryVoltage", label: "جهد البطارية (Voltage)", type: "select", options: ["12V", "24V"] },
-        { key: "batteryCapacity", label: "سعة البطارية (Ah)", type: "select", options: ["50 A", "70 A", "100 A", "120 A", "150 A", "200 A"] },
-        { key: "solarPower", label: "القدرة/لوح شمسي (Watt)", type: "select", options: ["100 W", "150 W", "160 W", "165 W", "170 W", "175 W", "220 W"] },
-        { key: "solarChargePower", label: "القدرة/منظم شحن البطارية", type: "select", options: ["20 A", "30 A", "50 A", "60 A"] },
-        { key: "inverterPower", label: "القدرة/محول الكهرباء (انفلتر)", type: "select", options: ["300 W", "500 W", "600 W", "700 W", "1000 W", "1500 W"] },
-        { key: "chargerPower", label: "القدرة/محول شحن البطارية من الكهرباء", type: "select", options: ["30 A", "50 A", "60 A"] },
-        { key: "warrantyPeriod", label: "مدة الضمان", type: "select", options: ["3 اشهر", "6 اشهر", "سنة"] },
+        { key: "batteryVoltage", label: "Volt", type: "select", options: ["12V", "24V"] },
+        { key: "batteryCapacity", label: "Ah", type: "select", options: ["50 A", "70 A", "100 A", "120 A", "150 A", "200 A"] },
+        { key: "solarPower", label: "Watt", type: "select", options: ["100 W", "150 W", "160 W", "165 W", "170 W", "175 W", "220 W"] },
+        { key: "solarChargePower", label: "A", type: "select", options: ["20 A", "30 A", "50 A", "60 A"] },
+        { key: "inverterPower", label: "W", type: "select", options: ["300 W", "500 W", "600 W", "700 W", "1000 W", "1500 W"] },
+        { key: "warrantyPeriod", label: "الضمان", type: "select", options: ["3 اشهر", "6 اشهر", "سنة"] },
         { key: "minStock", label: "الحد الأدنى للمخزون", type: "number", min: "0" },
-        { key: "location", label: "الموقع / المخزن الحالي", type: "location", required: true },
-        { key: "status", label: "حالة الجهاز", type: "status" },
-        { key: "supplier", label: "المورد / الشركة", type: "text" },
-        { key: "price", label: "سعر الشراء", type: "number", step: "0.01" },
-        { key: "currency", label: "نوع العملة", type: "currency" },
-        { key: "purchaseDate", label: "تاريخ الشراء (الإضافة)", type: "date" },
+        { key: "location", label: "الموقع / المخزن", type: "location", required: true },
+        { key: "status", label: "الحالة", type: "status" },
+        { key: "supplier", label: "المورد", type: "text" },
+        { key: "price", label: "السعر", type: "number", step: "0.01" },
+        { key: "currency", label: "العملة", type: "currency" },
+        { key: "purchaseDate", label: "التاريخ", type: "date" },
         { key: "quantity", label: "الكمية", type: "number", min: "0" },
         { key: "notes", label: "ملاحظات", type: "textarea", col: "12" }
     ];
 
     let categoryAssignedFieldsMap = {
-        "روتر بورد": ["name", "deviceClassification", "ip", "mac", "serial", "ownership", "location", "status", "supplier", "price", "currency", "purchaseDate", "warrantyPeriod", "notes"],
-        "أجهزة النقل M5": ["name", "deviceClassification", "ip", "mac", "serial", "pinsCount", "ownership", "location", "status", "supplier", "price", "currency", "purchaseDate", "warrantyPeriod", "notes"],
-        "أجهزة النقل M2": ["name", "deviceClassification", "ip", "mac", "serial", "pinsCount", "ownership", "location", "status", "supplier", "price", "currency", "purchaseDate", "warrantyPeriod", "notes"],
-        "Access Point": ["name", "deviceClassification", "ip", "mac", "serial", "ownership", "location", "status", "supplier", "price", "currency", "purchaseDate", "warrantyPeriod", "notes"],
-        "Switch": ["name", "deviceClassification", "serial", "portsCount", "switchVoltage", "portType", "ownership", "location", "status", "supplier", "price", "currency", "purchaseDate", "quantity", "warrantyPeriod", "notes"],
-        "بطاريات": ["name", "deviceClassification", "serial", "batteryVoltage", "batteryCapacity", "ownership", "location", "status", "supplier", "price", "currency", "purchaseDate", "quantity", "warrantyPeriod", "notes"],
-        "الواح شمسية": ["name", "deviceClassification", "serial", "solarPower", "boardColor", "boardDimensions", "weight", "ownership", "location", "status", "supplier", "price", "currency", "purchaseDate", "quantity", "warrantyPeriod", "notes"],
-        "محول كهرباء (انفلتر)": ["name", "deviceClassification", "serial", "inverterPower", "ownership", "location", "status", "supplier", "price", "currency", "purchaseDate", "quantity", "warrantyPeriod", "notes"],
-        "منظم شحن بطاريات": ["name", "deviceClassification", "serial", "solarChargePower", "ownership", "location", "status", "supplier", "price", "currency", "purchaseDate", "quantity", "warrantyPeriod", "notes"]
+        "روتر بورد": ["name", "deviceClassification", "ip", "mac", "serial", "location", "status", "supplier", "price", "currency", "purchaseDate", "warrantyPeriod", "notes"],
+        "أجهزة النقل M5": ["name", "deviceClassification", "ip", "mac", "serial", "pinsCount", "location", "status", "supplier", "price", "currency", "purchaseDate", "warrantyPeriod", "notes"],
+        "أجهزة النقل M2": ["name", "deviceClassification", "ip", "mac", "serial", "pinsCount", "location", "status", "supplier", "price", "currency", "purchaseDate", "warrantyPeriod", "notes"],
+        "Access Point": ["name", "deviceClassification", "ip", "mac", "serial", "location", "status", "supplier", "price", "currency", "purchaseDate", "warrantyPeriod", "notes"],
+        "Switch": ["name", "deviceClassification", "serial", "portsCount", "switchVoltage", "portType", "location", "status", "supplier", "price", "currency", "purchaseDate", "quantity", "warrantyPeriod", "notes"],
+        "بطاريات": ["name", "deviceClassification", "serial", "batteryVoltage", "batteryCapacity", "location", "status", "supplier", "price", "currency", "purchaseDate", "quantity", "warrantyPeriod", "notes"],
+        "الواح شمسية": ["name", "deviceClassification", "serial", "solarPower", "boardColor", "boardDimensions", "location", "status", "supplier", "price", "currency", "purchaseDate", "quantity", "warrantyPeriod", "notes"],
+        "محول كهرباء (انفلتر)": ["name", "deviceClassification", "serial", "inverterPower", "location", "status", "supplier", "price", "currency", "purchaseDate", "quantity", "warrantyPeriod", "notes"],
+        "منظم شحن بطاريات": ["name", "deviceClassification", "serial", "solarChargePower", "location", "status", "supplier", "price", "currency", "purchaseDate", "quantity", "warrantyPeriod", "notes"]
     };
 
     let defaultDevices = [
-        { id: 1, name: "Main-Tower-M5", itemType: "أجهزة شبكية", category: "أجهزة النقل M5", model: "NanoStation M5", deviceClassification: "خارجي", mac: "E0:63:DA:11:22:33", ip: "10.0.1.50", ownership: "يمن نت", location: "برج المطار الرئيسي - 01", status: "سليم", supplier: "مؤسسة الاتصالات", price: 120, currency: "USD", purchaseDate: "2026-01-15", warrantyPeriod: "سنة", createdBy: "admin" },
-        { id: 2, name: "Core-RB750", itemType: "أجهزة شبكية", category: "روتر بورد", model: "RB2011", deviceClassification: "اساسي", mac: "68:72:51:AA:BB:CC", ip: "10.0.0.1", ownership: "خاص", location: "المخزن الرئيسي", status: "سليم", supplier: "الوكيل المحلي", price: 85, currency: "USD", purchaseDate: "2026-02-10", warrantyPeriod: "6 اشهر", createdBy: "admin" }
+        { id: 1, name: "Main-Tower-M5", itemType: "أجهزة شبكية", category: "أجهزة النقل M5", model: "NanoStation M5", deviceClassification: "خارجي", mac: "E0:63:DA:11:22:33", ip: "10.0.1.50", location: "برج المطار الرئيسي - 01", status: "سليم", supplier: "مؤسسة الاتصالات", price: 120, currency: "USD", purchaseDate: "2026-01-15", warrantyPeriod: "سنة", createdBy: "admin" },
+        { id: 2, name: "Core-RB750", itemType: "أجهزة شبكية", category: "روتر بورد", model: "RB2011", deviceClassification: "اساسي", mac: "68:72:51:AA:BB:CC", ip: "10.0.0.1", location: "المخزن الرئيسي", status: "سليم", supplier: "الوكيل المحلي", price: 85, currency: "USD", purchaseDate: "2026-02-10", warrantyPeriod: "6 اشهر", createdBy: "admin" }
     ];
 
     let customSystemFields = {};
@@ -2004,7 +1998,7 @@
     function populateDeviceItemTypeSelect(selected = "") {
         const select = document.getElementById("devItemType");
         if(!select) return;
-        select.innerHTML = '<option value="" selected disabled>اختر نوع الصنف أولاً</option>';
+        select.innerHTML = '<option value="" selected disabled>اختر الصنف أولاً</option>';
         Object.keys(itemTypesCategoriesMap).forEach(it => {
             const option = document.createElement("option");
             option.value = it; option.textContent = it;
@@ -2019,7 +2013,7 @@
         if (!itemTypeSelect || !categorySelect) return;
 
         const selectedItemType = itemTypeSelect.value;
-        categorySelect.innerHTML = '<option value="" selected disabled>اختر فئة الجهاز</option>';
+        categorySelect.innerHTML = '<option value="" selected disabled>اختر الفئة</option>';
 
         const categoriesObj = itemTypesCategoriesMap[selectedItemType] || {};
         const categories = Object.keys(categoriesObj);
@@ -2757,10 +2751,10 @@
                 <thead>
                     <tr>
                         <th>#</th>
-                        <th>تاريخ الحركة</th>
+                        <th>التاريخ</th>
                         <th>نوع الحركة</th>
                         <th>اسم الجهاز</th>
-                        <th>MAC Address</th>
+                        <th>MAC</th>
                         <th>من المصدر</th>
                         <th>إلى الجهة المستلمة</th>
                         <th>سبب التحويل / ملاحظات</th>
@@ -2801,6 +2795,7 @@
         showAlert("تم تصدير البيانات بنجاح كملف Excel!");
     }
 
+    // دالة تصدير الأجهزة المحدثة ديناميكياً بالحقول الجديدة
     function exportDevicesExcel() {
         const search = document.getElementById("deviceSearchInput") ? document.getElementById("deviceSearchInput").value.toLowerCase() : "";
         const cat = document.getElementById("filterCategory") ? document.getElementById("filterCategory").value : "";
@@ -2816,6 +2811,8 @@
             return;
         }
 
+        const allFields = getAllSystemFields();
+
         let htmlTable = `
             <html dir="rtl">
             <head>
@@ -2828,20 +2825,21 @@
                 </style>
             </head>
             <body>
-            <h3 style="text-align:center; color:#333;">تقرير الأصول والأجهزة المخزنية</h3>
+            <h3 style="text-align:center; color:#333;">تقرير الأصول والأجهزة الشامل</h3>
             <table>
                 <thead>
                     <tr>
                         <th>#</th>
-                        <th>اسم الجهاز</th>
-                        <th>نوع الصنف</th>
+                        <th>الصنف</th>
                         <th>الفئة</th>
                         <th>الموديل</th>
-                        <th>MAC / السيريال</th>
-                        <th>IP Address</th>
-                        <th>سعر الشراء</th>
-                        <th>الموقع الحالي</th>
-                        <th>الحالة</th>
+        `;
+
+        allFields.forEach(f => {
+            htmlTable += `<th>${escapeHtml(f.label)}</th>`;
+        });
+
+        htmlTable += `
                     </tr>
                 </thead>
                 <tbody>
@@ -2851,17 +2849,17 @@
             htmlTable += `
                 <tr>
                     <td>${idx + 1}</td>
-                    <td>${escapeHtml(d.name)}</td>
                     <td>${escapeHtml(d.itemType || '-')}</td>
-                    <td>${escapeHtml(d.category)}</td>
-                    <td>${escapeHtml(d.model)}</td>
-                    <td>${escapeHtml(d.mac || d.serial || '-')}</td>
-                    <td>${escapeHtml(d.ip || '-')}</td>
-                    <td>${d.price ? d.price + ' ' + (d.currency || '$') : '-'}</td>
-                    <td>${escapeHtml(d.location)}</td>
-                    <td>${escapeHtml(d.status)}</td>
-                </tr>
+                    <td>${escapeHtml(d.category || '-')}</td>
+                    <td>${escapeHtml(d.model || '-')}</td>
             `;
+
+            allFields.forEach(f => {
+                let val = d[f.key] !== undefined && d[f.key] !== null ? d[f.key] : '-';
+                htmlTable += `<td>${escapeHtml(val)}</td>`;
+            });
+
+            htmlTable += `</tr>`;
         });
 
         htmlTable += `</tbody></table></body></html>`;
@@ -2870,11 +2868,11 @@
         const url = URL.createObjectURL(blob);
         const link = document.createElement("a");
         link.href = url;
-        link.download = `devices_report_${Date.now()}.xls`;
+        link.download = `all_devices_comprehensive_report_${Date.now()}.xls`;
         document.body.appendChild(link);
         link.click();
         link.remove();
-        showAlert("تم تصدير البيانات بنجاح كملف Excel!");
+        showAlert("تم تصدير كافة حقول الأجهزة بنجاح كملف Excel!");
     }
 
     function importDevicesExcel(e) {
@@ -2918,14 +2916,14 @@
                     };
 
                     const name = findVal(['اسم الجهاز', 'الاسم', 'name', 'device', 'title']);
-                    let itemType = findVal(['نوع الصنف', 'itemtype', 'type']) || 'أجهزة شبكية';
+                    let itemType = findVal(['الصنف', 'itemtype', 'type']) || 'أجهزة شبكية';
                     let category = findVal(['الفئة', 'النوع', 'category', 'cat']) || 'روتر بورد';
                     let model = findVal(['الموديل', 'model', 'mod']) || 'RB2011';
                     let mac = String(findVal(['mac address', 'mac', 'ماك', 'عنوان', 'سيريال', 'serial'])).trim().toUpperCase();
                     const ip = findVal(['ip address', 'ip', 'اي بي']);
-                    const location = findVal(['الموقع', 'المخزن', 'location', 'warehouse']) || 'المخزن الرئيسي';
+                    const location = findVal(['الموقع / المخزن', 'الموقع', 'المخزن', 'location', 'warehouse']) || 'المخزن الرئيسي';
                     const status = findVal(['الحالة', 'status']) || 'سليم';
-                    const price = findVal(['سعر الشراء', 'السعر', 'price', 'cost']) || 0;
+                    const price = findVal(['السعر', 'سعر الشراء', 'price', 'cost']) || 0;
                     const supplier = findVal(['المورد', 'supplier']) || '';
 
                     if (name) {
@@ -3072,11 +3070,11 @@
             tableTitle.innerHTML = `<i class="fa-solid fa-table-list me-2 text-primary"></i>${reportType === 'inventory_stock' ? 'تقرير جرد رصيد المخازن والأبراج' : 'تقرير الأصول والأجهزة حسب الحالة'}`;
             headersTr.innerHTML = `
                 <th>#</th>
-                <th>اسم الجهاز والعنصر</th>
-                <th>نوع الصنف والفئة</th>
+                <th>اسم الجهاز</th>
+                <th>الفئة والموديل</th>
                 <th>الموقع / المخزن</th>
-                <th>المعرف / IP</th>
-                <th>تاريخ وسعر الشراء</th>
+                <th>MAC / IP</th>
+                <th>السعر</th>
                 <th>الحالة</th>
             `;
 
@@ -3111,7 +3109,7 @@
                 <th>#</th>
                 <th>التاريخ</th>
                 <th>نوع الحركة</th>
-                <th>الجهاز / المعرف</th>
+                <th>الجهاز / MAC</th>
                 <th>من المصدر</th>
                 <th>إلى الجهة المستلمة</th>
                 <th>المسؤول</th>
@@ -3147,7 +3145,7 @@
                 <th>الجهاز والعطل</th>
                 <th>الفني المسؤول</th>
                 <th>التكلفة</th>
-                <th>حالة الصيانة</th>
+                <th>الحالة</th>
             `;
 
             totalCount = maintenance.length;
@@ -3305,7 +3303,7 @@
         if (itemTypeSelect) populateDeviceItemTypeSelect("");
         
         const categorySelect = document.getElementById("devCategory");
-        if (categorySelect) categorySelect.innerHTML = '<option value="" selected disabled>اختر نوع الصنف أولاً</option>';
+        if (categorySelect) categorySelect.innerHTML = '<option value="" selected disabled>اختر الصنف أولاً</option>';
 
         updateModelsDropdown();
         new bootstrap.Modal(document.getElementById('addDeviceModal')).show();
@@ -3334,7 +3332,7 @@
         const schema = getDeviceFieldSchema(category, itemType);
 
         if (!itemType || !category || !model) {
-            showAlert("يرجى تحديد نوع الصنف، الفئة، والموديل.", "warning");
+            showAlert("يرجى تحديد الصنف، الفئة، والموديل.", "warning");
             return;
         }
         const missing = schema.find(f => f.required && !String(dynamic[f.key] ?? "").trim());
@@ -3661,7 +3659,7 @@
             if (receiveScope === 'للمخازن والمواقع/الابراج المسؤل عنها فقط') {
                 const assignedTo = targetStaffAssignments[m.to] || [];
                 if (!assignedTo.includes(currentLoggedInUserObj.name)) {
-                    showAlert("عذراً، لا يمكنك الاستلام لأنك لست المسؤول المخول عن الجهة المستلمة (الوجهة النهائية) لهذا الجهاز!", "danger");
+                    showAlert("عذراً، لا يمكنك الاستلاستام لأنك لست المسؤول المخول عن الجهة المستلمة (الوجهة النهائية) لهذا الجهاز!", "danger");
                     return;
                 }
             }
@@ -3691,7 +3689,7 @@
 
         saveSystemData();
         renderAll();
-        showAlert("تم استلاستام التحويل بنجاح وتم نقل الجهاز إلى عهدة (" + m.to + ")");
+        showAlert("تم استلام التحويل بنجاح وتم نقل الجهاز إلى عهدة (" + m.to + ")");
     }
 
     function rejectMovement(index) {
@@ -4077,12 +4075,12 @@
                     <div class="card border-0 shadow-sm p-4 mb-3">
                         <h4 class="fw-bold text-primary mb-3"><i class="fa-solid fa-server me-2"></i>${escapeHtml(d.name)}</h4>
                         <div class="row g-2">
-                            <div class="col-md-6"><strong>نوع الصنف:</strong> ${escapeHtml(d.itemType || '-')}</div>
+                            <div class="col-md-6"><strong>الصنف:</strong> ${escapeHtml(d.itemType || '-')}</div>
                             <div class="col-md-6"><strong>الفئة:</strong> ${escapeHtml(d.category)}</div>
                             <div class="col-md-6"><strong>الموديل:</strong> ${escapeHtml(d.model)}</div>
-                            <div class="col-md-6"><strong>المعرف:</strong> <code>${escapeHtml(d.mac || d.serial || '-')}</code></div>
+                            <div class="col-md-6"><strong>MAC:</strong> <code>${escapeHtml(d.mac || d.serial || '-')}</code></div>
                             <div class="col-md-6"><strong>IP:</strong> ${escapeHtml(d.ip || '-')}</div>
-                            <div class="col-md-6"><strong>الموقع الحالي:</strong> ${escapeHtml(d.location)}</div>
+                            <div class="col-md-6"><strong>الموقع / المخزن:</strong> ${escapeHtml(d.location)}</div>
                             <div class="col-md-6"><strong>الحالة:</strong> ${getStatusBadge(d.status)}</div>
                         </div>
                     </div>
